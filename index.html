@@ -11,7 +11,7 @@
         
         <header>
             <div>
-                <h1>Code Snippets</h1>
+                <h1>SnippetShare</h1>
             </div>
         </header>
         
@@ -21,17 +21,17 @@
             <div>
                 <div>
                     
-                <div>
+                <fieldset>
                     <h2>Snippet 1</h2>
                     <code>System.out.println("Hello World");</code>
                     <p><small>By <em>Franzl</em></small></p>
-                </div>
-                <div>
+                </fieldset>
+                <fieldset>
                     <h2>Snippet 2</h2>
                     <code>console.log("Hello World")</code>
                     <p></p><small>By <em>Fritzl</em></small></p>
                 </div>
-                <div>
+                <fieldset>
                     <h2>Snippet 3</h2>
                     <pre>
                         ___________________________
@@ -61,6 +61,10 @@
                     <label for="snippet">Snippet: </label>
                     <textarea form="snippet-form" name="snippet" id="snippet" required></textarea>
                 </div>
+                <div >
+                    <label for="name">Your Name: </label>
+                    <input type="text" pattern="[a-zA-Z]" name="name" id="name" required></input>
+                </div>
                 <div>
                     <input type="submit" value="Submit" />
                 </div>
@@ -72,7 +76,7 @@
             <p>
                 This project was created for the course 
                 <a href="https://ssw.jku.at/Teaching/Lectures/IntroWebDev/2025/">Special Topic: Introduction to Full Stack Web Development</a>
-                course at the Johannes Kepler University.
+                at Johannes Kepler University.
             </p>
         </footer>
     </body>
