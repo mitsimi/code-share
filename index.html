@@ -1,83 +1,267 @@
 <!DOCTYPE html>
     <head>
-        <title>Index Page</title>
+        <title>SnippetShare - Explore</title>
 
         <meta name="author" content="Noah Füreder" />
         
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="styles.css">
     </head>
     <body>
-        
-        <header>
-            <div>
-                <h1>SnippetShare</h1>
-            </div>
-        </header>
-        
-        <hr/>
-        
-        <main>
-            <div>
-                <div>
-                    
-                <fieldset>
-                    <h2>Snippet 1</h2>
-                    <code>System.out.println("Hello World");</code>
-                    <p><small>By <em>Franzl</em></small></p>
-                </fieldset>
-                <fieldset>
-                    <h2>Snippet 2</h2>
-                    <code>console.log("Hello World")</code>
-                    <p></p><small>By <em>Fritzl</em></small></p>
+        <div class="site-container">
+            <header>
+                <div class="header-container">
+                    <div href="#" class="header-logo-name">
+                        <img src="logo.png" alt="SnippetShare Logo" class="header-logo"/>
+                        <span>SnippetShare</span>
+                    </div>
                 </div>
-                <fieldset>
-                    <h2>Snippet 3</h2>
-                    <pre>
-                        ___________________________
-                    &lt; I'm an expert in my field. &gt;
-                        ---------------------------
-                           \   ^__^
-                            \  (oo)\_______
-                               (__)\       )\/\
-                                   ||----w |
-                                   ||     ||
-                    </pre>
-                    <p></p><small>By <em>Sophie</em></small></p>
-                </div>
-            </div>
-        </main>
+            </header>
 
-        <hr/>
+            
+            <main>
+                <div class="card-container">                     
+                    <div class="card">
+                        <h2 class="card-title">Vue 3 Composition API Example</h2>
+                        <div class="card-content">
+                            <code>import { ref, computed } from 'vue'
+export default {
+    setup() {
+        const count = ref(0)
+        const double = computed(() => count.value * 2)
 
-        <div>
-            <h2>Submit a new snippet</h2>
-            <form action="" method="get" id="snippet-form">
-                <div>
-                    <label for="title">Title: </label>
-                    <input type="text" name="title" id="title" required />
+        function increment() {
+            count.value++
+        }
+
+        return {
+            count,
+            double,
+            increment
+        }
+    }
+}</code>
+                        </div>
+                        <div class="card-footer">
+                            <span>John Doe</span>
+                            <div class="card-likes">
+                                <span>290</span>
+                                <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="height: 1rem; width: 1rem;"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2 class="card-title">React Hooks: useEffect Example</h2>
+                        <div class="card-content">
+                            <code>import React, { useState, useEffect } from 'react';
+
+function Example() {
+    const [count, setCount] = useState(0);
+
+    useEffect(() =&gt; {
+    document.title = `Count: ${count}`;
+    });
+
+    return (
+    &lt;div&gt;
+        &lt;p&gt;You clicked {count} times&lt;/p&gt;
+        &lt;button onClick={() =&gt; setCount(count + 1)}&gt;Click me&lt;/button&gt;
+    &lt;/div&gt;
+    );
+}</code>
+                        </div>
+                        <div class="card-footer">
+                            <span>Alice Johnson</span>
+                            <div class="card-likes">
+                                <span>104</span>
+                                <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="height: 1rem; width: 1rem;"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2 class="card-title">Shell Script Example</h2>
+                        <div class="card-content">
+                            <code>#!/bin/bash
+
+echo "Hello, World!"</code>
+                        </div>
+                        <div class="card-footer">
+                            <span>Paula Cyan
+                            </span>
+                            <div class="card-likes">
+                                <span>17</span>
+                                <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="height: 1rem; width: 1rem;"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2 class="card-title">Java Basic Hello World</h2>
+                        <div class="card-content">
+                            <code>public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}</code>
+                        </div>
+                        <div class="card-footer">
+                            <span>Ivy Purple</span>
+                            <div class="card-likes">
+                                <span>3</span>
+                                <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="height: 1rem; width: 1rem;"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2 class="card-title">Go Simple HTTP Server</h2>
+                        <div class="card-content">
+                            <code>package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, World!")
+}
+
+func main() {
+    http.HandleFunc("/", handler)
+    http.ListenAndServe(":8080", nil)
+}</code>
+                        </div>
+                        <div class="card-footer">
+                            <span>Grace Yellow</span>
+                            <div class="card-likes">
+                                <span>561</span>
+                                <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="height: 1rem; width: 1rem;"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2 class="card-title">Python Data Analysis with Pandas</h2>
+                        <div class="card-content">
+                            <code>import pandas as pd
+
+data = {'Name': ['Tom', 'Jerry', 'Mickey'], 'Age': [20, 21, 19]}
+df = pd.DataFrame(data)
+print(df.describe())</code>
+                        </div>
+                        <div class="card-footer">
+                            <span>Guido van Rossum</span>
+                            <div class="card-likes devils-disciple">
+                                <span>-666</span>
+                                <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="height: 1rem; width: 1rem;"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div >
-                    <label for="snippet">Snippet: </label>
-                    <textarea form="snippet-form" name="snippet" id="snippet" required></textarea>
-                </div>
-                <div >
-                    <label for="name">Your Name: </label>
-                    <input type="text" pattern="[a-zA-Z]" name="name" id="name" required></input>
-                </div>
-                <div>
-                    <input type="submit" value="Submit" />
-                </div>
-            </form>
+            </main>
+
+
+            <footer>
+                <div class="footer-container">
+                    <div style="display: none;" class="form-container">
+                        <h2>Submit a new snippet</h2>
+                        <form class="snippet-form" action="" method="get" id="snippet-form">
+                            <label for="title">Title: </label>
+                            <input type="text" name="title" id="title" required />
+                        
+                            <label for="snippet">Snippet: </label>
+                            <textarea form="snippet-form" name="snippet" id="snippet" required></textarea>
+                        
+                            <label for="name">Your Name: </label>
+                            <input type="text" pattern="[a-zA-Z]" name="name" id="name" required></input>
+                            
+                            <input class="submit-button" type="submit" value="Submit" />
+                        </form>
+                    </div>
+                    <div class="footer-text">
+                        <p style="text-align: center;">
+                            This project was created for the course 
+                            <a href="https://ssw.jku.at/Teaching/Lectures/IntroWebDev/2025/">Special Topic: Introduction to Full Stack Web Development</a>
+                            at Johannes Kepler University.
+                        </p>
+                    </div>
+                </div>  
+            </footer>
         </div>
-        <hr/>
-
-        <footer>
-            <p>
-                This project was created for the course 
-                <a href="https://ssw.jku.at/Teaching/Lectures/IntroWebDev/2025/">Special Topic: Introduction to Full Stack Web Development</a>
-                at Johannes Kepler University.
-            </p>
-        </footer>
     </body>
 </html>
