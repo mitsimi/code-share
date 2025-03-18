@@ -7,14 +7,14 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="neumorphism.css">
     </head>
     <body>
         <div class="site-container">
             <header>
                 <div class="header-container">
                     <div href="#" class="header-logo-name">
-                        <img src="logo.png" alt="SnippetShare Logo" class="header-logo"/>
+                        <img src="logo.svg" alt="SnippetShare Logo" class="header-logo"/>
                         <span>SnippetShare</span>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                     <div class="card">
                         <h2 class="card-title">Vue 3 Composition API Example</h2>
                         <div class="card-content">
-                            <code>import { ref, computed } from 'vue'
+                            <pre><code>import { ref, computed } from 'vue'
 export default {
     setup() {
         const count = ref(0)
@@ -42,11 +42,11 @@ export default {
             increment
         }
     }
-}</code>
+}</code></pre>
                         </div>
                         <div class="card-footer">
                             <span>John Doe</span>
-                            <div class="card-likes">
+                            <div class="card-likes card-liked">
                                 <span>290</span>
                                 <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +67,7 @@ export default {
                     <div class="card">
                         <h2 class="card-title">React Hooks: useEffect Example</h2>
                         <div class="card-content">
-                            <code>import React, { useState, useEffect } from 'react';
+                            <pre><code>import React, { useState, useEffect } from 'react';
 
 function Example() {
     const [count, setCount] = useState(0);
@@ -82,11 +82,11 @@ function Example() {
         &lt;button onClick={() =&gt; setCount(count + 1)}&gt;Click me&lt;/button&gt;
     &lt;/div&gt;
     );
-}</code>
+}</code></pre>
                         </div>
                         <div class="card-footer">
                             <span>Alice Johnson</span>
-                            <div class="card-likes">
+                            <div class="card-likes card-liked">
                                 <span>104</span>
                                 <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -107,9 +107,9 @@ function Example() {
                     <div class="card">
                         <h2 class="card-title">Shell Script Example</h2>
                         <div class="card-content">
-                            <code>#!/bin/bash
+                            <pre><code>#!/bin/bash
 
-echo "Hello, World!"</code>
+echo "Hello, World!"</code></pre>
                         </div>
                         <div class="card-footer">
                             <span>Paula Cyan
@@ -136,11 +136,11 @@ echo "Hello, World!"</code>
                     <div class="card">
                         <h2 class="card-title">Java Basic Hello World</h2>
                         <div class="card-content">
-                            <code>public class HelloWorld {
+                            <pre><code>public class HelloWorld {
     public static void main(String[] args) {
         System.out.println("Hello, World!");
     }
-}</code>
+}</code></pre>
                         </div>
                         <div class="card-footer">
                             <span>Ivy Purple</span>
@@ -166,7 +166,7 @@ echo "Hello, World!"</code>
                     <div class="card">
                         <h2 class="card-title">Go Simple HTTP Server</h2>
                         <div class="card-content">
-                            <code>package main
+                            <pre><code>package main
 
 import (
     "fmt"
@@ -180,7 +180,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
     http.HandleFunc("/", handler)
     http.ListenAndServe(":8080", nil)
-}</code>
+}</code></pre>
                         </div>
                         <div class="card-footer">
                             <span>Grace Yellow</span>
@@ -205,11 +205,11 @@ func main() {
                     <div class="card">
                         <h2 class="card-title">Python Data Analysis with Pandas</h2>
                         <div class="card-content">
-                            <code>import pandas as pd
+                        <pre><code>import pandas as pd
 
 data = {'Name': ['Tom', 'Jerry', 'Mickey'], 'Age': [20, 21, 19]}
 df = pd.DataFrame(data)
-print(df.describe())</code>
+print(df.describe())</code></pre>
                         </div>
                         <div class="card-footer">
                             <span>Guido van Rossum</span>
