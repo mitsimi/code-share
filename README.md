@@ -18,4 +18,7 @@
 - `Lucide` for icons
 - `Shadcn-Vue` for basic components
 - `Inspira UI` for effects/background
-- 
+
+
+### Backend
+- `MongoDB` as document store
