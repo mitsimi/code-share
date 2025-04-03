@@ -10,3 +10,12 @@
     * Search for snippet (title)
     * Extended: 
         - Comment section with websockets
+
+## Stack
+### Frontend
+- `Vue`
+- `Tailwind` for styling
+- `Lucide` for icons
+- `Shadcn-Vue` for basic components
+- `Inspira UI` for effects/background
+- 
