@@ -1,32 +1,127 @@
 <!DOCTYPE html>
-    <head>
-        <title>SnippetShare - Explore</title>
+<head>
+    <title>SnippetShare - Explore</title>
 
-        <meta name="author" content="Noah Füreder" />
-        
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Noah Füreder" />
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="stylesheet" href="neumorphism.css">
-    </head>
-    <body>
-        <div class="site-container">
-            <header>
-                <div class="header-container">
-                    <div href="#" class="header-logo-name">
-                        <img src="logo.svg" alt="SnippetShare Logo" class="header-logo"/>
-                        <span>SnippetShare</span>
+    <link rel="stylesheet" href="neobrutalism.css">
+    
+    <!-- Add Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Add Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app" class="site-container">
+        <header>
+            <div class="header-container">
+                <div href="#" class="header-logo-name">
+                    <img src="logo.svg" alt="SnippetShare Logo" class="header-logo"/>
+                    <span>SnippetShare</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="card-container">                     
+                <div v-for="card in cards" :key="card.id" class="card">
+                    <h2 class="card-title">{{ card.title }}</h2>
+                    <div class="card-content">
+                        <pre><code>{{ card.code }}</code></pre>
+                    </div>
+                    <div class="card-footer">
+                        <span>{{ card.author }}</span>
+                        <div class="card-likes" 
+                             :class="{ 
+                                'card-liked': card.isLiked, 
+                                'devils-disciple': card.likes < 0 
+                             }"
+                             @click.stop="toggleLike(card)">
+                            <span>{{ card.likes }}</span>
+                            <i data-lucide="heart" :fill="card.isLiked ? 'currentColor' : 'none'" style="height: 1rem; width: 1rem;"></i>
+                        </div>
                     </div>
                 </div>
-            </header>
+            </div>
+        </main>
 
-            
-            <main>
-                <div class="card-container">                     
-                    <div class="card">
-                        <h2 class="card-title">Vue 3 Composition API Example</h2>
-                        <div class="card-content">
-                            <pre><code>import { ref, computed } from 'vue'
+        <footer>
+            <div class="footer-container">
+                <div class="footer-text">
+                    <p style="text-align: center;">
+                        This project was created for the course 
+                        <a href="https://ssw.jku.at/Teaching/Lectures/IntroWebDev/2025/">Special Topic: Introduction to Full Stack Web Development</a>
+                        at Johannes Kepler University.
+                    </p>
+                </div>
+            </div>  
+        </footer>
+
+        <!-- Floating Action Button -->
+        <button class="floating-btn" @click="showModal = true">
+            <i data-lucide="plus" style="height: 1.5rem; width: 1.5rem;"></i>
+        </button>
+
+        <!-- Modal for snippet submission -->
+        <div class="modal" :class="{ 'show': showModal }" @click="closeModalOutside">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Submit a new snippet</h2>
+                    <button class="close-btn" @click="showModal = false">&times;</button>
+                </div>
+                <form class="snippet-form" @submit.prevent="submitSnippet">
+                    <label for="title-modal">Title: </label>
+                    <input type="text" v-model="newSnippet.title" id="title-modal" required />
+                
+                    <label for="snippet-modal">Snippet: </label>
+                    <textarea v-model="newSnippet.code" id="snippet-modal" required></textarea>
+                
+                    <label for="name-modal">Your Name: </label>
+                    <input type="text" v-model="newSnippet.author" id="name-modal" required />
+                    
+                    <input class="submit-button" type="submit" value="Submit" />
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast-container">
+            <div class="toast" :class="{ 'show-toast': showToast }">
+                <div class="toast-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>{{ toastMessage }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue app script -->
+    <script>
+        lucide.createIcons();
+        const { createApp } = Vue
+        
+        createApp({
+            data() {
+                return {
+                    showModal: false,
+                    showToast: false,
+                    toastMessage: '',
+                    toastTimeout: null,
+                    newSnippet: {
+                        title: '',
+                        code: '',
+                        author: '',
+                    },
+                    cards: [
+                        {
+                            id: 1,
+                            title: "Vue 3 Composition API Example",
+                            code: `import { ref, computed } from 'vue'
 export default {
     setup() {
         const count = ref(0)
@@ -42,131 +137,60 @@ export default {
             increment
         }
     }
-}</code></pre>
-                        </div>
-                        <div class="card-footer">
-                            <span>John Doe</span>
-                            <div class="card-likes card-liked">
-                                <span>290</span>
-                                <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                style="height: 1rem; width: 1rem;"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h2 class="card-title">React Hooks: useEffect Example</h2>
-                        <div class="card-content">
-                            <pre><code>import React, { useState, useEffect } from 'react';
+}`,
+                            author: "John Doe",
+                            likes: 290,
+                            isLiked: true
+                        },
+                        {
+                            id: 2,
+                            title: "React Hooks: useEffect Example",
+                            code: `import React, { useState, useEffect } from 'react';
 
 function Example() {
     const [count, setCount] = useState(0);
 
-    useEffect(() =&gt; {
-    document.title = `Count: ${count}`;
+    useEffect(() => {
+    document.title = \`Count: \${count}\`;
     });
 
     return (
-    &lt;div&gt;
-        &lt;p&gt;You clicked {count} times&lt;/p&gt;
-        &lt;button onClick={() =&gt; setCount(count + 1)}&gt;Click me&lt;/button&gt;
-    &lt;/div&gt;
+    <div>
+        <p>You clicked {count} times</p>
+        <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
     );
-}</code></pre>
-                        </div>
-                        <div class="card-footer">
-                            <span>Alice Johnson</span>
-                            <div class="card-likes card-liked">
-                                <span>104</span>
-                                <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                style="height: 1rem; width: 1rem;"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h2 class="card-title">Shell Script Example</h2>
-                        <div class="card-content">
-                            <pre><code>#!/bin/bash
+}`,
+                            author: "Alice Johnson",
+                            likes: 104,
+                            isLiked: true
+                        },
+                        {
+                            id: 3,
+                            title: "Shell Script Example",
+                            code: `#!/bin/bash
 
-echo "Hello, World!"</code></pre>
-                        </div>
-                        <div class="card-footer">
-                            <span>Paula Cyan
-                            </span>
-                            <div class="card-likes">
-                                <span>17</span>
-                                <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                style="height: 1rem; width: 1rem;"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h2 class="card-title">Java Basic Hello World</h2>
-                        <div class="card-content">
-                            <pre><code>public class HelloWorld {
+echo "Hello, World!"`,
+                            author: "Paula Cyan",
+                            likes: 17,
+                            isLiked: false
+                        },
+                        {
+                            id: 4,
+                            title: "Java Basic Hello World",
+                            code: `public class HelloWorld {
     public static void main(String[] args) {
         System.out.println("Hello, World!");
     }
-}</code></pre>
-                        </div>
-                        <div class="card-footer">
-                            <span>Ivy Purple</span>
-                            <div class="card-likes">
-                                <span>3</span>
-                                <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                style="height: 1rem; width: 1rem;"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h2 class="card-title">Go Simple HTTP Server</h2>
-                        <div class="card-content">
-                            <pre><code>package main
+}`,
+                            author: "Ivy Purple",
+                            likes: 3,
+                            isLiked: false
+                        },
+                        {
+                            id: 5,
+                            title: "Go Simple HTTP Server",
+                            code: `package main
 
 import (
     "fmt"
@@ -180,88 +204,83 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
     http.HandleFunc("/", handler)
     http.ListenAndServe(":8080", nil)
-}</code></pre>
-                        </div>
-                        <div class="card-footer">
-                            <span>Grace Yellow</span>
-                            <div class="card-likes">
-                                <span>561</span>
-                                <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                style="height: 1rem; width: 1rem;"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h2 class="card-title">Python Data Analysis with Pandas</h2>
-                        <div class="card-content">
-                        <pre><code>import pandas as pd
+}`,
+                            author: "Grace Yellow",
+                            likes: 561,
+                            isLiked: false
+                        },
+                        {
+                            id: 6,
+                            title: "Python Data Analysis with Pandas",
+                            code: `import pandas as pd
 
 data = {'Name': ['Tom', 'Jerry', 'Mickey'], 'Age': [20, 21, 19]}
 df = pd.DataFrame(data)
-print(df.describe())</code></pre>
-                        </div>
-                        <div class="card-footer">
-                            <span>Guido van Rossum</span>
-                            <div class="card-likes devils-disciple">
-                                <span>-666</span>
-                                <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                style="height: 1rem; width: 1rem;"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-
-            <footer>
-                <div class="footer-container">
-                    <div style="display: none;" class="form-container">
-                        <h2>Submit a new snippet</h2>
-                        <form class="snippet-form" action="" method="get" id="snippet-form">
-                            <label for="title">Title: </label>
-                            <input type="text" name="title" id="title" required />
-                        
-                            <label for="snippet">Snippet: </label>
-                            <textarea form="snippet-form" name="snippet" id="snippet" required></textarea>
-                        
-                            <label for="name">Your Name: </label>
-                            <input type="text" pattern="[a-zA-Z]" name="name" id="name" required></input>
-                            
-                            <input class="submit-button" type="submit" value="Submit" />
-                        </form>
-                    </div>
-                    <div class="footer-text">
-                        <p style="text-align: center;">
-                            This project was created for the course 
-                            <a href="https://ssw.jku.at/Teaching/Lectures/IntroWebDev/2025/">Special Topic: Introduction to Full Stack Web Development</a>
-                            at Johannes Kepler University.
-                        </p>
-                    </div>
-                </div>  
-            </footer>
-        </div>
-    </body>
+print(df.describe())`,
+                            author: "Guido van Rossum",
+                            likes: -666,
+                            isLiked: false
+                        }
+                    ]
+                }
+            },
+            methods: {
+                toggleLike(card) {
+                    card.isLiked = !card.isLiked;
+                    card.likes += card.isLiked ? 1 : -1;
+                },
+                closeModalOutside(event) {
+                    if (event.target.classList.contains('modal')) {
+                        this.showModal = false;
+                    }
+                },
+                submitSnippet() {
+                    // Generate a new ID
+                    const newId = Math.max(...this.cards.map(card => card.id)) + 1;
+                    
+                    // Create the new snippet object
+                    const newCard = {
+                        id: newId,
+                        title: this.newSnippet.title,
+                        code: this.newSnippet.code,
+                        author: this.newSnippet.author,
+                        likes: 0,
+                        isLiked: false
+                    };
+                    
+                    // Add it to the cards array
+                    this.cards.unshift(newCard);
+                    
+                    // Reset the form
+                    this.newSnippet = {
+                        title: '',
+                        code: '',
+                        author: ''
+                    };
+                    
+                    // Close the modal
+                    this.showModal = false;
+                    
+                    // Show the toast notification
+                    this.showToastMessage(`"${newCard.title}" has been added successfully!`);
+                },
+                showToastMessage(message) {
+                    // Clear any existing timeout
+                    if (this.toastTimeout) {
+                        clearTimeout(this.toastTimeout);
+                    }
+                    
+                    // Set message and show toast
+                    this.toastMessage = message;
+                    this.showToast = true;
+                    
+                    // Hide toast after 3 seconds
+                    this.toastTimeout = setTimeout(() => {
+                        this.showToast = false;
+                    }, 3000);
+                }
+            }
+        }).mount('#app')
+    </script>      
+</body>
 </html>
