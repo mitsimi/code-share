@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <head>
-    <title>SnippetShare - Explore</title>
-
+    <!-- Basic page metadata -->
+    <title>SnippetShare</title>
     <meta name="author" content="Noah Füreder" />
-    
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="neobrutalism.css">
+    <!-- Stylesheet reference -->
+    <link rel="stylesheet" href="styles.css">
     
-    <!-- Add Lucide icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Add Vue.js -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- External libraries -->
+    <script src="https://unpkg.com/lucide@latest"></script>  <!-- Icon library -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>  <!-- Vue.js framework -->
 </head>
 <body>
+    <!-- Root Vue application container -->
     <div id="app" class="site-container">
+        <!-- Header section -->
         <header>
             <div class="header-container">
                 <div href="#" class="header-logo-name">
-                    <img src="logo.svg" alt="SnippetShare Logo" class="header-logo"/>
+                    <!-- Logo with fallback -->
+                    <img src="logo.svg" onerror="this.src='https://img.logoipsum.com/284.svg'" alt="SnippetShare Logo" class="header-logo"/>
                     <span>SnippetShare</span>
                 </div>
             </div>
         </header>
 
+        <!-- Main content area -->
         <main>
+            <!-- Card grid container -->
             <div class="card-container">                     
+                <!-- Dynamic card generation using Vue v-for -->
                 <div v-for="card in cards" :key="card.id" class="card">
                     <h2 class="card-title">{{ card.title }}</h2>
                     <div class="card-content">
@@ -34,6 +39,7 @@
                     </div>
                     <div class="card-footer">
                         <span>{{ card.author }}</span>
+                        <!-- Like button with conditional classes -->
                         <div class="card-likes" 
                              :class="{ 
                                 'card-liked': card.isLiked, 
@@ -48,6 +54,7 @@
             </div>
         </main>
 
+        <!-- Footer section -->
         <footer>
             <div class="footer-container">
                 <div class="footer-text">
@@ -60,24 +67,30 @@
             </div>  
         </footer>
 
-        <!-- Floating Action Button -->
+        <!-- Floating action button -->
         <button class="floating-btn" @click="showModal = true">
             <i data-lucide="plus" style="height: 1.5rem; width: 1.5rem;"></i>
         </button>
-
-        <!-- Modal for snippet submission -->
+        
+        <!-- Modal for new snippet submission -->
         <div class="modal" :class="{ 'show': showModal }" @click="closeModalOutside">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Submit a new snippet</h2>
                     <button class="close-btn" @click="showModal = false">&times;</button>
                 </div>
+                <!-- Snippet submission form -->
                 <form class="snippet-form" @submit.prevent="submitSnippet">
                     <label for="title-modal">Title: </label>
                     <input type="text" v-model="newSnippet.title" id="title-modal" required />
                 
                     <label for="snippet-modal">Snippet: </label>
-                    <textarea v-model="newSnippet.code" id="snippet-modal" required></textarea>
+                    <textarea 
+                        v-model="newSnippet.code" 
+                        id="snippet-modal" 
+                        required
+                        @keydown="handleTabKey"
+                    ></textarea>
                 
                     <label for="name-modal">Your Name: </label>
                     <input type="text" v-model="newSnippet.author" id="name-modal" required />
@@ -87,7 +100,7 @@
             </div>
         </div>
 
-        <!-- Toast Notification -->
+        <!-- Toast notification container -->
         <div class="toast-container">
             <div class="toast" :class="{ 'show-toast': showToast }">
                 <div class="toast-content">
@@ -100,12 +113,15 @@
         </div>
     </div>
 
-    <!-- Vue app script -->
+    <!-- Vue application script -->
     <script>
+        // Initialize Lucide icons
         lucide.createIcons();
         const { createApp } = Vue
         
+        // Create Vue application
         createApp({
+            // Application state
             data() {
                 return {
                     showModal: false,
@@ -224,21 +240,23 @@ print(df.describe())`,
                     ]
                 }
             },
+            // Application methods
             methods: {
+                // Toggle like status for a card
                 toggleLike(card) {
                     card.isLiked = !card.isLiked;
                     card.likes += card.isLiked ? 1 : -1;
                 },
+                // Close modal when clicking outside
                 closeModalOutside(event) {
                     if (event.target.classList.contains('modal')) {
                         this.showModal = false;
                     }
                 },
+                // Submit new snippet
                 submitSnippet() {
-                    // Generate a new ID
                     const newId = Math.max(...this.cards.map(card => card.id)) + 1;
                     
-                    // Create the new snippet object
                     const newCard = {
                         id: newId,
                         title: this.newSnippet.title,
@@ -248,36 +266,73 @@ print(df.describe())`,
                         isLiked: false
                     };
                     
-                    // Add it to the cards array
                     this.cards.unshift(newCard);
                     
-                    // Reset the form
+                    // Reset form
                     this.newSnippet = {
                         title: '',
                         code: '',
                         author: ''
                     };
                     
-                    // Close the modal
                     this.showModal = false;
-                    
-                    // Show the toast notification
                     this.showToastMessage(`"${newCard.title}" has been added successfully!`);
                 },
+                // Show toast message
                 showToastMessage(message) {
-                    // Clear any existing timeout
                     if (this.toastTimeout) {
                         clearTimeout(this.toastTimeout);
                     }
                     
-                    // Set message and show toast
                     this.toastMessage = message;
                     this.showToast = true;
-                    
-                    // Hide toast after 3 seconds
                     this.toastTimeout = setTimeout(() => {
                         this.showToast = false;
                     }, 3000);
+                },
+                // Handle tab key in textarea
+                handleTabKey(event) {
+                    if (event.key === 'Tab') {
+                        event.preventDefault();
+                        
+                        const textarea = event.target;
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const value = textarea.value;
+                        
+                        if (start !== end && value.substring(start, end).includes('\n')) {
+                            const selectedText = value.substring(start, end);
+                            const lines = selectedText.split('\n');
+                            
+                            const newLines = lines.map(line => 
+                                event.shiftKey ? this.removeTab(line) : '    ' + line
+                            );
+                            const newText = newLines.join('\n');
+                            
+                            textarea.value = value.substring(0, start) + newText + value.substring(end);
+                            textarea.selectionStart = start;
+                            textarea.selectionEnd = start + newText.length;
+                        } else {
+                            const spaces = '    '; 
+                            textarea.value = value.substring(0, start) + spaces + value.substring(end);
+                            textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+                        }
+                        
+                        this.newSnippet.code = textarea.value;
+                    }
+                },
+                // Remove tab from line
+                removeTab(line) {
+                    if (line.startsWith('\t')) {
+                        return line.substring(1);
+                    }
+                    if (line.startsWith('    ')) {
+                        return line.substring(4);
+                    }
+                    if (line.startsWith('  ')) {
+                        return line.substring(2);
+                    }
+                    return line;
                 }
             }
         }).mount('#app')

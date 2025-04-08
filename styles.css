@@ -1,26 +1,30 @@
-/* Create invisible barrier above header */
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Rubik:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap');
+
+/* Create a barrier at the top of the page to prevent overscroll issues */
 body::before {
   content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 10px; /* Small barrier */
-  z-index: 101; /* Higher than header */
-  pointer-events: none; /* Won't block interactions */
+  height: 10px;
+  z-index: 101;
+  pointer-events: none;
 }
 
-/* Only on touch devices */
+/* Enable interaction blocking at top only on touch devices */
 @media (pointer: coarse) {
   body::before {
-    pointer-events: auto; /* Block interactions at very top */
-    opacity: 0; /* Invisible */
+    pointer-events: auto;
+    opacity: 0;
   }
 }
 
-
-/* Base styles and variables */
+/* Root variables for consistent theming */
 :root {
+  /* Color palette */
   --main-bg: #fcf7de;
   --text-color: #000000;
   --accent-color: #ff3e4d;
@@ -29,15 +33,53 @@ body::before {
   --card-bg: #ffffff;
   --border-color: #000000;
   --offset: 5px;
+
+  /* Typography */
+  --font-primary: 'Space Grotesk', sans-serif;
+  --font-heading: 'Rubik', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
+/* Base styles */
 html {
-  font-family: "Arial", sans-serif;
   background: var(--main-bg);
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
+  font-family: var(--font-primary);
+}
+
+/* Typography styles */
+h1, h2, h3, .card-title, .submit-button {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.card-content code, 
+pre, 
+textarea, input[type="text"] {
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.card-title {
+  font-family: var(--font-primary);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.submit-button {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.theme-menu-header {
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 /* Layout containers */
@@ -88,12 +130,14 @@ main {
   padding: 1rem;
 }
 
+/* Card grid layout */
 .card-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
 }
 
+/* Card styling */
 .card {
   background: var(--card-bg);
   border: 4px solid var(--border-color);
@@ -107,6 +151,7 @@ main {
   transition: all 0.2s ease;
 }
 
+/* Alternate card rotation */
 .card:nth-child(odd) {
   transform: rotate(1deg);
 }
@@ -115,12 +160,14 @@ main {
   transform: rotate(-1deg);
 }
 
+/* Card hover effects */
 .card:hover {
   transform: translateY(-5px) rotate(0);
   box-shadow: calc(var(--offset) + 3px) calc(var(--offset) + 3px) 0
     var(--border-color);
 }
 
+/* Card components */
 .card-title {
   font-size: 20px;
   font-weight: 900;
@@ -153,6 +200,7 @@ main {
   padding: 0;
 }
 
+/* Card footer */
 .card-footer {
   display: flex;
   justify-content: space-between;
@@ -164,6 +212,7 @@ main {
   padding-top: 0.5rem;
 }
 
+/* Like button styles */
 .card-likes {
   display: flex;
   align-items: center;
@@ -184,6 +233,7 @@ main {
   stroke: white;
 }
 
+/* Special theme */
 .devils-disciple {
   background-color: black;
   color: white;
@@ -198,7 +248,6 @@ main {
 }
 
 /* Footer styles */
-/* Footer styles */
 .footer-container {
   max-width: 80rem;
   margin: 0 auto;
@@ -211,6 +260,7 @@ main {
   transform: rotate(1deg);
 }
 
+/* Form container */
 .form-container {
   width: 100%;
   padding-right: 1rem;
@@ -226,9 +276,10 @@ main {
   text-transform: uppercase;
 }
 
+/* Form layout */
 .snippet-form {
   display: grid;
-  grid-template-columns: auto 1fr; /* Label then input */
+  grid-template-columns: auto 1fr;
   align-items: start;
   gap: 1rem;
 }
@@ -240,6 +291,7 @@ main {
   align-self: center;
 }
 
+/* Form inputs */
 .snippet-form input[type="text"],
 .snippet-form textarea {
   resize: none;
@@ -252,6 +304,7 @@ main {
   width: 100%;
 }
 
+/* Submit button */
 .submit-button {
   grid-column: 1 / span 2;
   background: var(--accent-color);
@@ -267,6 +320,7 @@ main {
   margin-top: 0.5rem;
 }
 
+/* Footer text */
 .footer-text {
   width: 100%;
   font-family: monospace;
@@ -279,10 +333,10 @@ main {
   padding-left: 1rem;
 }
 
-/* Responsive adjustment for mobile */
+/* Mobile responsiveness */
 @media (max-width: 768px) {
   .footer-container {
-    grid-template-columns: 1fr; /* Stack on mobile */
+    grid-template-columns: 1fr;
     padding: 1.5rem 1rem;
   }
   
@@ -299,13 +353,14 @@ main {
   }
 }
 
+/* SVG styles */
 svg {
   fill: none;
   stroke: currentColor;
   stroke-width: 3;
 }
 
-/* Floating Button */
+/* Floating action button */
 .floating-btn {
   position: fixed;
   bottom: 30px;
@@ -340,7 +395,7 @@ svg {
   height: 24px;
 }
 
-/* Modal */
+/* Modal styles */
 .modal {
   display: none;
   position: fixed;
@@ -371,6 +426,7 @@ svg {
   overflow-y: auto;
 }
 
+/* Modal header */
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -387,6 +443,7 @@ svg {
   text-transform: uppercase;
 }
 
+/* Close button */
 .close-btn {
   background: none;
   border: 3px solid var(--border-color);
@@ -408,7 +465,7 @@ svg {
   color: white;
 }
 
-/* Form styling for modal */
+/* Modal form styling */
 .modal .snippet-form {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -429,7 +486,7 @@ svg {
   grid-column: 1 / span 2;
 }
 
-/* Adjust floating button on mobile */
+/* Mobile modal adjustments */
 @media (max-width: 768px) {
   .modal-content {
     width: 95%;
@@ -444,7 +501,6 @@ svg {
     height: 50px;
   }
 }
-
 
 /* Toast notification */
 .toast-container {
@@ -482,6 +538,7 @@ svg {
   flex-shrink: 0;
 }
 
+/* Mobile toast adjustments */
 @media (max-width: 768px) {
   .toast-container {
     bottom: 20px;
@@ -493,4 +550,30 @@ svg {
     width: auto;
     max-width: none;
   }
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--main-bg);
+  border-left: 3px solid var(--border-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border: 3px solid var(--border-color);
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--main-bg);
+}
+
+/* Modal scrollbar customization */
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
 }
