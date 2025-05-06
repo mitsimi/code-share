@@ -1,20 +1,26 @@
 <template>
-  <div class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-    <CodeCard
+  <div class="m:grid-cols-2 grid grid-cols-1 gap-10 lg:grid-cols-3">
+    <div
       v-for="(card, index) in cards"
       :key="card.id"
-      :title="card.title"
-      :code="card.code"
-      :author="card.author"
-      :likes="card.likes"
-      :is-liked="card.isLiked"
-      :is-odd="index % 2 === 0"
-      @toggle-like="toggleLike(card)"
-    />
+      @click="handleCardClick(card)"
+      class="cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:rotate-0"
+      :class="{ 'rotate-1': index % 2 === 0, '-rotate-1': index % 2 !== 0 }"
+    >
+      <CodeCard
+        :title="card.title"
+        :code="card.code"
+        :author="card.author"
+        :likes="card.likes"
+        :is-liked="card.isLiked"
+        @toggle-like="(event) => handleLikeClick(event, card)"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import CodeCard from './CodeCard.vue'
 
 interface Card {
@@ -31,10 +37,17 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'toggle-like', card: Card): void
+  (e: 'toggleLike', card: Card): void
 }>()
 
-const toggleLike = (card: Card) => {
-  emit('toggle-like', card)
+const router = useRouter()
+
+const handleCardClick = (card: Card) => {
+  router.push(`/snippets/${card.id}`)
+}
+
+const handleLikeClick = (event: Event, card: Card) => {
+  event.stopPropagation()
+  emit('toggleLike', card)
 }
 </script>

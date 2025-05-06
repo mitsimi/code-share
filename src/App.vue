@@ -1,6 +1,11 @@
 <template>
   <RouterView />
+  <ToastNotification />
 </template>
+
+<script setup lang="ts">
+import ToastNotification from './components/ToastNotification.vue'
+</script>
 
 <style>
 /* Custom scrollbar styling */
@@ -15,7 +20,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ff3e4d;
+  background: var(--color-accent);
   border: 3px solid #000000;
   box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.3);
 }

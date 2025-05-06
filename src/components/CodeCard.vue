@@ -1,7 +1,6 @@
 <template>
   <div
-    class="flex max-h-[22rem] cursor-pointer flex-col border-4 border-black bg-white p-6 shadow-[5px_5px_0_0_#000] transition-all duration-200 hover:-translate-y-1 hover:rotate-0 hover:shadow-[8px_8px_0_0_#000]"
-    :class="{ 'rotate-1': isOdd, '-rotate-1': !isOdd }"
+    class="flex max-h-[22rem] cursor-pointer flex-col border-4 border-black bg-white p-6 shadow-[5px_5px_0_0_#000] transition-all duration-200 hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#000]"
   >
     <h2
       class="overflow-wrap mb-3 border-b-3 border-black pb-2 text-xl font-black break-words text-black"

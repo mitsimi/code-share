@@ -1,27 +1,4 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-import AppHeader from '../components/AppHeader.vue'
-import CardGrid from '../components/CardGrid.vue'
-import AppFooter from '../components/AppFooter.vue'
-import FloatingActionButton from '../components/FloatingActionButton.vue'
-import SnippetModal from '../components/SnippetModal.vue'
-import ToastNotification from '../components/ToastNotification.vue'
-
-interface Card {
-  id: number
-  title: string
-  code: string
-  author: string
-  likes: number
-  isLiked: boolean
-}
-
-const showModal = ref(false)
-const showToast = ref(false)
-const toastMessage = ref('')
-const toastTimeout = ref<number | null>(null)
-
-const cards = ref<Card[]>([
+export const snippets = [
   {
     id: 1,
     title: 'Vue 3 Composition API Example',
@@ -70,55 +47,4 @@ const cards = ref<Card[]>([
     likes: -666,
     isLiked: false,
   },
-])
-
-const toggleLike = (card: Card) => {
-  card.isLiked = !card.isLiked
-  card.likes += card.isLiked ? 1 : -1
-}
-
-const submitSnippet = (formData: { title: string; code: string; author: string }) => {
-  const newId = Math.max(...cards.value.map((card) => card.id)) + 1
-
-  const newCard: Card = {
-    id: newId,
-    title: formData.title,
-    code: formData.code,
-    author: formData.author,
-    likes: 0,
-    isLiked: false,
-  }
-
-  cards.value.unshift(newCard)
-  showModal.value = false
-  showToastMessage('"' + newCard.title + '" has been added successfully!')
-}
-
-const showToastMessage = (message: string) => {
-  if (toastTimeout.value) {
-    clearTimeout(toastTimeout.value)
-  }
-
-  toastMessage.value = message
-  showToast.value = true
-  toastTimeout.value = window.setTimeout(() => {
-    showToast.value = false
-  }, 3000)
-}
-</script>
-
-<template>
-  <AppHeader />
-
-  <main class="mx-auto my-12 max-w-7xl px-4">
-    <CardGrid :cards="cards" @toggle-like="toggleLike" />
-  </main>
-
-  <AppFooter />
-
-  <FloatingActionButton @click="showModal = true" />
-
-  <SnippetModal :show="showModal" @close="showModal = false" @submit="submitSnippet" />
-
-  <ToastNotification :show="showToast" :message="toastMessage" />
-</template>
+]
