@@ -1,24 +1,39 @@
-# Project for Full Stack Web Development
+# code-share
 
-## Ideas
-- Code Snippet Sharing
-    * Share your code snippet
-        - Create new
-        - Delete old
-        - Update some
-    * Browse shared snippets
-    * Search for snippet (title)
-    * Extended: 
-        - Comment section with websockets
+This template should help get you started developing with Vue 3 in Vite.
 
-## Stack
-### Frontend
-- `Vue`
-- `Tailwind` for styling
-- `Lucide` for icons
-- `Shadcn-Vue` for basic components
-- `Inspira UI` for effects/background
+## Recommended IDE Setup
 
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-### Backend
-- `MongoDB` as document store
+## Type Support for `.vue` Imports in TS
+
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
+
+```sh
+pnpm install
+```
+
+### Compile and Hot-Reload for Development
+
+```sh
+pnpm dev
+```
+
+### Type-Check, Compile and Minify for Production
+
+```sh
+pnpm build
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+pnpm lint
+```

@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Space Grotesk', 'sans-serif';
+  --font-serig: 'Rubik', 'sans-serif';
+  --font-mono: 'JetBrains Mono', 'monospace';
+
+  --color-background: #fcf7de;
+  --color-foreground: #000000;
+
+  --color-accent: #ff3e4d;
+  --color-secondary: #27a5ef;
+  --color-tertiary: #9747ff;
+
+  --color-success: #4caf50;
+  --color-error: #f44336;
+  --color-warning: #ff9800;
+  --color-info: #2196f3;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+}
