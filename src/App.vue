@@ -28,7 +28,7 @@ import ToastNotification from './components/ToastNotification.vue'
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-accent);
+  background: var(--destructive);
   border: 3px solid #000000;
   box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.3);
 }

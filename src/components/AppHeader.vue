@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-accent sticky top-0 z-50 border-b-4 border-black">
+  <header class="bg-primary sticky top-0 z-50 border-b-4 border-black">
     <div class="container mx-auto px-4 py-4">
       <!-- Desktop Navigation -->
       <div class="hidden sm:flex sm:items-center sm:justify-between">

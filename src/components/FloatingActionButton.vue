@@ -1,5 +1,5 @@
 <template>
-  <Button variant="accent" class="fixed right-8 bottom-8 flex size-16" @click="$emit('click')">
+  <Button variant="destructive" class="fixed right-8 bottom-8 flex size-16" @click="$emit('click')">
     <Plus class="size-8" />
   </Button>
 </template>
