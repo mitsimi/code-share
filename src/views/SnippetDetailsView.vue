@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useToast } from '../composables/useToast'
 import { Heart, ArrowLeft } from 'lucide-vue-next'
 import { snippets } from '../data'
-
+import { Button } from '../components/ui/button'
 interface Snippet {
   id: number
   title: string
@@ -41,26 +41,19 @@ const toggleLike = () => {
   <main class="mx-auto my-12 max-w-4xl px-4">
     <div v-if="snippet" class="space-y-6">
       <!-- Back button -->
-      <button
-        class="inline-flex items-center gap-2 rounded-lg border-4 border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-        @click="$router.back()"
-      >
-        <ArrowLeft class="h-5 w-5" />
+      <Button variant="outline" @click="$router.back()">
+        <ArrowLeft class="size-5" />
         Back
-      </button>
+      </Button>
 
       <!-- Snippet header -->
       <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <button
-            class="flex items-center gap-2 rounded-lg border-4 border-black px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-            :class="{ 'bg-accent text-white': snippet.isLiked }"
-            @click="toggleLike"
-          >
-            <Heart class="h-5 w-5" :class="{ 'fill-current': snippet.isLiked }" />
+          <Button :variant="snippet.isLiked ? 'destructive' : 'outline'" @click="toggleLike">
+            <Heart class="size-5" :class="{ 'fill-current': snippet.isLiked }" />
             {{ snippet.likes }}
-          </button>
+          </Button>
         </div>
         <p class="text-lg text-gray-600">By {{ snippet.author }}</p>
       </div>

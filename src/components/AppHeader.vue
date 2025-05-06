@@ -14,14 +14,14 @@
         <router-link
           to="/snippets"
           class="rounded-lg border-4 border-black px-4 py-2 font-mono font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          active-class="bg-primary"
-        >
-          Snippets
+          active-class="bg-foreground text-background"
+          >Snippets
         </router-link>
+
         <router-link
           to="/about"
           class="rounded-lg border-4 border-black px-4 py-2 font-mono font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          active-class="bg-primary"
+          active-class="bg-foreground text-background"
         >
           About
         </router-link>

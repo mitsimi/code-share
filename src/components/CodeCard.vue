@@ -8,29 +8,25 @@
     <div class="grow overflow-hidden border-4 border-black bg-gray-100 p-4">
       <pre class="m-0 p-0"><code class="text-sm leading-relaxed text-black">{{ code }}</code></pre>
     </div>
-    <div
-      class="mt-4 flex items-center justify-between border-t-4 border-black pt-2 font-bold text-black"
-    >
+    <div class="mt-4 flex items-center justify-between border-t-4 border-black pt-2 font-bold">
       <span>{{ author }}</span>
-      <button
-        class="flex items-center gap-2 rounded-lg border-4 border-black px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+      <Button
+        :variant="isLiked ? 'destructive' : 'outline'"
         :class="{
-          'bg-accent text-white': isLiked,
           'bg-black text-white': likes < 0,
-          'bg-white': !isLiked && likes >= 0,
         }"
         @click="$emit('toggle-like')"
       >
         <span>{{ likes }}</span>
         <Heart class="h-5 w-5" :class="{ 'fill-current': isLiked }" />
-      </button>
+      </Button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Heart } from 'lucide-vue-next'
-
+import { Button } from './ui/button'
 defineProps<{
   title: string
   code: string
