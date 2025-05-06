@@ -40,7 +40,7 @@ const toggleLike = () => {
 </script>
 
 <template>
-  <div class="bg-main-bg min-h-screen text-black">
+  <div class="bg-background min-h-screen text-black">
     <AppHeader />
 
     <main class="mx-auto my-12 max-w-4xl px-4">
@@ -59,7 +59,7 @@ const toggleLike = () => {
           <div class="mb-4 flex items-center justify-between">
             <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
             <button
-              class="flex items-center gap-2 rounded-lg border-4 border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+              class="flex items-center gap-2 rounded-lg border-4 border-black px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
               :class="{ 'bg-accent text-white': snippet.isLiked }"
               @click="toggleLike"
             >
@@ -82,9 +82,3 @@ const toggleLike = () => {
     <AppFooter />
   </div>
 </template>
-
-<style scoped>
-.bg-main-bg {
-  background-color: #fcf7de;
-}
-</style>

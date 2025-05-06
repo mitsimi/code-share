@@ -1,24 +1,40 @@
 <template>
-  <header class="bg-secondary p-4">
-    <div
-      class="bg-background mx-auto flex max-w-7xl -rotate-[0.5deg] items-center justify-between border-4 border-black px-8 py-4 shadow-[5px_5px_0_0_#000]"
-    >
+  <header class="border-b-4 border-black bg-white">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-6">
       <div class="flex items-center gap-2">
         <img
           src="../assets/logo.svg"
           @error="handleLogoError"
           alt="SnippetShare Logo"
-          class="size-8 w-auto"
+          class="h-8 w-8"
         />
-        <span class="text-2xl font-black text-black">SnippetShare</span>
+        <h1 class="text-3xl font-bold">SnippetShare</h1>
       </div>
+      <nav>
+        <ul class="flex gap-4">
+          <li>
+            <a
+              href="#"
+              class="rounded-lg border-4 border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+              >Home</a
+            >
+          </li>
+          <li>
+            <a
+              href="#"
+              class="rounded-lg border-4 border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+              >About</a
+            >
+          </li>
+        </ul>
+      </nav>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-const handleLogoError = (e: Event) => {
-  const img = e.target as HTMLImageElement
-  img.src = 'https://img.logoipsum.com/284.svg'
+const handleLogoError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.style.display = 'none'
 }
 </script>

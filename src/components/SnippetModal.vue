@@ -5,60 +5,68 @@
     @click="$emit('close')"
   >
     <div
-      class="bg-main-bg relative max-h-[90vh] w-[90%] max-w-2xl -rotate-1 overflow-y-auto border-4 border-black p-8 shadow-[8px_8px_0_0_#000]"
+      class="bg-background w-full max-w-2xl rounded-lg border-4 border-black p-6 shadow-[8px_8px_0_0_#000]"
       @click.stop
     >
-      <div class="mb-6 flex items-center justify-between border-b-3 border-black pb-4">
-        <h2 class="m-0 text-2xl font-black uppercase">Submit a new snippet</h2>
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-2xl font-bold">Add New Snippet</h2>
         <button
-          class="hover:bg-accent flex h-9 w-9 cursor-pointer items-center justify-center border-3 border-black bg-white text-2xl shadow-[3px_3px_0_0_#000] hover:text-white"
+          class="flex h-8 w-8 items-center justify-center rounded-lg border-4 border-black bg-white shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
           @click="$emit('close')"
         >
-          &times;
+          <X class="h-4 w-4" />
         </button>
       </div>
 
-      <form
-        class="grid grid-cols-[auto_1fr] items-start gap-4"
-        @submit.prevent="$emit('submit', formData)"
-      >
-        <label for="title-modal" class="self-center text-base font-bold text-black">Title: </label>
-        <input
-          type="text"
-          v-model="formData.title"
-          id="title-modal"
-          required
-          class="box-border w-full resize-none border-3 border-black bg-white p-2 text-black shadow-[3px_3px_0_0_#000]"
-        />
+      <form @submit.prevent="handleSubmit" class="space-y-4">
+        <div>
+          <label for="title" class="mb-2 block font-bold">Title</label>
+          <input
+            id="title"
+            v-model="title"
+            type="text"
+            required
+            class="focus:ring-accent w-full rounded-lg border-4 border-black bg-white p-2 shadow-[4px_4px_0_0_#000] focus:ring-2 focus:outline-none"
+          />
+        </div>
 
-        <label for="snippet-modal" class="self-center text-base font-bold text-black"
-          >Snippet:
-        </label>
-        <textarea
-          v-model="formData.code"
-          id="snippet-modal"
-          required
-          @keydown="handleTabKey"
-          class="box-border h-[150px] w-full resize-none border-3 border-black bg-white p-2 text-black shadow-[3px_3px_0_0_#000]"
-        ></textarea>
+        <div>
+          <label for="code" class="mb-2 block font-bold">Code</label>
+          <textarea
+            id="code"
+            v-model="code"
+            required
+            rows="8"
+            class="focus:ring-accent w-full rounded-lg border-4 border-black bg-white p-2 font-mono text-sm shadow-[4px_4px_0_0_#000] focus:ring-2 focus:outline-none"
+          ></textarea>
+        </div>
 
-        <label for="name-modal" class="self-center text-base font-bold text-black"
-          >Your Name:
-        </label>
-        <input
-          type="text"
-          v-model="formData.author"
-          id="name-modal"
-          required
-          class="box-border w-full resize-none border-3 border-black bg-white p-2 text-black shadow-[3px_3px_0_0_#000]"
-        />
+        <div>
+          <label for="author" class="mb-2 block font-bold">Author</label>
+          <input
+            id="author"
+            v-model="author"
+            type="text"
+            required
+            class="focus:ring-accent w-full rounded-lg border-4 border-black bg-white p-2 shadow-[4px_4px_0_0_#000] focus:ring-2 focus:outline-none"
+          />
+        </div>
 
-        <button
-          type="submit"
-          class="bg-accent col-span-2 mt-2 cursor-pointer border-3 border-black p-3 text-base font-black text-white uppercase shadow-[3px_3px_0_0_#000] transition-all duration-200"
-        >
-          Submit
-        </button>
+        <div class="flex justify-end gap-4">
+          <button
+            type="button"
+            class="rounded-lg border-4 border-black bg-white px-6 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+            @click="$emit('close')"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="bg-accent rounded-lg border-4 border-black px-6 py-2 font-bold text-white shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          >
+            Submit
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -66,76 +74,29 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { X } from 'lucide-vue-next'
 
-interface FormData {
-  title: string
-  code: string
-  author: string
-}
-
-const props = defineProps<{
+defineProps<{
   show: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'submit', data: FormData): void
+  (e: 'submit', data: { title: string; code: string; author: string }): void
 }>()
 
-const formData = ref<FormData>({
-  title: '',
-  code: '',
-  author: '',
-})
+const title = ref('')
+const code = ref('')
+const author = ref('')
 
-const handleTabKey = (event: KeyboardEvent) => {
-  if (event.key === 'Tab') {
-    event.preventDefault()
-
-    const textarea = event.target as HTMLTextAreaElement
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
-    const value = textarea.value
-
-    if (start !== end && value.substring(start, end).includes('\n')) {
-      const selectedText = value.substring(start, end)
-      const lines = selectedText.split('\n')
-
-      const newLines = lines.map((line) => (event.shiftKey ? removeTab(line) : '    ' + line))
-      const newText = newLines.join('\n')
-
-      textarea.value = value.substring(0, start) + newText + value.substring(end)
-      textarea.selectionStart = start
-      textarea.selectionEnd = start + newText.length
-    } else {
-      const spaces = '    '
-      textarea.value = value.substring(0, start) + spaces + value.substring(end)
-      textarea.selectionStart = textarea.selectionEnd = start + spaces.length
-    }
-
-    formData.value.code = textarea.value
-  }
-}
-
-const removeTab = (line: string) => {
-  if (line.startsWith('\t')) {
-    return line.substring(1)
-  }
-  if (line.startsWith('    ')) {
-    return line.substring(4)
-  }
-  if (line.startsWith('  ')) {
-    return line.substring(2)
-  }
-  return line
+const handleSubmit = () => {
+  emit('submit', {
+    title: title.value,
+    code: code.value,
+    author: author.value,
+  })
+  title.value = ''
+  code.value = ''
+  author.value = ''
 }
 </script>
-
-<style scoped>
-.bg-main-bg {
-  background-color: #fcf7de;
-}
-.bg-accent {
-  background-color: #ff3e4d;
-}
-</style>

@@ -4,7 +4,7 @@
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="flex max-w-[300px] min-w-[200px] transform items-center border-4 border-black p-4 text-white shadow-[5px_5px_0_0_#000]"
+        class="flex max-w-[300px] min-w-[200px] transform items-center rounded-lg border-4 border-black p-4 text-white shadow-[8px_8px_0_0_#000]"
         :class="[toastClasses[toast.type], 'translate-y-0 rotate-2']"
       >
         <div class="flex items-center gap-3">
@@ -12,7 +12,7 @@
           <span>{{ toast.message }}</span>
         </div>
         <button
-          class="ml-2 flex h-6 w-6 items-center justify-center"
+          class="ml-2 flex h-6 w-6 items-center justify-center rounded-lg border-4 border-black bg-white/20 shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
           @click="removeToast(toast.id)"
         >
           <X class="h-4 w-4" />
@@ -55,12 +55,5 @@ const icons = {
 .toast-leave-to {
   opacity: 0;
   transform: translateY(-100%) rotate(-3deg);
-}
-
-.bg-secondary {
-  background-color: #27a5ef;
-}
-.bg-accent {
-  background-color: #ff3e4d;
 }
 </style>

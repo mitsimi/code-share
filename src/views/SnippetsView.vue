@@ -49,7 +49,7 @@ const submitSnippet = (formData: { title: string; code: string; author: string }
 </script>
 
 <template>
-  <div class="bg-main-bg min-h-screen text-black">
+  <div class="bg-background min-h-screen text-black">
     <AppHeader />
 
     <main class="mx-auto my-12 max-w-7xl px-4">
@@ -63,9 +63,3 @@ const submitSnippet = (formData: { title: string; code: string; author: string }
     <SnippetModal :show="showModal" @close="showModal = false" @submit="submitSnippet" />
   </div>
 </template>
-
-<style scoped>
-.bg-main-bg {
-  background-color: #fcf7de;
-}
-</style>
