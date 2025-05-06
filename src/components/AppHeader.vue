@@ -1,32 +1,30 @@
 <template>
-  <header class="border-b-4 border-black bg-white">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-6">
-      <div class="flex items-center gap-2">
+  <header class="sticky top-0 z-50 border-b-4 border-black bg-white">
+    <div class="container mx-auto flex items-center justify-between px-4 py-4">
+      <div class="flex items-center gap-4">
         <img
           src="../assets/logo.svg"
+          alt="CodeShare Logo"
+          class="h-12 w-12"
           @error="handleLogoError"
-          alt="SnippetShare Logo"
-          class="h-8 w-8"
         />
-        <h1 class="text-3xl font-bold">SnippetShare</h1>
+        <h1 class="font-mono text-2xl font-bold">CodeShare</h1>
       </div>
-      <nav>
-        <ul class="flex gap-4">
-          <li>
-            <a
-              href="#"
-              class="rounded-lg border-4 border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-              >Home</a
-            >
-          </li>
-          <li>
-            <a
-              href="#"
-              class="rounded-lg border-4 border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-              >About</a
-            >
-          </li>
-        </ul>
+      <nav class="flex items-center gap-4">
+        <router-link
+          to="/snippets"
+          class="rounded-lg border-4 border-black px-4 py-2 font-mono font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          active-class="bg-primary"
+        >
+          Snippets
+        </router-link>
+        <router-link
+          to="/about"
+          class="rounded-lg border-4 border-black px-4 py-2 font-mono font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          active-class="bg-primary"
+        >
+          About
+        </router-link>
       </nav>
     </div>
   </header>

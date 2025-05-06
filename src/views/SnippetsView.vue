@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import AppHeader from '../components/AppHeader.vue'
 import CardGrid from '../components/CardGrid.vue'
-import AppFooter from '../components/AppFooter.vue'
 import FloatingActionButton from '../components/FloatingActionButton.vue'
 import SnippetModal from '../components/SnippetModal.vue'
 import { useToast } from '../composables/useToast'
@@ -49,17 +47,11 @@ const submitSnippet = (formData: { title: string; code: string; author: string }
 </script>
 
 <template>
-  <div class="bg-background min-h-screen text-black">
-    <AppHeader />
+  <main class="mx-auto my-12 max-w-7xl px-4">
+    <CardGrid :cards="cards" @toggle-like="toggleLike" />
+  </main>
 
-    <main class="mx-auto my-12 max-w-7xl px-4">
-      <CardGrid :cards="cards" @toggle-like="toggleLike" />
-    </main>
+  <FloatingActionButton @click="showModal = true" />
 
-    <AppFooter />
-
-    <FloatingActionButton @click="showModal = true" />
-
-    <SnippetModal :show="showModal" @close="showModal = false" @submit="submitSnippet" />
-  </div>
+  <SnippetModal :show="showModal" @close="showModal = false" @submit="submitSnippet" />
 </template>

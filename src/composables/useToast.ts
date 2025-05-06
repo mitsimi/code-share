@@ -7,6 +7,7 @@ interface Toast {
   message: string
   type: ToastType
   timeout?: number
+  timer?: number
 }
 
 const toasts = ref<Toast[]>([])
@@ -25,7 +26,7 @@ export function useToast() {
     toasts.value.push(toast)
 
     if (timeout > 0) {
-      setTimeout(() => {
+      toast.timer = window.setTimeout(() => {
         removeToast(id)
       }, timeout)
     }
@@ -36,7 +37,28 @@ export function useToast() {
   const removeToast = (id: number) => {
     const index = toasts.value.findIndex((t) => t.id === id)
     if (index !== -1) {
+      const toast = toasts.value[index]
+      if (toast.timer) {
+        clearTimeout(toast.timer)
+      }
       toasts.value.splice(index, 1)
+    }
+  }
+
+  const pauseToast = (id: number) => {
+    const toast = toasts.value.find((t) => t.id === id)
+    if (toast && toast.timer) {
+      clearTimeout(toast.timer)
+      toast.timer = undefined
+    }
+  }
+
+  const resumeToast = (id: number) => {
+    const toast = toasts.value.find((t) => t.id === id)
+    if (toast && toast.timeout && !toast.timer) {
+      toast.timer = window.setTimeout(() => {
+        removeToast(id)
+      }, toast.timeout)
     }
   }
 
@@ -44,5 +66,7 @@ export function useToast() {
     toasts,
     showToast,
     removeToast,
+    pauseToast,
+    resumeToast,
   }
 }

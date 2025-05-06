@@ -6,6 +6,8 @@
         :key="toast.id"
         class="flex max-w-[300px] min-w-[200px] transform items-center rounded-lg border-4 border-black p-4 text-white shadow-[8px_8px_0_0_#000]"
         :class="[toastClasses[toast.type], 'translate-y-0 rotate-2']"
+        @mouseenter="pauseToast(toast.id)"
+        @mouseleave="resumeToast(toast.id)"
       >
         <div class="flex items-center gap-3">
           <component :is="icons[toast.type]" class="h-6 w-6 flex-shrink-0" />
@@ -26,7 +28,7 @@
 import { useToast } from '../composables/useToast'
 import { Info, CheckCircle, AlertCircle, X } from 'lucide-vue-next'
 
-const { toasts, removeToast } = useToast()
+const { toasts, removeToast, pauseToast, resumeToast } = useToast()
 
 const toastClasses = {
   info: 'bg-secondary',
