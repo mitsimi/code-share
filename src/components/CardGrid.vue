@@ -13,7 +13,7 @@
         :author="card.author"
         :likes="card.likes"
         :is-liked="card.isLiked"
-        @toggle-like="(event) => handleLikeClick(event, card)"
+        @toggle-like="() => handleLikeClick(card)"
       />
     </div>
   </div>
@@ -46,8 +46,7 @@ const handleCardClick = (card: Card) => {
   router.push(`/snippets/${card.id}`)
 }
 
-const handleLikeClick = (event: Event, card: Card) => {
-  event.stopPropagation()
+const handleLikeClick = (card: Card) => {
   emit('toggleLike', card)
 }
 </script>

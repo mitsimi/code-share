@@ -37,7 +37,6 @@ defineProps<{
   author: string
   likes: number
   isLiked: boolean
-  isOdd: boolean
 }>()
 
 defineEmits<{
