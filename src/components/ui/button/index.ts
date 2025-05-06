@@ -10,11 +10,13 @@ export const buttonVariants = cva(
         default:
           'bg-primary text-primary-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
         destructive:
-          'bg-destructive text-white hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
+          'bg-destructive text-destructive-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
         outline:
           'bg-background hover:bg-accent hover:text-accent-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
         secondary:
           'bg-secondary text-secondary-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
+        accent:
+          'bg-accent text-accent-foreground hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
         ghost:
           'border-none shadow-none hover:bg-accent hover:text-accent-foreground hover:border-4 hover:border-black dark:hover:border-white hover:shadow-[4px_4px_0_0_#000] dark:hover:shadow-[4px_4px_0_0_#fff]',
         link: 'border-none shadow-none text-primary underline-offset-4 hover:underline',

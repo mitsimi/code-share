@@ -14,7 +14,7 @@ const toasts = ref<Toast[]>([])
 let nextId = 1
 
 export function useToast() {
-  const showToast = (message: string, type: ToastType = 'info', timeout = 5000) => {
+  const showToast = (message: string, type: ToastType = 'info', timeout = 3000) => {
     const id = nextId++
     const toast: Toast = {
       id,

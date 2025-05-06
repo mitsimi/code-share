@@ -1,5 +1,5 @@
 <template>
-  <Button class="bg-accent fixed right-8 bottom-8 flex size-16" @click="$emit('click')">
+  <Button variant="accent" class="fixed right-8 bottom-8 flex size-16" @click="$emit('click')">
     <Plus class="size-8" />
   </Button>
 </template>
@@ -12,9 +12,3 @@ defineEmits<{
   (e: 'click'): void
 }>()
 </script>
-
-<style scoped>
-.bg-accent {
-  background-color: #ff3e4d;
-}
-</style>

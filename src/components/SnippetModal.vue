@@ -39,7 +39,7 @@
         </div>
 
         <div class="flex justify-end gap-4">
-          <Button variant="secondary" type="button" @click="$emit('close')"> Cancel </Button>
+          <Button variant="outline" type="button" @click="$emit('close')"> Cancel </Button>
           <Button type="submit"> Submit </Button>
         </div>
       </form>

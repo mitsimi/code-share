@@ -28,9 +28,9 @@ import { Button } from './ui/button'
 const { toasts, removeToast, pauseToast, resumeToast } = useToast()
 
 const toastClasses = {
-  info: 'bg-color-toast-info text-color-toast-info-foreground',
-  success: 'bg-toast-success text-toast-success-foreground',
-  error: 'bg-color-toast-error text-color-toast-error-foreground',
+  info: 'bg-primary text-primary-foreground',
+  success: 'bg-secondary text-secondary-foreground',
+  error: 'bg-destructive text-destructive-foreground',
 }
 
 const icons = {
