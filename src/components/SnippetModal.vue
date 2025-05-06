@@ -10,12 +10,9 @@
     >
       <div class="mb-6 flex items-center justify-between">
         <h2 class="text-2xl font-bold">Add New Snippet</h2>
-        <button
-          class="flex h-8 w-8 items-center justify-center rounded-lg border-4 border-black bg-white shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          @click="$emit('close')"
-        >
-          <X class="h-4 w-4" />
-        </button>
+        <Button variant="outline" size="icon" @click="$emit('close')">
+          <X class="size-4" />
+        </Button>
       </div>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -53,19 +50,8 @@
         </div>
 
         <div class="flex justify-end gap-4">
-          <button
-            type="button"
-            class="rounded-lg border-4 border-black bg-white px-6 py-2 font-bold shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-            @click="$emit('close')"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="bg-accent rounded-lg border-4 border-black px-6 py-2 font-bold text-white shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          >
-            Submit
-          </button>
+          <Button variant="secondary" type="button" @click="$emit('close')"> Cancel </Button>
+          <Button type="submit"> Submit </Button>
         </div>
       </form>
     </div>
@@ -73,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from './ui/button'
 import { ref } from 'vue'
 import { X } from 'lucide-vue-next'
 
