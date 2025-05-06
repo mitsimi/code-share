@@ -39,7 +39,7 @@
 
       <!-- Bottom Section -->
       <div class="text-secondary-foreground/80 mt-8 text-center font-mono text-sm">
-        © 2024 CodeShare. All rights reserved.
+        © 2025 CodeShare. All rights reserved.
       </div>
     </div>
   </footer>

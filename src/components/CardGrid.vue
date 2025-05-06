@@ -3,7 +3,6 @@
     <div
       v-for="(card, index) in cards"
       :key="card.id"
-      @click="handleCardClick(card)"
       class="cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:rotate-0"
       :class="{ 'rotate-1': index % 2 === 0, '-rotate-1': index % 2 !== 0 }"
     >
@@ -13,6 +12,7 @@
         :author="card.author"
         :likes="card.likes"
         :is-liked="card.isLiked"
+        @click="handleCardClick(card)"
         @toggle-like="() => handleLikeClick(card)"
       />
     </div>

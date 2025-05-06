@@ -1,5 +1,8 @@
 <template>
-  <div class="card flex max-h-[22rem] min-h-[22rem] cursor-pointer flex-col p-6">
+  <div
+    class="card flex max-h-[22rem] min-h-[22rem] cursor-pointer flex-col p-6"
+    @click="$emit('click')"
+  >
     <h2 class="mb-3 border-b-4 border-black pb-2 text-xl font-bold break-words">
       {{ title }}
     </h2>
@@ -13,7 +16,7 @@
         :class="{
           'bg-black text-white': likes < 0,
         }"
-        @click="$emit('toggle-like')"
+        @click.stop="$emit('toggle-like')"
       >
         <span>{{ likes }}</span>
         <Heart class="h-5 w-5" :class="{ 'fill-current': isLiked }" />
@@ -34,6 +37,7 @@ defineProps<{
 }>()
 
 defineEmits<{
+  (e: 'click'): void
   (e: 'toggle-like'): void
 }>()
 </script>
