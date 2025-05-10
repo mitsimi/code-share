@@ -4,7 +4,7 @@
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="flex max-w-[300px] min-w-[200px] transform items-center rounded-lg border-4 border-black p-4 text-white shadow-[8px_8px_0_0_#000]"
+        class="bg-background flex max-w-[300px] min-w-[200px] transform items-center rounded-lg border-4 border-black p-4 shadow-[4px_4px_0_0_#000]"
         :class="[toastClasses[toast.type], 'translate-y-0 rotate-2']"
         @mouseenter="pauseToast(toast.id)"
         @mouseleave="resumeToast(toast.id)"
@@ -13,12 +13,9 @@
           <component :is="icons[toast.type]" class="h-6 w-6 flex-shrink-0" />
           <span>{{ toast.message }}</span>
         </div>
-        <button
-          class="ml-2 flex h-6 w-6 items-center justify-center rounded-lg border-4 border-black bg-white/20 shadow-[4px_4px_0_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          @click="removeToast(toast.id)"
-        >
-          <X class="h-4 w-4" />
-        </button>
+        <Button variant="ghost" size="icon" @click="removeToast(toast.id)">
+          <X class="size-6" />
+        </Button>
       </div>
     </TransitionGroup>
   </div>
@@ -27,13 +24,13 @@
 <script setup lang="ts">
 import { useToast } from '../composables/useToast'
 import { Info, CheckCircle, AlertCircle, X } from 'lucide-vue-next'
-
+import { Button } from './ui/button'
 const { toasts, removeToast, pauseToast, resumeToast } = useToast()
 
 const toastClasses = {
-  info: 'bg-secondary',
-  success: 'bg-success',
-  error: 'bg-error',
+  info: 'bg-primary text-primary-foreground',
+  success: 'bg-secondary text-secondary-foreground',
+  error: 'bg-destructive text-destructive-foreground',
 }
 
 const icons = {
