@@ -1,4 +1,4 @@
-# Simple workflow for deploying static content to GitHub Pages
+# Deploy static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
@@ -31,16 +31,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: latest # Or specify a pnpm version like 8 or 9
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'pnpm' # Caches pnpm's store
+          cache: 'pnpm'
+
+      # Ensure pnpm is installed and available in PATH
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest # Or specify a pnpm version
+
+      # Verify pnpm installation
+      - name: Verify pnpm installation
+        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
