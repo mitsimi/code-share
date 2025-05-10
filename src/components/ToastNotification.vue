@@ -4,7 +4,7 @@
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="bg-background flex max-w-[300px] min-w-[200px] transform items-center rounded-lg border-4 border-black p-4 shadow-[4px_4px_0_0_#000]"
+        class="bg-background flex max-w-[300px] min-w-[200px] transform items-center justify-between rounded-lg border-4 border-black p-4 shadow-[4px_4px_0_0_#000]"
         :class="[toastClasses[toast.type], 'translate-y-0 rotate-2']"
         @mouseenter="pauseToast(toast.id)"
         @mouseleave="resumeToast(toast.id)"
