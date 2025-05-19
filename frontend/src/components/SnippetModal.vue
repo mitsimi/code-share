@@ -5,7 +5,7 @@
     @click="$emit('close')"
   >
     <div
-      class="bg-background w-full max-w-2xl rounded-lg border-4 border-black p-6 shadow-[8px_8px_0_0_#000]"
+      class="bg-card w-full max-w-2xl rounded-lg border-4 border-black p-6 shadow-[8px_8px_0_0_#000]"
       @click.stop
     >
       <div class="mb-6 flex items-center justify-between">
