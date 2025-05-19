@@ -7,19 +7,19 @@
       {{ title }}
     </h2>
     <div class="bg-muted grow overflow-hidden border-4 border-black p-4">
-      <pre class="m-0 p-0"><code class="text-sm leading-relaxed">{{ code }}</code></pre>
+      <pre class="m-0 p-0"><code class="text-sm leading-relaxed">{{ content }}</code></pre>
     </div>
     <div class="mt-4 flex items-center justify-between border-t-4 border-black pt-2 font-bold">
       <span>{{ author }}</span>
       <Button
-        :variant="isLiked ? 'destructive' : 'outline'"
+        variant="outline"
         :class="{
           'bg-black text-white': likes < 0,
         }"
         @click.stop="$emit('toggle-like')"
       >
         <span>{{ likes }}</span>
-        <Heart class="h-5 w-5" :class="{ 'fill-current': isLiked }" />
+        <Heart class="h-5 w-5" />
       </Button>
     </div>
   </div>
@@ -30,10 +30,9 @@ import { Heart } from 'lucide-vue-next'
 import { Button } from './ui/button'
 defineProps<{
   title: string
-  code: string
+  content: string
   author: string
   likes: number
-  isLiked: boolean
 }>()
 
 defineEmits<{

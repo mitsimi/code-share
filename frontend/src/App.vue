@@ -7,12 +7,14 @@
     <AppFooter />
     <ToastNotification />
   </div>
+  <VueQueryDevtools />
 </template>
 
 <script setup lang="ts">
 import AppHeader from './components/AppHeader.vue'
 import AppFooter from './components/AppFooter.vue'
 import ToastNotification from './components/ToastNotification.vue'
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
 </script>
 
 <style>

@@ -1,0 +1,63 @@
+export interface Card {
+  id: string
+  title: string
+  content: string
+  author: string
+  likes: number
+}
+
+export const snippets = [
+  {
+    id: '1',
+    title: 'Vue 3 Composition API Example',
+    content:
+      "import { ref, computed } from 'vue'\nexport default {\n    setup() {\n        const count = ref(0)\n        const double = computed(() => count.value * 2)\n\n        function increment() {\n            count.value++\n        }\n\n        return {\n            count,\n            double,\n            increment\n        }\n    }\n}",
+    author: 'John Doe',
+    likes: 290,
+    isLiked: true,
+  },
+  {
+    id: '2',
+    title: 'React Hooks: useEffect Example',
+    content:
+      "import React, { useState, useEffect } from 'react';\n\nfunction Example() {\n    const [count, setCount] = useState(0);\n\n    useEffect(() => {\n    document.title = `Count: ${count}`;\n    });\n\n    return (\n    <div>\n        <p>You clicked {count} times</p>\n        <button onClick={() => setCount(count + 1)}>Click me</button>\n    </div>\n    );\n}",
+    author: 'Alice Johnson',
+    likes: 104,
+    isLiked: true,
+  },
+  {
+    id: '3',
+    title: 'Shell Script Example',
+    content: '#!/bin/bash\n\necho "Hello, World!"',
+    author: 'Paula Cyan',
+    likes: 17,
+    isLiked: false,
+  },
+  {
+    id: '4',
+    title: 'Java Basic Hello World',
+    content:
+      'public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
+    author: 'Ivy Purple',
+    likes: 3,
+    isLiked: false,
+  },
+  {
+    id: '5',
+    title: 'Go Simple HTTP Server',
+    content:
+      'package main\n\nimport (\n    "fmt"\n    "net/http"\n)\n\nfunc handler(w http.ResponseWriter, r *http.Request) {\n    fmt.Fprintf(w, "Hello, World!")\n}\n\nfunc main() {\n    http.HandleFunc("/", handler)\n    http.ListenAndServe(":8080", nil)\n}',
+    author: 'Grace Yellow',
+    likes: 561,
+    isLiked: false,
+  },
+  {
+    id: '6',
+    title: 'Python Data Analysis with Pandas',
+    content:
+      "import pandas as pd\n\ndata = {'Name': ['Tom', 'Jerry', 'Mickey'], 'Age': [20, 21, 19]}\ndf = pd.DataFrame(data)\nprint(df.describe())",
+    author: 'Guido van Rossum',
+    likes: -666,
+    isLiked: false,
+  },
+]
