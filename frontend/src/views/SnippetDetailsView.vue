@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { Heart, ArrowLeft } from 'lucide-vue-next'
-import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useQuery } from '@tanstack/vue-query'
 import { useCustomFetch } from '@/composables/useCustomFetch'
 import { onMounted } from 'vue'
 
@@ -11,11 +11,10 @@ import { useLikeSnippet } from '@/composables/useLikeSnippet'
 
 const route = useRoute()
 const router = useRouter()
-const queryClient = useQueryClient()
 
 const getSnippet = async (): Promise<Card> => {
   const snippetId = route.params.snippetId as string
-  const { data, error } = await useCustomFetch<Card>(`/api/snippets/${snippetId}`).json()
+  const { data, error } = await useCustomFetch<Card>(`/snippets/${snippetId}`).json()
 
   if (error.value) {
     throw new Error('Failed to fetch snippet')

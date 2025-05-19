@@ -4,4 +4,5 @@ export const useCustomFetch = createFetch({
   fetchOptions: {
     mode: 'cors',
   },
+  baseUrl: '/api',
 })
