@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-background min-h-screen">
+  <div class="bg-background flex min-h-screen flex-col">
     <AppHeader />
-    <main>
+    <main class="grow">
       <RouterView />
     </main>
     <AppFooter />
-    <Toaster richColors position="bottom-left" />
   </div>
+  <Toaster richColors position="bottom-left" />
   <VueQueryDevtools />
 </template>
 
