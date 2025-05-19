@@ -48,17 +48,17 @@ func (s *MemoryStorage) GetSnippet(id string) (models.Snippet, error) {
 	return snippet, nil
 }
 
-func (s *MemoryStorage) CreateSnippet(snippet models.Snippet) error {
+func (s *MemoryStorage) CreateSnippet(snippet models.Snippet) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	snippet.ID = uuid.New().String()
+	snippet.ID = uuid.NewString()
 	snippet.CreatedAt = time.Now()
 	snippet.UpdatedAt = time.Now()
 	snippet.Likes = 0
 
 	s.snippets[snippet.ID] = snippet
-	return nil
+	return snippet.ID, nil
 }
 
 func (s *MemoryStorage) UpdateSnippet(snippet models.Snippet) error {
