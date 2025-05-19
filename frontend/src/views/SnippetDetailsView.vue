@@ -86,7 +86,7 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
           <Button variant="outline" @click="toggleLike">
-            <Heart class="size-5" :class="{ 'fill-current': snippet.likes > 0 }" />
+            <Heart class="size-5" />
             {{ snippet.likes }}
           </Button>
         </div>

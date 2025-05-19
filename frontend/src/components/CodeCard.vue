@@ -19,7 +19,7 @@
         @click.stop="$emit('toggle-like')"
       >
         <span>{{ likes }}</span>
-        <Heart class="h-5 w-5" />
+        <Heart class="size-5" />
       </Button>
     </div>
   </div>
