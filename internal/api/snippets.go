@@ -56,13 +56,15 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		Author: req.Author,
 	}
 
-	if err := h.storage.CreateSnippet(snippet); err != nil {
+	id, err := h.storage.CreateSnippet(snippet)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(snippet)
+	s, _ := h.storage.GetSnippet(id)
+	json.NewEncoder(w).Encode(s)
 }
 
 // UpdateSnippet updates an existing snippet
