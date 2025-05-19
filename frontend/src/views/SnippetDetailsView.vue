@@ -56,7 +56,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="mx-auto my-12 max-w-4xl px-4">
+  <main class="mx-auto my-12 w-fit max-w-7xl min-w-4xl px-4">
     <!-- Back button -->
     <Button variant="outline" @click="router.back()">
       <ArrowLeft class="size-5" />
