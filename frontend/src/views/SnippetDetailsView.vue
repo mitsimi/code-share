@@ -4,6 +4,7 @@ import { useToast } from '../composables/useToast'
 import { Heart, ArrowLeft } from 'lucide-vue-next'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCustomFetch } from '@/composables/useCustomFetch'
+import { onMounted } from 'vue'
 
 import { Button } from '../components/ui/button'
 import type { Card } from '@/models'
@@ -50,6 +51,10 @@ const toggleLike = () => {
   console.log(`Toggling ${action} for snippet:`, snippet.value.id)
   updateLike({ snippetId: snippet.value.id, action })
 }
+
+onMounted(() => {
+  window.scrollTo({ top: 0, behavior: 'auto' })
+})
 </script>
 
 <template>
