@@ -2,13 +2,12 @@ package main
 
 import (
 	"codeShare/frontend"
-	"io"
 	"log"
 	"mime"
 	"net/http"
-	"net/url"
-	"path/filepath"
-	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func init() {
@@ -18,46 +17,33 @@ func init() {
 	mime.AddExtensionType(".css", "text/css")
 }
 
+
+
 func main() {
+	// Create a new Chi router
+	r := chi.NewRouter()
+
+	// Add middleware
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.CleanPath)
+	r.Use(middleware.GetHead)
+
 	// Create a file server handler for the embedded dist directory
-	fs := http.FileServer(http.FS(frontend.DistDirFS))
+	fs := http.FS(frontend.DistDirFS)
 
-	// Custom handler to handle Vue.js routing
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path
-
-		// Get the file extension
-		ext := filepath.Ext(path)
-		mimeType := mime.TypeByExtension(ext)
-
-		// If it's a static asset (has a mime type), serve it directly
-		if mimeType != "" {
-			// Set the correct content type
-			w.Header().Set("Content-Type", mimeType)
-			// Create a new request with the modified path
-			r2 := new(http.Request)
-			*r2 = *r
-			r2.URL = new(url.URL)
-			*r2.URL = *r.URL
-			r2.URL.Path = path
-			fs.ServeHTTP(w, r2)
-			return
-		}
-
-		// For all other routes, serve index.html
-		indexFile, err := frontend.DistDirFS.Open("index.html")
-		if err != nil {
-			http.Error(w, "Error loading index.html", http.StatusInternalServerError)
-			return
-		}
-		defer indexFile.Close()
-
-		http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
+	// Handle all routes
+	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+		serveStaticAsset(w, r, fs)
 	})
 
-	// Start the server on port 8080
-	log.Println("Server starting on http://localhost:8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	})
+
+	// Start the server
+	port := ":8080"
+	log.Printf("Server starting on http://localhost%s", port)
+	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatal(err)
 	}
 }
