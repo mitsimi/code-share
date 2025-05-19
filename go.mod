@@ -7,4 +7,4 @@ require (
 	github.com/google/uuid v1.6.0
 )
 
-require github.com/go-chi/cors v1.2.1 // indirect
+require github.com/go-chi/cors v1.2.1
