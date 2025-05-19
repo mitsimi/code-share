@@ -113,10 +113,25 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 // ToggleLikeSnippet toggles the like status of a snippet
 func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	if err := h.storage.ToggleLikeSnippet(id); err != nil {
+	
+	// Parse the action from query parameters
+	action := r.URL.Query().Get("action")
+	if action != "like" && action != "unlike" {
+		http.Error(w, "Invalid action. Must be 'like' or 'unlike'", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.storage.ToggleLikeSnippet(id, action == "like"); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	// Get the updated snippet
+	snippet, err := h.storage.GetSnippet(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(snippet)
 } 

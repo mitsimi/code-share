@@ -12,5 +12,5 @@ type Storage interface {
 	CreateSnippet(snippet models.Snippet) (string, error)
 	UpdateSnippet(snippet models.Snippet) error
 	DeleteSnippet(id string) error
-	ToggleLikeSnippet(id string) error
+	ToggleLikeSnippet(id string, isLike bool) error
 } 

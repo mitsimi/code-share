@@ -1,57 +1,89 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '../composables/useToast'
 import { Heart, ArrowLeft } from 'lucide-vue-next'
-import { snippets } from '../data'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useCustomFetch } from '@/composables/useCustomFetch'
+
 import { Button } from '../components/ui/button'
-interface Snippet {
-  id: number
-  title: string
-  code: string
-  author: string
-  likes: number
-  isLiked: boolean
-}
+import type { Card } from '@/models'
+import { useLikeSnippet } from '@/composables/useLikeSnippet'
 
 const route = useRoute()
+const router = useRouter()
 const { showToast } = useToast()
-const snippet = ref<Snippet | null>(null)
+const queryClient = useQueryClient()
 
-onMounted(() => {
+const getSnippet = async (): Promise<Card> => {
   const snippetId = Number(route.params.snippetId)
-  const foundSnippet = snippets.find((s) => s.id === snippetId)
-  if (foundSnippet) {
-    snippet.value = foundSnippet
+  const { data, error } = await useCustomFetch<Card>(`/snippets/${snippetId}`).json()
+
+  if (error.value) {
+    throw new Error('Failed to fetch snippet')
   }
+
+  if (!data.value) {
+    throw new Error('Snippet not found')
+  }
+
+  return data.value
+}
+
+const {
+  data: snippet,
+  isPending,
+  isError,
+  error,
+} = useQuery({
+  queryKey: ['snippet', route.params.snippetId],
+  queryFn: getSnippet,
 })
 
+const { updateLike } = useLikeSnippet()
+
 const toggleLike = () => {
-  if (!snippet.value) return
-  snippet.value.isLiked = !snippet.value.isLiked
-  snippet.value.likes += snippet.value.isLiked ? 1 : -1
-  showToast(
-    snippet.value.isLiked ? 'Added to favorites' : 'Removed from favorites',
-    snippet.value.isLiked ? 'success' : 'info',
-  )
+  if (!snippet.value) {
+    console.error('Cannot toggle like: snippet is null')
+    return
+  }
+  const action = snippet.value.likes > 0 ? 'unlike' : 'like'
+  console.log(`Toggling ${action} for snippet:`, snippet.value.id)
+  updateLike({ snippetId: snippet.value.id, action })
 }
 </script>
 
 <template>
   <main class="mx-auto my-12 max-w-4xl px-4">
-    <div v-if="snippet" class="space-y-6">
-      <!-- Back button -->
-      <Button variant="outline" @click="$router.back()">
-        <ArrowLeft class="size-5" />
-        Back
-      </Button>
+    <!-- Back button -->
+    <Button variant="outline" @click="router.back()">
+      <ArrowLeft class="size-5" />
+      Back
+    </Button>
 
+    <!-- Loading state -->
+    <div v-if="isPending" class="mt-6 space-y-6">
+      <div class="h-32 animate-pulse rounded-lg border-4 border-black bg-gray-100"></div>
+      <div class="h-64 animate-pulse rounded-lg border-4 border-black bg-gray-100"></div>
+    </div>
+
+    <!-- Error state -->
+    <div
+      v-else-if="isError"
+      class="border-destructive bg-destructive/10 mt-6 rounded-lg border-4 p-6"
+    >
+      <h2 class="text-destructive text-xl font-bold">Error</h2>
+      <p class="text-destructive mt-2">{{ error?.message || 'An unexpected error occurred' }}</p>
+      <Button class="mt-4" @click="router.back()">Go Back</Button>
+    </div>
+
+    <!-- Snippet content -->
+    <div v-else-if="snippet" class="mt-6 space-y-6">
       <!-- Snippet header -->
       <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <Button :variant="snippet.isLiked ? 'destructive' : 'outline'" @click="toggleLike">
-            <Heart class="size-5" :class="{ 'fill-current': snippet.isLiked }" />
+          <Button variant="outline" @click="toggleLike">
+            <Heart class="size-5" :class="{ 'fill-current': snippet.likes > 0 }" />
             {{ snippet.likes }}
           </Button>
         </div>
@@ -62,7 +94,7 @@ const toggleLike = () => {
       <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
         <pre
           class="overflow-x-auto rounded-lg bg-gray-100 p-4 font-mono text-sm"
-        ><code>{{ snippet.code }}</code></pre>
+        ><code>{{ snippet.content }}</code></pre>
       </div>
     </div>
   </main>

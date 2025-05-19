@@ -86,7 +86,7 @@ func (s *MemoryStorage) DeleteSnippet(id string) error {
 	return nil
 }
 
-func (s *MemoryStorage) ToggleLikeSnippet(id string) error {
+func (s *MemoryStorage) ToggleLikeSnippet(id string, isLike bool) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -95,7 +95,13 @@ func (s *MemoryStorage) ToggleLikeSnippet(id string) error {
 		return errors.New("snippet not found")
 	}
 
-	snippet.Likes++
+	if isLike {
+		snippet.Likes++
+	} else {
+		if snippet.Likes > 0 {
+			snippet.Likes--
+		}
+	}
 	s.snippets[id] = snippet
 	return nil
 } 
