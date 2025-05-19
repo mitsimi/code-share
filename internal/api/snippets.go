@@ -5,6 +5,7 @@ import (
 	"codeShare/internal/storage"
 	"encoding/json"
 	"net/http"
+	"slices"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -26,6 +27,10 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	slices.SortFunc(snippets, func(a, b models.Snippet) int {
+		return b.CreatedAt.Compare(a.CreatedAt)
+	})
 
 	json.NewEncoder(w).Encode(snippets)
 }
