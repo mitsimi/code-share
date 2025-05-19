@@ -14,7 +14,7 @@ const queryClient = useQueryClient()
 const { updateLike } = useLikeSnippet()
 
 const getSnippets = async (): Promise<Card[]> => {
-  const { data, error } = await useCustomFetch<Card[]>('/snippets', {
+  const { data, error } = await useCustomFetch<Card[]>('/api/snippets', {
     afterFetch: (ctx) => {
       ctx.data = ctx.data.map((snippet: Card) => ({
         ...snippet,

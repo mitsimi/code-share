@@ -15,7 +15,7 @@ const queryClient = useQueryClient()
 
 const getSnippet = async (): Promise<Card> => {
   const snippetId = route.params.snippetId as string
-  const { data, error } = await useCustomFetch<Card>(`/snippets/${snippetId}`).json()
+  const { data, error } = await useCustomFetch<Card>(`/api/snippets/${snippetId}`).json()
 
   if (error.value) {
     throw new Error('Failed to fetch snippet')
