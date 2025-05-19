@@ -1,12 +1,13 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './fonts.css';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&: is(.dark *));
 
 @theme {
-  --font-sans: 'Space Grotesk', 'sans-serif';
-  --font-serif: 'Rubik', 'sans-serif';
-  --font-mono: 'JetBrains Mono', 'monospace';
+  --font-sans: 'Space Grotesk', sans-serif;
+  --font-serif: 'Rubik', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 @layer base {
