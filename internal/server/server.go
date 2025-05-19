@@ -67,12 +67,11 @@ func (s *Server) setupRoutes() {
 	// API routes
 	s.router.Route("/api/snippets", func(r chi.Router) {
 		r.Use(cors.Handler(cors.Options{
-			// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-			AllowedOrigins:   []string{"https://*", "http://*"},
-			// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedOrigins:   []string{"http://localhost:5173"}, // Development server
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-			AllowCredentials: false,
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: true,
 			MaxAge:           300, // Maximum value not ignored by any of major browsers
 		}))
 
