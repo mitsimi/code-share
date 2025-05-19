@@ -1,11 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useCustomFetch } from './useCustomFetch'
-import { useToast } from './useToast'
+import { toast } from 'vue-sonner'
 import type { Card } from '@/models'
 
 export function useLikeSnippet() {
   const queryClient = useQueryClient()
-  const { showToast } = useToast()
 
   const { mutate: updateLike } = useMutation({
     mutationKey: ['likeMutation'],
@@ -50,14 +49,13 @@ export function useLikeSnippet() {
         )
       })
 
-      showToast(
-        updatedSnippet.likes > 0 ? 'Added to favorites' : 'Removed from favorites',
-        updatedSnippet.likes > 0 ? 'success' : 'info',
-      )
+      toast.success(updatedSnippet.likes > 0 ? 'Added to favorites' : 'Removed from favorites', {
+        description: `"${updatedSnippet.title}" ${updatedSnippet.likes > 0 ? 'added to' : 'removed from'} your favorites`,
+      })
     },
     onError: (error) => {
       console.error('Like mutation failed:', error)
-      showToast(`${error.message || 'Please try again'}`, 'error')
+      toast.error(error.message || 'Please try again')
     },
   })
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { useToast } from '../composables/useToast'
 import { Heart, ArrowLeft } from 'lucide-vue-next'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCustomFetch } from '@/composables/useCustomFetch'
@@ -12,11 +11,10 @@ import { useLikeSnippet } from '@/composables/useLikeSnippet'
 
 const route = useRoute()
 const router = useRouter()
-const { showToast } = useToast()
 const queryClient = useQueryClient()
 
 const getSnippet = async (): Promise<Card> => {
-  const snippetId = Number(route.params.snippetId)
+  const snippetId = route.params.snippetId as string
   const { data, error } = await useCustomFetch<Card>(`/snippets/${snippetId}`).json()
 
   if (error.value) {
