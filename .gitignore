@@ -1,30 +1,44 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-node_modules
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go profiler, specified with `go test -coverprofile`
+*.out
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
 .DS_Store
-dist
-dist-ssr
-coverage
-*.local
+Thumbs.db
 
-/cypress/videos/
-/cypress/screenshots/
+# Environment files
+.env
+.env.local
+.env.*.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Build output
+bin/
+dist/
+build/
 
-*.tsbuildinfo
+# Debug files
+debug
+
+# Temporary directory for air
+tmp/
