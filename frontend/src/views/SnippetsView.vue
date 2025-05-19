@@ -33,6 +33,7 @@ const getSnippets = async (): Promise<Card[]> => {
 const { isPending, isError, data, error, refetch } = useQuery({
   queryKey: ['snippets'],
   queryFn: getSnippets,
+  staleTime: 1000 * 60, // Consider data fresh for 1 minute
 })
 
 // Show toast notification when an error occurs
