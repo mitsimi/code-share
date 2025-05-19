@@ -58,7 +58,9 @@
         :author="card.author"
         :likes="card.likes"
         @click="handleCardClick(card)"
-        @toggle-like="() => handleLikeClick(card)"
+        @toggle-like="
+          () => updateLike({ snippetId: card.id, action: card.likes > 0 ? 'unlike' : 'like' })
+        "
       />
     </div>
   </div>
@@ -66,9 +68,10 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import CodeCard from './CodeCard.vue'
 import { Button } from './ui/button'
 import type { Card } from '@/models'
+import { useLikeSnippet } from '@/composables/useLikeSnippet'
+import CodeCard from './CodeCard.vue'
 
 defineProps<{
   cards: Card[]
@@ -79,7 +82,6 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'toggleLike', card: Card): void
   (e: 'retry'): void
 }>()
 
@@ -89,7 +91,5 @@ const handleCardClick = (card: Card) => {
   router.push(`/snippets/${card.id}`)
 }
 
-const handleLikeClick = (card: Card) => {
-  emit('toggleLike', card)
-}
+const { updateLike } = useLikeSnippet()
 </script>
