@@ -31,7 +31,7 @@
               to="/about"
               class="neobrutalism bg-background hover:bg-accent hover:text-accent-foreground rounded-lg px-4 py-2 font-mono font-bold"
             >
-              About Page
+              About This Project
             </router-link>
           </div>
         </div>
