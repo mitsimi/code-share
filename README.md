@@ -29,10 +29,10 @@ A web application for sharing and managing code snippets, built with Go and Vue.
 ## Features
 
 - Share code snippets with others
-- Like and manage snippets
-- Real-time updates
-- Modern, responsive UI
-- RESTful API
+- Like and unlike snippets with real-time updates
+- Modern, responsive UI with loading states
+- RESTful API with proper error handling
+- Client-side caching with TanStack Query
 
 ## API Endpoints
 
@@ -43,7 +43,7 @@ A web application for sharing and managing code snippets, built with Go and Vue.
 - `POST /api/snippets` - Create a new snippet
 - `PUT /api/snippets/{id}` - Update a snippet
 - `DELETE /api/snippets/{id}` - Delete a snippet
-- `PATCH /api/snippets/{id}/like` - Toggle like on a snippet
+- `PATCH /api/snippets/{id}/like?action=like|unlike` - Like or unlike a snippet
 
 ### Request/Response Format
 
