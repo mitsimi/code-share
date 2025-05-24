@@ -6,15 +6,15 @@ import { useCustomFetch } from '@/composables/useCustomFetch'
 import { onMounted } from 'vue'
 
 import { Button } from '../components/ui/button'
-import type { Card } from '@/models'
 import { useLikeSnippet } from '@/composables/useLikeSnippet'
+import type { Snippet } from '@/models'
 
 const route = useRoute()
 const router = useRouter()
 
-const getSnippet = async (): Promise<Card> => {
+const getSnippet = async (): Promise<Snippet> => {
   const snippetId = route.params.snippetId as string
-  const { data, error } = await useCustomFetch<Card>(`/snippets/${snippetId}`).json()
+  const { data, error } = await useCustomFetch<Snippet>(`/snippets/${snippetId}`).json()
 
   if (error.value) {
     throw new Error('Failed to fetch snippet')
@@ -44,8 +44,8 @@ const toggleLike = () => {
     console.error('Cannot toggle like: snippet is null')
     return
   }
-  const action = snippet.value.isLiked ? 'unlike' : 'like'
-  console.log(`Toggling ${action} for snippet:`, snippet.value.id)
+  const action = snippet.value.is_liked ? 'unlike' : 'like'
+  console.log(`Toggling ${action} (${snippet.value.is_liked}) for snippet:`, snippet.value.id)
   updateLike({ snippetId: snippet.value.id, action })
 }
 
@@ -87,11 +87,11 @@ onMounted(() => {
           <Button
             variant="outline"
             :class="{
-              'bg-black text-white': snippet.isLiked,
+              'bg-black text-white': snippet.is_liked,
             }"
             @click="toggleLike"
           >
-            <Heart class="size-5" :fill="snippet.isLiked ? 'red' : 'none'" />
+            <Heart class="size-5" :fill="snippet.is_liked ? 'red' : 'none'" />
             {{ snippet.likes }}
           </Button>
         </div>

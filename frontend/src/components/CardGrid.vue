@@ -70,25 +70,21 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { Button } from './ui/button'
-import type { Card } from '@/models'
 import { useLikeSnippet } from '@/composables/useLikeSnippet'
 import CodeCard from './CodeCard.vue'
+import type { Snippet } from '@/models'
 
 defineProps<{
-  cards: Card[]
+  cards: Snippet[]
   isLoading?: boolean
   isEmpty?: boolean
   isError?: boolean
   errorMessage?: string
 }>()
 
-const emit = defineEmits<{
-  (e: 'retry'): void
-}>()
-
 const router = useRouter()
 
-const handleCardClick = (card: Card) => {
+const handleCardClick = (card: Snippet) => {
   router.push(`/snippets/${card.id}`)
 }
 
