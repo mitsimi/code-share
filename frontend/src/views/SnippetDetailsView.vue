@@ -84,13 +84,7 @@ onMounted(() => {
       <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <Button
-            variant="outline"
-            :class="{
-              'bg-black text-white': snippet.is_liked,
-            }"
-            @click="toggleLike"
-          >
+          <Button variant="outline" @click="toggleLike">
             <Heart class="size-5" :fill="snippet.is_liked ? 'red' : 'none'" />
             {{ snippet.likes }}
           </Button>

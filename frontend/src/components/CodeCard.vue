@@ -11,13 +11,7 @@
     </div>
     <div class="mt-4 flex items-center justify-between border-t-4 border-black pt-2 font-bold">
       <span>{{ author }}</span>
-      <Button
-        variant="outline"
-        :class="{
-          'bg-black text-white': is_liked,
-        }"
-        @click.stop="$emit('toggle-like')"
-      >
+      <Button variant="outline" @click.stop="$emit('toggle-like')">
         <span>{{ likes }}</span>
         <Heart class="size-5" :fill="is_liked ? 'red' : 'none'" />
       </Button>
