@@ -44,7 +44,7 @@ const toggleLike = () => {
     console.error('Cannot toggle like: snippet is null')
     return
   }
-  const action = snippet.value.likes > 0 ? 'unlike' : 'like'
+  const action = snippet.value.isLiked ? 'unlike' : 'like'
   console.log(`Toggling ${action} for snippet:`, snippet.value.id)
   updateLike({ snippetId: snippet.value.id, action })
 }
@@ -84,8 +84,14 @@ onMounted(() => {
       <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <Button variant="outline" @click="toggleLike">
-            <Heart class="size-5" />
+          <Button
+            variant="outline"
+            :class="{
+              'bg-black text-white': snippet.isLiked,
+            }"
+            @click="toggleLike"
+          >
+            <Heart class="size-5" :fill="snippet.isLiked ? 'red' : 'none'" />
             {{ snippet.likes }}
           </Button>
         </div>

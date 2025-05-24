@@ -99,6 +99,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		Title:    req.Title,
 		Content:  req.Content,
 		Author: req.Author,
+		UserLikes: make(map[string]bool),
 	}
 
 	id, err := h.storage.CreateSnippet(snippet)
@@ -189,4 +190,4 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 	response.UserLikes = nil
 
 	json.NewEncoder(w).Encode(response)
-} 
+}
