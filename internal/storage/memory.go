@@ -56,6 +56,7 @@ func (s *MemoryStorage) CreateSnippet(snippet models.Snippet) (string, error) {
 	snippet.CreatedAt = time.Now()
 	snippet.UpdatedAt = time.Now()
 	snippet.Likes = 0
+	snippet.UserLikes = make(map[string]bool)
 
 	s.snippets[snippet.ID] = snippet
 	return snippet.ID, nil
@@ -95,11 +96,19 @@ func (s *MemoryStorage) ToggleLikeSnippet(id string, isLike bool) error {
 		return errors.New("snippet not found")
 	}
 
+	// For now, we'll use a dummy user ID since we don't have authentication
+	// In a real application, this would come from the authenticated user
+	userID := "current_user"
+
 	if isLike {
-		snippet.Likes++
+		if !snippet.UserLikes[userID] {
+			snippet.Likes++
+			snippet.UserLikes[userID] = true
+		}
 	} else {
-		if snippet.Likes > 0 {
+		if snippet.UserLikes[userID] {
 			snippet.Likes--
+			snippet.UserLikes[userID] = false
 		}
 	}
 	s.snippets[id] = snippet

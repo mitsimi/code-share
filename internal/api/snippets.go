@@ -28,11 +28,36 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slices.SortFunc(snippets, func(a, b models.Snippet) int {
+	// For now, we'll use a dummy user ID since we don't have authentication
+	// In a real application, this would come from the authenticated user
+	userID := "current_user"
+
+	// Add isLiked field to each snippet
+	response := make([]struct {
+		models.Snippet
+		IsLiked bool `json:"is_liked"`
+	}, len(snippets))
+
+	for i, snippet := range snippets {
+		response[i] = struct {
+			models.Snippet
+			IsLiked bool `json:"is_liked"`
+		}{
+			Snippet: snippet,
+			IsLiked: snippet.UserLikes[userID],
+		}
+		// Clear the UserLikes map before sending
+		response[i].UserLikes = nil
+	}
+
+	slices.SortFunc(response, func(a, b struct {
+		models.Snippet
+		IsLiked bool `json:"is_liked"`
+	}) int {
 		return b.CreatedAt.Compare(a.CreatedAt)
 	})
 
-	json.NewEncoder(w).Encode(snippets)
+	json.NewEncoder(w).Encode(response)
 }
 
 // GetSnippet returns a specific snippet
@@ -44,7 +69,22 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(snippet)
+	// For now, we'll use a dummy user ID since we don't have authentication
+	// In a real application, this would come from the authenticated user
+	userID := "current_user"
+
+	// Add isLiked field to the response
+	response := struct {
+		models.Snippet
+		IsLiked bool `json:"is_liked"`
+	}{
+		Snippet: snippet,
+		IsLiked: snippet.UserLikes[userID],
+	}
+	// Clear the UserLikes map before sending
+	response.UserLikes = nil
+
+	json.NewEncoder(w).Encode(response)
 }
 
 // CreateSnippet creates a new snippet
@@ -121,6 +161,10 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// For now, we'll use a dummy user ID since we don't have authentication
+	// In a real application, this would come from the authenticated user
+	userID := "current_user"
+
 	if err := h.storage.ToggleLikeSnippet(id, action == "like"); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -133,5 +177,16 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	json.NewEncoder(w).Encode(snippet)
+	// Add isLiked field to the response
+	response := struct {
+		models.Snippet
+		IsLiked bool `json:"is_liked"`
+	}{
+		Snippet: snippet,
+		IsLiked: snippet.UserLikes[userID],
+	}
+	// Clear the UserLikes map before sending
+	response.UserLikes = nil
+
+	json.NewEncoder(w).Encode(response)
 } 

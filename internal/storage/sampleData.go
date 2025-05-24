@@ -15,6 +15,9 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-24 * time.Hour),
 		UpdatedAt: time.Now().Add(-24 * time.Hour),
 		Likes:     290,
+		UserLikes: map[string]bool{
+			"current_user": true,
+		},
 	},
 	{
 		ID:        "2",
@@ -24,6 +27,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-48 * time.Hour),
 		UpdatedAt: time.Now().Add(-48 * time.Hour),
 		Likes:     104,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "3",
@@ -33,6 +37,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-72 * time.Hour),
 		UpdatedAt: time.Now().Add(-72 * time.Hour),
 		Likes:     17,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "4",
@@ -42,6 +47,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-96 * time.Hour),
 		UpdatedAt: time.Now().Add(-96 * time.Hour),
 		Likes:     3,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "5",
@@ -51,6 +57,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-120 * time.Hour),
 		UpdatedAt: time.Now().Add(-120 * time.Hour),
 		Likes:     561,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "6",
@@ -60,6 +67,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-144 * time.Hour),
 		UpdatedAt: time.Now().Add(-144 * time.Hour),
 		Likes:     666,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "7",
@@ -69,6 +77,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-168 * time.Hour),
 		UpdatedAt: time.Now().Add(-168 * time.Hour),
 		Likes:     423,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "8",
@@ -78,6 +87,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-192 * time.Hour),
 		UpdatedAt: time.Now().Add(-192 * time.Hour),
 		Likes:     289,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "9",
@@ -87,6 +97,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-216 * time.Hour),
 		UpdatedAt: time.Now().Add(-216 * time.Hour),
 		Likes:     512,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "10",
@@ -96,6 +107,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-240 * time.Hour),
 		UpdatedAt: time.Now().Add(-240 * time.Hour),
 		Likes:     378,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "11",
@@ -105,6 +117,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-264 * time.Hour),
 		UpdatedAt: time.Now().Add(-264 * time.Hour),
 		Likes:     245,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "12",
@@ -114,6 +127,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-288 * time.Hour),
 		UpdatedAt: time.Now().Add(-288 * time.Hour),
 		Likes:     189,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "13",
@@ -123,6 +137,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-312 * time.Hour),
 		UpdatedAt: time.Now().Add(-312 * time.Hour),
 		Likes:     312,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "14",
@@ -132,6 +147,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-336 * time.Hour),
 		UpdatedAt: time.Now().Add(-336 * time.Hour),
 		Likes:     178,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "15",
@@ -141,6 +157,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-360 * time.Hour),
 		UpdatedAt: time.Now().Add(-360 * time.Hour),
 		Likes:     267,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "16",
@@ -150,6 +167,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-384 * time.Hour),
 		UpdatedAt: time.Now().Add(-384 * time.Hour),
 		Likes:     156,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "17",
@@ -159,6 +177,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-408 * time.Hour),
 		UpdatedAt: time.Now().Add(-408 * time.Hour),
 		Likes:     234,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "18",
@@ -168,6 +187,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-432 * time.Hour),
 		UpdatedAt: time.Now().Add(-432 * time.Hour),
 		Likes:     198,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "19",
@@ -177,6 +197,7 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-456 * time.Hour),
 		UpdatedAt: time.Now().Add(-456 * time.Hour),
 		Likes:     345,
+		UserLikes: make(map[string]bool),
 	},
 	{
 		ID:        "20",
@@ -186,5 +207,6 @@ var sampleSnippets = []models.Snippet{
 		CreatedAt: time.Now().Add(-480 * time.Hour),
 		UpdatedAt: time.Now().Add(-480 * time.Hour),
 		Likes:     278,
+		UserLikes: make(map[string]bool),
 	},
 }
