@@ -39,11 +39,11 @@ const { isPending, isError, data, error, refetch } = useQuery({
 })
 
 // Show toast notification when an error occurs
-watch(isError, (newIsError) => {
+/* watch(isError, (newIsError) => {
   if (newIsError) {
     toast.error('Failed to load snippets. Please try again.')
   }
-})
+}) */
 
 const createSnippet = async (formData: {
   title: string
