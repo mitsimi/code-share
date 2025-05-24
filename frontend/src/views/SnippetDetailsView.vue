@@ -66,8 +66,21 @@ onMounted(() => {
 
     <!-- Loading state -->
     <div v-if="isPending" class="mt-6 space-y-6">
-      <div class="h-32 animate-pulse rounded-lg border-4 border-black bg-gray-100"></div>
-      <div class="h-64 animate-pulse rounded-lg border-4 border-black bg-gray-100"></div>
+      <!-- Snippet header skeleton -->
+      <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
+        <div class="mb-4 flex items-center justify-between">
+          <div class="h-8 w-3/4 animate-pulse rounded-lg bg-gray-200"></div>
+          <div class="h-10 w-20 animate-pulse rounded-lg bg-gray-200"></div>
+        </div>
+        <div class="h-6 w-1/4 animate-pulse rounded-lg bg-gray-200"></div>
+      </div>
+
+      <!-- Code block skeleton -->
+      <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
+        <div class="space-y-2">
+          <div class="h-80 w-full animate-pulse rounded-lg bg-gray-200"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Error state -->
