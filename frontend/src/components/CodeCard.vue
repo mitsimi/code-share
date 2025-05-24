@@ -14,12 +14,12 @@
       <Button
         variant="outline"
         :class="{
-          'bg-black text-white': likes < 0,
+          'bg-black text-white': is_liked,
         }"
         @click.stop="$emit('toggle-like')"
       >
         <span>{{ likes }}</span>
-        <Heart class="size-5" />
+        <Heart class="size-5" :fill="is_liked ? 'red' : 'none'" />
       </Button>
     </div>
   </div>
@@ -33,6 +33,7 @@ defineProps<{
   content: string
   author: string
   likes: number
+  is_liked: boolean
 }>()
 
 defineEmits<{

@@ -45,13 +45,15 @@ export function useLikeSnippet() {
       queryClient.setQueryData(['snippets'], (oldData: Card[] | undefined) => {
         if (!oldData) return [updatedSnippet]
         return oldData.map((snippet) =>
-          snippet.id === updatedSnippet.id ? updatedSnippet : snippet,
+          snippet.id === updatedSnippet.id
+            ? { ...updatedSnippet, isLiked: !snippet.isLiked }
+            : snippet,
         )
       })
 
-      toast.success(updatedSnippet.likes > 0 ? 'Added to favorites' : 'Removed from favorites', {
-        description: `"${updatedSnippet.title}" ${updatedSnippet.likes > 0 ? 'added to' : 'removed from'} your favorites`,
-      })
+      /*toast.success(updatedSnippet.isLiked ? 'Added to favorites' : 'Removed from favorites', {
+        description: `"${updatedSnippet.title}" ${updatedSnippet.isLiked ? 'added to' : 'removed from'} your favorites`,
+      })*/
     },
     onError: (error) => {
       console.error('Like mutation failed:', error)

@@ -57,9 +57,10 @@
         :content="card.content"
         :author="card.author"
         :likes="card.likes"
+        :is_liked="card.is_liked"
         @click="handleCardClick(card)"
         @toggle-like="
-          () => updateLike({ snippetId: card.id, action: card.likes > 0 ? 'unlike' : 'like' })
+          () => updateLike({ snippetId: card.id, action: card.is_liked ? 'unlike' : 'like' })
         "
       />
     </div>
