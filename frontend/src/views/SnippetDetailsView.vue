@@ -14,7 +14,9 @@ const router = useRouter()
 
 const getSnippet = async (): Promise<Snippet> => {
   const snippetId = route.params.snippetId as string
-  const { data, error } = await useCustomFetch<Snippet>(`/snippets/${snippetId}`).json()
+  const { data, error } = await useCustomFetch<Snippet>(`/snippets/${snippetId}`, {
+    timeout: 1000,
+  }).json()
 
   if (error.value) {
     throw new Error('Failed to fetch snippet')
@@ -75,7 +77,6 @@ onMounted(() => {
     >
       <h2 class="text-destructive text-xl font-bold">Error</h2>
       <p class="text-destructive mt-2">{{ error?.message || 'An unexpected error occurred' }}</p>
-      <Button class="mt-4" @click="router.back()">Go Back</Button>
     </div>
 
     <!-- Snippet content -->
