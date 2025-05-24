@@ -33,6 +33,7 @@ A web application for sharing and managing code snippets, built with Go and Vue.
 - Modern, responsive UI with loading states
 - RESTful API with proper error handling
 - Client-side caching with TanStack Query
+- Secure API responses that protect user data
 
 ## API Endpoints
 
@@ -67,9 +68,12 @@ A web application for sharing and managing code snippets, built with Go and Vue.
   "author": "string",
   "created_at": "timestamp",
   "updated_at": "timestamp",
-  "likes": "number"
+  "likes": "number",
+  "is_liked": "boolean"
 }
 ```
+
+The `is_liked` field indicates whether the current user has liked the snippet. This is the only user-specific like information exposed by the API, ensuring user privacy and data security.
 
 ## Development
 
