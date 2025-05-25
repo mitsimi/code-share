@@ -42,3 +42,5 @@ debug
 
 # Temporary directory for air
 tmp/
+
+data/
