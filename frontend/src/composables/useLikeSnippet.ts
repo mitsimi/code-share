@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useCustomFetch } from './useCustomFetch'
 import { toast } from 'vue-sonner'
-import type { Card } from '@/models'
+import type { Snippet } from '@/models'
 
 export function useLikeSnippet() {
   const queryClient = useQueryClient()
@@ -11,7 +11,7 @@ export function useLikeSnippet() {
     mutationFn: async ({ snippetId, action }: { snippetId: string; action: 'like' | 'unlike' }) => {
       console.log(`Starting ${action} mutation for snippet:`, snippetId)
       try {
-        const { data, error } = await useCustomFetch<Card>(
+        const { data, error } = await useCustomFetch<Snippet>(
           `/snippets/${snippetId}/like?action=${action}`,
           {
             method: 'PATCH',
@@ -42,11 +42,11 @@ export function useLikeSnippet() {
       queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
 
       // Update the snippet in the list view
-      queryClient.setQueryData(['snippets'], (oldData: Card[] | undefined) => {
+      queryClient.setQueryData(['snippets'], (oldData: Snippet[] | undefined) => {
         if (!oldData) return [updatedSnippet]
         return oldData.map((snippet) =>
           snippet.id === updatedSnippet.id
-            ? { ...updatedSnippet, isLiked: !snippet.isLiked }
+            ? { ...updatedSnippet, isLiked: !snippet.is_liked }
             : snippet,
         )
       })

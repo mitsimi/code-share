@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import CardGrid from '@/components/CardGrid.vue'
 import FloatingActionButton from '@/components/FloatingActionButton.vue'
 import SnippetModal from '@/components/SnippetModal.vue'
 import { toast } from 'vue-sonner'
-import type { Card } from '@/models'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useCustomFetch } from '@/composables/useCustomFetch'
 import { useLikeSnippet } from '@/composables/useLikeSnippet'
+import type { Snippet } from '@/models'
 
 const showModal = ref(false)
 const queryClient = useQueryClient()
 const { updateLike } = useLikeSnippet()
 
-const getSnippets = async (): Promise<Card[]> => {
-  const { data, error } = await useCustomFetch<Card[]>('/snippets', {
+const getSnippets = async (): Promise<Snippet[]> => {
+  const { data, error } = await useCustomFetch<Snippet[]>('/snippets', {
     timeout: 1000,
     afterFetch: (ctx) => {
-      ctx.data = ctx.data.map((snippet: Card) => ({
+      ctx.data = ctx.data.map((snippet: Snippet) => ({
         ...snippet,
         id: snippet.id,
       }))
@@ -49,8 +49,8 @@ const createSnippet = async (formData: {
   title: string
   code: string
   author: string
-}): Promise<Card> => {
-  const { data, error } = await useCustomFetch<Card>('/snippets', {
+}): Promise<Snippet> => {
+  const { data, error } = await useCustomFetch<Snippet>('/snippets', {
     method: 'POST',
     body: JSON.stringify({
       title: formData.title,
@@ -70,7 +70,7 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
   mutationFn: createSnippet,
   onSuccess: (newSnippet) => {
     // Update the cache with the new snippet
-    queryClient.setQueryData(['snippets'], (oldData: Card[] | undefined) => {
+    queryClient.setQueryData(['snippets'], (oldData: Snippet[] | undefined) => {
       if (!oldData) return [newSnippet]
       return [newSnippet, ...oldData]
     })
