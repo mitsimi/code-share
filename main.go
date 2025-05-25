@@ -1,19 +1,34 @@
 package main
 
 import (
+	"codeShare/internal/config"
 	"codeShare/internal/server"
 	"codeShare/internal/storage"
 	"log"
 )
 
 func main() {
-	// Initialize storage
-	store := storage.NewMemoryStorage()
+	// Load configuration
+	cfg, err := config.New()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	// Initialize SQLite storage
+	store, err := storage.NewSQLiteStorage(cfg.DBPath)
+	if err != nil {
+		log.Fatalf("Failed to initialize SQLite storage: %v", err)
+	}
+	defer store.Close()
+
+	// Seed the database with sample data
+	if err := store.Seed(); err != nil {
+		log.Printf("Warning: Failed to seed database: %v", err)
+	}
 
 	// Create and start server
 	srv := server.New(store)
-	if err := srv.Start(":8080"); err != nil {
+	if err := srv.Start(":" + cfg.Port); err != nil {
 		log.Fatal(err)
 	}
 }
-
