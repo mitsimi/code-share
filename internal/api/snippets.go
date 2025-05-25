@@ -96,9 +96,9 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	snippet := models.Snippet{
-		Title:    req.Title,
-		Content:  req.Content,
-		Author: req.Author,
+		Title:     req.Title,
+		Content:   req.Content,
+		Author:    req.Author,
 		UserLikes: make(map[string]bool),
 	}
 
@@ -154,7 +154,7 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 // ToggleLikeSnippet toggles the like status of a snippet
 func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	
+
 	// Parse the action from query parameters
 	action := r.URL.Query().Get("action")
 	if action != "like" && action != "unlike" {
