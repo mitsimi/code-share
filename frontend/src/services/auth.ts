@@ -3,16 +3,22 @@ import type { AuthResponse, LoginRequest, SignupRequest, User } from '@/types'
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const { data, error } = await useCustomFetch<AuthResponse>('/auth/login', {
+    const response = await useCustomFetch<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     }).json()
+
+    const { data, error } = response
 
     if (error.value) {
       throw new Error(error.value.message || 'Failed to login')
     }
 
-    return data.value!
+    if (!data.value) {
+      throw new Error('Invalid response from server')
+    }
+
+    return data.value
   },
 
   async signup(userData: SignupRequest): Promise<AuthResponse> {
@@ -25,7 +31,11 @@ export const authService = {
       throw new Error(error.value.message || 'Failed to sign up')
     }
 
-    return data.value!
+    if (!data.value) {
+      throw new Error('No response data received')
+    }
+
+    return data.value
   },
 
   async logout(): Promise<void> {
@@ -47,7 +57,11 @@ export const authService = {
       throw new Error(error.value.message || 'Failed to refresh token')
     }
 
-    return data.value!
+    if (!data.value) {
+      throw new Error('No response data received')
+    }
+
+    return data.value
   },
 
   async getCurrentUser(): Promise<User> {
@@ -57,6 +71,10 @@ export const authService = {
       throw new Error('Not authenticated')
     }
 
-    return data.value!
+    if (!data.value) {
+      throw new Error('No user data received')
+    }
+
+    return data.value
   },
 }

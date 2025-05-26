@@ -89,7 +89,7 @@ const isLoading = ref(false)
 const formSchema = toTypedSchema(
   z.object({
     email: z.string().email('Please enter a valid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    password: z.string(),
   }),
 )
 
@@ -104,6 +104,7 @@ const onSubmit = handleSubmit(async (values) => {
     authStore.setAuth({
       user: response.user,
       token: response.token,
+      refreshToken: response.refresh_token,
       expiresAt: response.expires_at,
     })
     toast.success('You have been logged in successfully')

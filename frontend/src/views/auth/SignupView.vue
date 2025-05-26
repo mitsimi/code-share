@@ -141,6 +141,7 @@ const onSubmit = handleSubmit(async (values) => {
     authStore.setAuth({
       user: response.user,
       token: response.token,
+      refreshToken: response.refresh_token,
       expiresAt: response.expires_at,
     })
     toast.success('Your account has been created successfully')

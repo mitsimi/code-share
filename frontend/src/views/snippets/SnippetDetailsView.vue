@@ -7,7 +7,7 @@ import { onMounted } from 'vue'
 
 import { Button } from '@/components/ui/button'
 import { useLikeSnippet } from '@/composables/useLikeSnippet'
-import type { Snippet } from '@/models'
+import type { Snippet } from '@/types'
 
 const route = useRoute()
 const router = useRouter()

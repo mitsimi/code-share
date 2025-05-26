@@ -11,4 +11,21 @@ const pinia = createPinia()
 
 app.use(router).use(pinia).use(VueQueryPlugin)
 
-app.mount('#app')
+// Initialize app
+const init = async () => {
+  // Initialize Pinia stores
+  const { useAuthStore } = await import('@/stores/auth')
+  const authStore = useAuthStore()
+  
+  try {
+    // Try to restore authentication state
+    await authStore.initializeAuth()
+  } catch (error) {
+    console.error('Failed to initialize auth:', error)
+  }
+
+  // Mount the app
+  app.mount('#app')
+}
+
+init()

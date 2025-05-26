@@ -7,7 +7,7 @@ import { toast } from 'vue-sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useCustomFetch } from '@/composables/useCustomFetch'
 import { useLikeSnippet } from '@/composables/useLikeSnippet'
-import type { Snippet } from '@/models'
+import type { Snippet } from '@/types'
 
 const showModal = ref(false)
 const queryClient = useQueryClient()
