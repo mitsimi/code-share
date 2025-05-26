@@ -80,7 +80,7 @@ func GenerateToken(userID, secretKey string, isRefreshToken bool) (TokenResponse
 // ValidateToken validates a JWT token and returns the claims
 func ValidateToken(tokenString string, secretKey string) (JWTClaims, error) {
 	// Parse the token
-	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (any, error) {
 		// Validate the signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidToken
