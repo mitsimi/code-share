@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import SnippetsView from '../views/SnippetsView.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -20,12 +20,12 @@ const router = createRouter({
     {
       path: '/snippets',
       name: 'snippets',
-      component: SnippetsView,
+      component: () => import('@/views/snippets/SnippetsView.vue'),
     },
     {
       path: '/snippets/:snippetId',
       name: 'snippet-details',
-      component: () => import('@/views/SnippetDetailsView.vue'),
+      component: () => import('@/views/snippets/SnippetDetailsView.vue'),
     },
     {
       path: '/about',
