@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_64ApooWvah
+createdAt: 2025-05-26T16:06:37.048072
+updatedAt: 2025-05-26T16:10:44.486696
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_dMgTuuDT2c
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "username": "mitsimi",
+      "email": "me@mitsimi.dev",
+      "password": "password"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: FtiDCaejqK
+method: POST
+name: Signup
+sortPriority: 0.0
+url: ${[ BASE_URL ]}/auth/signup
+urlParameters: []

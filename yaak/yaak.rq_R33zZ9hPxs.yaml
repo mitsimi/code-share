@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_R33zZ9hPxs
+createdAt: 2025-05-19T15:03:26.389485
+updatedAt: 2025-05-26T16:05:57.235658
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_kb6ND2zGAX
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "title": "some title",
+      "content": "cat file1 file2 file3",
+      "author": "John Doe"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: AU7eh74ZMs
+method: POST
+name: CreateSnippet
+sortPriority: 0.0
+url: ${[ BASE_URL ]}/snippets/
+urlParameters: []

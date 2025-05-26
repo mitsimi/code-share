@@ -1,0 +1,18 @@
+type: http_request
+model: http_request
+id: rq_w7vFD9EzoR
+createdAt: 2025-05-26T16:10:31.137544
+updatedAt: 2025-05-26T16:17:57.013780
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_dMgTuuDT2c
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: Me
+sortPriority: 3000.0
+url: ${[ BASE_URL ]}/auth/me
+urlParameters: []

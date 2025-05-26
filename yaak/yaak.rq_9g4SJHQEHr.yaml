@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_9g4SJHQEHr
+createdAt: 2025-05-26T16:09:32.253972
+updatedAt: 2025-05-26T16:10:44.486843
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_dMgTuuDT2c
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "email": "me@mitsimi.dev",
+      "password": "password"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: 2g09pZsmji
+method: POST
+name: Login
+sortPriority: 1000.0
+url: ${[ BASE_URL ]}/auth/login
+urlParameters: []
