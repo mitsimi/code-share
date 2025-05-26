@@ -138,12 +138,12 @@ The frontend is built with Vue.js and uses:
 
 ## Future Improvements
 
-- [ ] Add database integration
+- [x] Add database integration
+- [ ] Add user authentication
 - [ ] Add syntax highlighting
 
 Optional:
 
-- [ ] Add user authentication
 - [ ] Add snippet categories/tags
 - [ ] Add search functionality
 - [ ] Add user profiles

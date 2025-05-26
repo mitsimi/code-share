@@ -9,9 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
+var _ Storage = (*MemoryStorage)(nil)
+
 // MemoryStorage implements Storage interface with in-memory storage
 type MemoryStorage struct {
 	snippets map[string]models.Snippet
+	users    map[string]models.User
+	sessions map[string]models.Session
 	mu       sync.RWMutex
 }
 
@@ -23,7 +27,134 @@ func NewMemoryStorage() *MemoryStorage {
 	}
 	return &MemoryStorage{
 		snippets: snippets,
+		users:    make(map[string]models.User),
+		sessions: make(map[string]models.Session),
 	}
+}
+
+// CreateUser creates a new user
+func (s *MemoryStorage) CreateUser(username, email, password string) (string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Check if username or email already exists
+	for _, user := range s.users {
+		if user.Username == username || user.Email == email {
+			return "", errors.New("username or email already exists")
+		}
+	}
+
+	user := models.User{
+		ID:           uuid.NewString(),
+		Username:     username,
+		Email:        email,
+		PasswordHash: password, // In a real app, this should be hashed
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+	s.users[user.ID] = user
+	return user.ID, nil
+}
+
+// GetUser gets a user by ID
+func (s *MemoryStorage) GetUser(id string) (models.User, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	user, exists := s.users[id]
+	if !exists {
+		return models.User{}, errors.New("user not found")
+	}
+	return user, nil
+}
+
+// GetUserByUsername gets a user by username
+func (s *MemoryStorage) GetUserByUsername(username string) (models.User, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, user := range s.users {
+		if user.Username == username {
+			return user, nil
+		}
+	}
+	return models.User{}, errors.New("user not found")
+}
+
+// GetUserByEmail gets a user by email
+func (s *MemoryStorage) GetUserByEmail(email string) (models.User, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, user := range s.users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+	return models.User{}, errors.New("user not found")
+}
+
+// Login authenticates a user
+func (s *MemoryStorage) Login(email, password string) (string, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, user := range s.users {
+		if user.Email == email && user.PasswordHash == password { // In a real app, use proper password comparison
+			return user.ID, nil
+		}
+	}
+	return "", errors.New("invalid credentials")
+}
+
+// CreateSession creates a new session
+func (s *MemoryStorage) CreateSession(userID string, token string, expiresAt UnixTime) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	session := models.Session{
+		ID:        uuid.NewString(),
+		UserID:    userID,
+		Token:     token,
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+	}
+	s.sessions[token] = session
+	return nil
+}
+
+// GetSession gets a session by token
+func (s *MemoryStorage) GetSession(token string) (models.Session, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	session, exists := s.sessions[token]
+	if !exists {
+		return models.Session{}, errors.New("session not found")
+	}
+	return session, nil
+}
+
+// DeleteSession deletes a session
+func (s *MemoryStorage) DeleteSession(token string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	delete(s.sessions, token)
+	return nil
+}
+
+// DeleteExpiredSessions deletes expired sessions
+func (s *MemoryStorage) DeleteExpiredSessions() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for token, session := range s.sessions {
+		if session.ExpiresAt < time.Now().Unix() {
+			delete(s.sessions, token)
+		}
+	}
+	return nil
 }
 
 func (s *MemoryStorage) GetSnippets() ([]models.Snippet, error) {
@@ -56,7 +187,7 @@ func (s *MemoryStorage) CreateSnippet(snippet models.Snippet) (string, error) {
 	snippet.CreatedAt = time.Now()
 	snippet.UpdatedAt = time.Now()
 	snippet.Likes = 0
-	snippet.UserLikes = make(map[string]bool)
+	snippet.IsLiked = false
 
 	s.snippets[snippet.ID] = snippet
 	return snippet.ID, nil
@@ -96,21 +227,27 @@ func (s *MemoryStorage) ToggleLikeSnippet(id string, isLike bool) error {
 		return errors.New("snippet not found")
 	}
 
-	// For now, we'll use a dummy user ID since we don't have authentication
-	// In a real application, this would come from the authenticated user
-	userID := "current_user"
-
 	if isLike {
-		if !snippet.UserLikes[userID] {
+		if !snippet.IsLiked {
 			snippet.Likes++
-			snippet.UserLikes[userID] = true
+			snippet.IsLiked = true
 		}
 	} else {
-		if snippet.UserLikes[userID] {
+		if snippet.IsLiked {
 			snippet.Likes--
-			snippet.UserLikes[userID] = false
+			snippet.IsLiked = false
 		}
 	}
 	s.snippets[id] = snippet
 	return nil
-} 
+}
+
+// Close implements the Storage interface
+func (s *MemoryStorage) Close() error {
+	return nil
+}
+
+// Seed populates the storage with sample data
+func (s *MemoryStorage) Seed() error {
+	return nil
+}

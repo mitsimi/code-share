@@ -1,6 +1,7 @@
 package api
 
 import (
+	"codeShare/internal/logger"
 	"codeShare/internal/models"
 	"codeShare/internal/storage"
 	"encoding/json"
@@ -8,29 +9,37 @@ import (
 	"slices"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
 )
 
 // SnippetHandler handles snippet-related HTTP requests
 type SnippetHandler struct {
 	storage storage.Storage
+	logger  *zap.Logger
 }
 
 // NewSnippetHandler creates a new snippet handler
 func NewSnippetHandler(storage storage.Storage) *SnippetHandler {
-	return &SnippetHandler{storage: storage}
+	return &SnippetHandler{
+		storage: storage,
+		logger:  logger.Log,
+	}
 }
 
 // GetSnippets returns all snippets
 func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(zap.String("request_id", requestID))
+
 	snippets, err := h.storage.GetSnippets()
 	if err != nil {
+		log.Error("failed to get snippets",
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// For now, we'll use a dummy user ID since we don't have authentication
-	// In a real application, this would come from the authenticated user
-	userID := "current_user"
 
 	// Add isLiked field to each snippet
 	response := make([]struct {
@@ -44,10 +53,8 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 			IsLiked bool `json:"is_liked"`
 		}{
 			Snippet: snippet,
-			IsLiked: snippet.UserLikes[userID],
+			IsLiked: snippet.IsLiked,
 		}
-		// Clear the UserLikes map before sending
-		response[i].UserLikes = nil
 	}
 
 	slices.SortFunc(response, func(a, b struct {
@@ -57,21 +64,29 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		return b.CreatedAt.Compare(a.CreatedAt)
 	})
 
+	log.Debug("retrieved snippets",
+		zap.Int("count", len(snippets)),
+	)
 	json.NewEncoder(w).Encode(response)
 }
 
 // GetSnippet returns a specific snippet
 func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("snippet_id", id),
+	)
+
 	snippet, err := h.storage.GetSnippet(id)
 	if err != nil {
+		log.Error("failed to get snippet",
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-
-	// For now, we'll use a dummy user ID since we don't have authentication
-	// In a real application, this would come from the authenticated user
-	userID := "current_user"
 
 	// Add isLiked field to the response
 	response := struct {
@@ -79,51 +94,82 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		IsLiked bool `json:"is_liked"`
 	}{
 		Snippet: snippet,
-		IsLiked: snippet.UserLikes[userID],
+		IsLiked: snippet.IsLiked,
 	}
-	// Clear the UserLikes map before sending
-	response.UserLikes = nil
 
+	log.Debug("retrieved snippet",
+		zap.String("title", snippet.Title),
+		zap.String("author", snippet.Author),
+	)
 	json.NewEncoder(w).Encode(response)
 }
 
 // CreateSnippet creates a new snippet
 func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(zap.String("request_id", requestID))
+
 	var req models.SnippetRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Error("failed to decode request body",
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	snippet := models.Snippet{
-		Title:    req.Title,
-		Content:  req.Content,
-		Author: req.Author,
-		UserLikes: make(map[string]bool),
+		Title:   req.Title,
+		Content: req.Content,
+		Author:  req.Author,
+		Likes:   0,
+		IsLiked: false,
 	}
 
 	id, err := h.storage.CreateSnippet(snippet)
 	if err != nil {
+		log.Error("failed to create snippet",
+			zap.Error(err),
+			zap.String("title", snippet.Title),
+			zap.String("author", snippet.Author),
+		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	s, _ := h.storage.GetSnippet(id)
+	log.Info("created new snippet",
+		zap.String("id", id),
+		zap.String("title", s.Title),
+		zap.String("author", s.Author),
+	)
 	json.NewEncoder(w).Encode(s)
 }
 
 // UpdateSnippet updates an existing snippet
 func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("snippet_id", id),
+	)
+
 	var req models.SnippetRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Error("failed to decode request body",
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	snippet, err := h.storage.GetSnippet(id)
 	if err != nil {
+		log.Error("failed to get snippet for update",
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -133,40 +179,75 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 	snippet.Author = req.Author
 
 	if err := h.storage.UpdateSnippet(snippet); err != nil {
+		log.Error("failed to update snippet",
+			zap.Error(err),
+			zap.String("title", snippet.Title),
+			zap.String("author", snippet.Author),
+		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(snippet)
+	response := struct {
+		models.Snippet
+		IsLiked bool `json:"is_liked"`
+	}{
+		Snippet: snippet,
+		IsLiked: snippet.IsLiked,
+	}
+
+	log.Info("updated snippet",
+		zap.String("title", snippet.Title),
+		zap.String("author", snippet.Author),
+	)
+	json.NewEncoder(w).Encode(response)
 }
 
 // DeleteSnippet deletes a snippet
 func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("snippet_id", id),
+	)
+
 	if err := h.storage.DeleteSnippet(id); err != nil {
+		log.Error("failed to delete snippet",
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
+	log.Info("deleted snippet")
 	w.WriteHeader(http.StatusNoContent)
 }
 
 // ToggleLikeSnippet toggles the like status of a snippet
 func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("snippet_id", id),
+	)
+
 	// Parse the action from query parameters
 	action := r.URL.Query().Get("action")
 	if action != "like" && action != "unlike" {
+		log.Error("invalid action",
+			zap.String("action", action),
+		)
 		http.Error(w, "Invalid action. Must be 'like' or 'unlike'", http.StatusBadRequest)
 		return
 	}
 
-	// For now, we'll use a dummy user ID since we don't have authentication
-	// In a real application, this would come from the authenticated user
-	userID := "current_user"
-
 	if err := h.storage.ToggleLikeSnippet(id, action == "like"); err != nil {
+		log.Error("failed to toggle like",
+			zap.Error(err),
+			zap.String("action", action),
+		)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -174,20 +255,16 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 	// Get the updated snippet
 	snippet, err := h.storage.GetSnippet(id)
 	if err != nil {
+		log.Error("failed to get updated snippet",
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Add isLiked field to the response
-	response := struct {
-		models.Snippet
-		IsLiked bool `json:"is_liked"`
-	}{
-		Snippet: snippet,
-		IsLiked: snippet.UserLikes[userID],
-	}
-	// Clear the UserLikes map before sending
-	response.UserLikes = nil
-
-	json.NewEncoder(w).Encode(response)
+	log.Info("toggled snippet like",
+		zap.String("action", action),
+		zap.Int("likes", int(snippet.Likes)),
+	)
+	json.NewEncoder(w).Encode(snippet)
 }

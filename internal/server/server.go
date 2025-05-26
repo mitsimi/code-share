@@ -3,9 +3,9 @@ package server
 import (
 	"codeShare/frontend"
 	"codeShare/internal/api"
+	"codeShare/internal/logger"
 	"codeShare/internal/storage"
 	"io"
-	"log"
 	"mime"
 	"net/http"
 	"path/filepath"
@@ -14,12 +14,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"go.uber.org/zap"
 )
 
 // Server represents the application server
 type Server struct {
 	router  *chi.Mux
 	storage storage.Storage
+	logger  *zap.Logger
 }
 
 // New creates a new server instance
@@ -27,6 +29,7 @@ func New(storage storage.Storage) *Server {
 	s := &Server{
 		router:  chi.NewRouter(),
 		storage: storage,
+		logger:  logger.Log,
 	}
 	s.setupMiddleware()
 	s.setupRoutes()
@@ -35,7 +38,13 @@ func New(storage storage.Storage) *Server {
 
 // setupMiddleware configures the server middleware
 func (s *Server) setupMiddleware() {
-	s.router.Use(middleware.Logger)
+	// Add request ID to context
+	s.router.Use(middleware.RequestID)
+
+	// Use our structured logger
+	s.router.Use(logger.RequestLogger)
+
+	// Other middleware
 	s.router.Use(middleware.Recoverer)
 	s.router.Use(middleware.RealIP)
 	s.router.Use(middleware.CleanPath)
@@ -91,6 +100,10 @@ func (s *Server) setupRoutes() {
 	s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		indexFile, err := frontend.DistDirFS.Open("index.html")
 		if err != nil {
+			s.logger.Error("failed to load index.html",
+				zap.Error(err),
+				zap.String("request_id", middleware.GetReqID(r.Context())),
+			)
 			http.Error(w, "Error loading index.html", http.StatusInternalServerError)
 			return
 		}
@@ -101,7 +114,10 @@ func (s *Server) setupRoutes() {
 }
 
 // Start starts the server
-func (s *Server) Start(port string) error {
-	log.Printf("Server starting on http://localhost%s", port)
+func (s *Server) Start(port, env string) error {
+	s.logger.Info("server starting",
+		zap.String("port", port),
+		zap.String("environment", env),
+	)
 	return http.ListenAndServe(port, s.router)
-} 
+}
