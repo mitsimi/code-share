@@ -32,9 +32,15 @@ importers:
       lucide-vue-next:
         specifier: ^0.507.0
         version: 0.507.0(vue@3.5.13(typescript@5.8.3))
+      pinia:
+        specifier: ^3.0.2
+        version: 3.0.2(typescript@5.8.3)(vue@3.5.13(typescript@5.8.3))
       reka-ui:
         specifier: ^2.2.1
         version: 2.2.1(typescript@5.8.3)(vue@3.5.13(typescript@5.8.3))
+      sonner:
+        specifier: ^2.0.3
+        version: 2.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       tailwind-merge:
         specifier: ^3.2.0
         version: 3.2.0
@@ -1829,6 +1835,15 @@ packages:
     engines: {node: '>=0.10'}
     hasBin: true
 
+  pinia@3.0.2:
+    resolution: {integrity: sha512-sH2JK3wNY809JOeiiURUR0wehJ9/gd9qFN2Y828jCbxEzKEmEt0pzCXwqiSTfuRsK9vQsOflSdnbdBOGrhtn+g==}
+    peerDependencies:
+      typescript: '>=4.4.4'
+      vue: ^2.7.0 || ^3.5.11
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   pkce-challenge@5.0.0:
     resolution: {integrity: sha512-ueGLflrrnvwB3xuo/uGob5pd5FN7l0MsLf0Z87o/UQmRtwjvfylfc9MurIxRAWywCYTgrvpXBcqjV4OfCYGCIQ==}
     engines: {node: '>=16.20.0'}
@@ -1936,6 +1951,15 @@ packages:
     resolution: {integrity: sha512-RmkhL8CAyCRPXCE28MMH0z2PNWQBNk2Q09ZdxM9IOOXwxwZbN+qbWaatPkdkWIKL2ZVDImrN/pK5HTRz2PcS4g==}
     engines: {node: '>= 0.8'}
 
+  react-dom@19.1.0:
+    resolution: {integrity: sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g==}
+    peerDependencies:
+      react: ^19.1.0
+
+  react@19.1.0:
+    resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
+    engines: {node: '>=0.10.0'}
+
   read-package-json-fast@4.0.0:
     resolution: {integrity: sha512-qpt8EwugBWDw2cgE2W+/3oxC+KTez2uSVR8JU9Q36TXPAGCaozfQUs59v4j4GFpWTaw0i6hAZSvOmu1J0uOEUg==}
     engines: {node: ^18.17.0 || >=20.5.0}
@@ -1980,6 +2004,9 @@ packages:
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+
+  scheduler@0.26.0:
+    resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -2036,6 +2063,12 @@ packages:
   sirv@3.0.1:
     resolution: {integrity: sha512-FoqMu0NCGBLCcAkS1qA+XJIQTR6/JHfQXl+uGteNCQ76T91DMUjPa9xfmeqMY3z80nLSg9yQmNjK0Px6RWsH/A==}
     engines: {node: '>=18'}
+
+  sonner@2.0.3:
+    resolution: {integrity: sha512-njQ4Hht92m0sMqqHVDL32V2Oun9W1+PHO9NDv9FHfJjT3JT22IG4Jpo3FPQy+mouRKCXFWO+r67v6MrHX2zeIA==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -4006,6 +4039,13 @@ snapshots:
 
   pidtree@0.6.0: {}
 
+  pinia@3.0.2(typescript@5.8.3)(vue@3.5.13(typescript@5.8.3)):
+    dependencies:
+      '@vue/devtools-api': 7.7.6
+      vue: 3.5.13(typescript@5.8.3)
+    optionalDependencies:
+      typescript: 5.8.3
+
   pkce-challenge@5.0.0: {}
 
   postcss-selector-parser@6.1.2:
@@ -4056,6 +4096,13 @@ snapshots:
       http-errors: 2.0.0
       iconv-lite: 0.6.3
       unpipe: 1.0.0
+
+  react-dom@19.1.0(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      scheduler: 0.26.0
+
+  react@19.1.0: {}
 
   read-package-json-fast@4.0.0:
     dependencies:
@@ -4133,6 +4180,8 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
+  scheduler@0.26.0: {}
+
   semver@6.3.1: {}
 
   semver@7.7.1: {}
@@ -4207,6 +4256,11 @@ snapshots:
       '@polka/url': 1.0.0-next.29
       mrmime: 2.0.1
       totalist: 3.0.1
+
+  sonner@2.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   source-map-js@1.2.1: {}
 

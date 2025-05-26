@@ -20,7 +20,7 @@
         </div>
 
         <!-- Desktop Navigation Links -->
-        <nav class="flex gap-2">
+        <nav class="flex items-center gap-2">
           <router-link
             to="/snippets"
             class="neobrutalism bg-background hover:bg-primary hover:text-primary-foreground rounded-lg px-6 py-3 font-mono font-bold"
@@ -36,6 +36,32 @@
           >
             About
           </router-link>
+
+          <template v-if="authStore.isAuthenticated()">
+            <Button
+              variant="destructive"
+              class="neobrutalism hover:bg-destructive hover:text-destructive-foreground rounded-lg px-6 py-3 font-mono font-bold"
+              @click="handleLogout"
+            >
+              Logout
+            </Button>
+          </template>
+          <template v-else>
+            <router-link
+              to="/login"
+              class="neobrutalism bg-background hover:bg-primary hover:text-primary-foreground rounded-lg px-6 py-3 font-mono font-bold"
+              active-class="bg-primary text-primary-foreground"
+            >
+              Login
+            </router-link>
+            <router-link
+              to="/signup"
+              class="neobrutalism bg-background hover:bg-primary hover:text-primary-foreground rounded-lg px-6 py-3 font-mono font-bold"
+              active-class="bg-primary text-primary-foreground"
+            >
+              Sign Up
+            </router-link>
+          </template>
         </nav>
       </div>
 
@@ -95,6 +121,34 @@
             >
               About
             </router-link>
+
+            <template v-if="authStore.isAuthenticated()">
+              <Button
+                variant="destructive"
+                class="neobrutalism hover:bg-destructive hover:text-destructive-foreground w-full rounded-lg px-4 py-2 text-center font-mono font-bold"
+                @click="handleLogout"
+              >
+                Logout
+              </Button>
+            </template>
+            <template v-else>
+              <router-link
+                to="/login"
+                class="neobrutalism bg-background hover:bg-primary hover:text-primary-foreground rounded-lg px-4 py-2 text-center font-mono font-bold"
+                active-class="bg-primary text-primary-foreground"
+                @click="isMenuOpen = false"
+              >
+                Login
+              </router-link>
+              <router-link
+                to="/signup"
+                class="neobrutalism bg-background hover:bg-primary hover:text-primary-foreground rounded-lg px-4 py-2 text-center font-mono font-bold"
+                active-class="bg-primary text-primary-foreground"
+                @click="isMenuOpen = false"
+              >
+                Sign Up
+              </router-link>
+            </template>
           </nav>
         </Transition>
       </div>
@@ -106,11 +160,20 @@
 import { ref } from 'vue'
 import { Menu, X } from 'lucide-vue-next'
 import { Button } from './ui/button'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const authStore = useAuthStore()
 const isMenuOpen = ref(false)
 
 const handleLogoError = (event: Event) => {
   const img = event.target as HTMLImageElement
   img.style.display = 'none'
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/login')
 }
 </script>

@@ -42,8 +42,9 @@
           <Button
             type="submit"
             class="bg-primary text-primary-foreground hover:bg-primary/90 w-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
+            :disabled="isLoading"
           >
-            Login
+            {{ isLoading ? 'Logging in...' : 'Login' }}
           </Button>
         </form>
       </CardContent>
@@ -63,6 +64,9 @@
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
+import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -74,6 +78,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { authService } from '@/services/auth'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+const isLoading = ref(false)
 
 const formSchema = toTypedSchema(
   z.object({
@@ -86,8 +97,22 @@ const { handleSubmit } = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = handleSubmit((values) => {
-  // TODO: Implement login logic
-  console.log(values)
+const onSubmit = handleSubmit(async (values) => {
+  try {
+    isLoading.value = true
+    const response = await authService.login(values)
+    authStore.setAuth({
+      user: response.user,
+      token: response.token,
+      expiresAt: response.expires_at,
+    })
+    toast.success('You have been logged in successfully')
+    const redirectPath = route.query.redirect as string
+    router.push(redirectPath || '/snippets')
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Failed to login')
+  } finally {
+    isLoading.value = false
+  }
 })
 </script>

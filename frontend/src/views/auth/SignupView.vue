@@ -9,14 +9,14 @@
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" class="space-y-4">
-          <FormField v-slot="{ componentField }" name="name">
+          <FormField v-slot="{ componentField }" name="username">
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
                   type="text"
-                  placeholder="Enter your name"
+                  placeholder="Enter your username"
                   class="border-2 border-black focus:ring-2 focus:ring-black"
                 />
               </FormControl>
@@ -72,8 +72,9 @@
           <Button
             type="submit"
             class="bg-primary text-primary-foreground hover:bg-primary/90 w-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
+            :disabled="isLoading"
           >
-            Sign Up
+            {{ isLoading ? 'Creating account...' : 'Sign Up' }}
           </Button>
         </form>
       </CardContent>
@@ -93,6 +94,9 @@
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -104,13 +108,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { authService } from '@/services/auth'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const isLoading = ref(false)
 
 const formSchema = toTypedSchema(
   z
     .object({
-      name: z.string().min(2, 'Name must be at least 2 characters'),
+      username: z.string().min(2, 'Username must be at least 2 characters'),
       email: z.string().email('Please enter a valid email address'),
-      password: z.string().min(6, 'Password must be at least 6 characters'),
+      password: z.string().min(8, 'Password must be at least 8 characters'),
       confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
@@ -123,8 +133,22 @@ const { handleSubmit } = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = handleSubmit((values) => {
-  // TODO: Implement signup logic
-  console.log(values)
+const onSubmit = handleSubmit(async (values) => {
+  try {
+    isLoading.value = true
+    const { confirmPassword, ...signupData } = values
+    const response = await authService.signup(signupData)
+    authStore.setAuth({
+      user: response.user,
+      token: response.token,
+      expiresAt: response.expires_at,
+    })
+    toast.success('Your account has been created successfully')
+    router.push('/snippets')
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Failed to create account')
+  } finally {
+    isLoading.value = false
+  }
 })
 </script>
