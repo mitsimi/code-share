@@ -11,6 +11,9 @@ type Config struct {
 	DBPath string
 	Port   string
 	Seed   bool
+	// Logger configuration
+	LogLevel    string
+	Environment string
 }
 
 // New creates a new Config instance
@@ -37,9 +40,23 @@ func New() (*Config, error) {
 	seedEnv := os.Getenv("SEED")
 	seed := strings.ToLower(seedEnv) == "true"
 
+	// Get log level from environment variable or use default
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel == "" {
+		logLevel = "info"
+	}
+
+	// Determine environment
+	environment := "development"
+	if os.Getenv("ENVIRONMENT") == "production" {
+		environment = "production"
+	}
+
 	return &Config{
-		DBPath: dbPath,
-		Port:   port,
-		Seed:   seed,
+		DBPath:      dbPath,
+		Port:        port,
+		Seed:        seed,
+		LogLevel:    logLevel,
+		Environment: environment,
 	}, nil
 }
