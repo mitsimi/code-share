@@ -401,3 +401,71 @@ func TestSQLiteDeleteExpiredSessions(t *testing.T) {
 		t.Errorf("Expected token %q, got %q", validToken, session.Token)
 	}
 }
+
+func TestSQLiteTokenRefresh(t *testing.T) {
+	store, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	// Create a user first
+	username := "testuser"
+	email := "testuser@example.com"
+	password := "password123"
+	createdUser, err := store.CreateUser(username, email, password)
+	if err != nil {
+		t.Fatalf("Failed to create user: %v", err)
+	}
+
+	// Create initial session
+	initialToken := "initial-token"
+	initialRefreshToken := "initial-refresh-token"
+	initialExpiresAt := time.Now().Add(24 * time.Hour).Unix()
+	err = store.CreateSession(createdUser.ID, initialToken, initialRefreshToken, initialExpiresAt)
+	if err != nil {
+		t.Fatalf("Failed to create initial session: %v", err)
+	}
+
+	// Get initial session
+	initialSession, err := store.GetSession(initialToken)
+	if err != nil {
+		t.Fatalf("Failed to get initial session: %v", err)
+	}
+
+	// Verify initial session
+	if initialSession.UserID != createdUser.ID {
+		t.Errorf("Expected user ID %q, got %q", createdUser.ID, initialSession.UserID)
+	}
+	if initialSession.RefreshToken != initialRefreshToken {
+		t.Errorf("Expected refresh token %q, got %q", initialRefreshToken, initialSession.RefreshToken)
+	}
+
+	// Update session with new refresh token
+	newRefreshToken := "new-refresh-token"
+	newExpiresAt := time.Now().Add(48 * time.Hour).Unix()
+	err = store.UpdateSessionExpiry(initialToken, newExpiresAt, newRefreshToken)
+	if err != nil {
+		t.Fatalf("Failed to update session: %v", err)
+	}
+
+	// Get updated session
+	updatedSession, err := store.GetSession(initialToken)
+	if err != nil {
+		t.Fatalf("Failed to get updated session: %v", err)
+	}
+
+	// Verify updated session
+	if updatedSession.UserID != createdUser.ID {
+		t.Errorf("Expected user ID %q, got %q", createdUser.ID, updatedSession.UserID)
+	}
+	if updatedSession.RefreshToken != newRefreshToken {
+		t.Errorf("Expected new refresh token %q, got %q", newRefreshToken, updatedSession.RefreshToken)
+	}
+	if updatedSession.ExpiresAt != newExpiresAt {
+		t.Errorf("Expected new expiry time %v, got %v", newExpiresAt, updatedSession.ExpiresAt)
+	}
+
+	// Test updating non-existent session
+	err = store.UpdateSessionExpiry("non-existent-token", newExpiresAt, newRefreshToken)
+	if err == nil {
+		t.Error("Expected error when updating non-existent session")
+	}
+}

@@ -188,25 +188,6 @@ func (q *Queries) GetSession(ctx context.Context, token string) (Session, error)
 	return i, err
 }
 
-const getSessionByRefreshToken = `-- name: GetSessionByRefreshToken :one
-SELECT id, user_id, token, refresh_token, expires_at, created_at FROM sessions
-WHERE refresh_token = ? LIMIT 1
-`
-
-func (q *Queries) GetSessionByRefreshToken(ctx context.Context, refreshToken string) (Session, error) {
-	row := q.queryRow(ctx, q.getSessionByRefreshTokenStmt, getSessionByRefreshToken, refreshToken)
-	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Token,
-		&i.RefreshToken,
-		&i.ExpiresAt,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
 const getSnippet = `-- name: GetSnippet :one
 SELECT 
     s.id, s.title, s.content, s.author, s.created_at, s.updated_at, s.likes,
@@ -430,17 +411,17 @@ const updateSessionExpiry = `-- name: UpdateSessionExpiry :exec
 UPDATE sessions
 SET expires_at = ?,
     refresh_token = ?
-WHERE id = ?
+WHERE token = ?
 `
 
 type UpdateSessionExpiryParams struct {
 	ExpiresAt    int64  `json:"expires_at"`
 	RefreshToken string `json:"refresh_token"`
-	ID           string `json:"id"`
+	Token        string `json:"token"`
 }
 
 func (q *Queries) UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) error {
-	_, err := q.exec(ctx, q.updateSessionExpiryStmt, updateSessionExpiry, arg.ExpiresAt, arg.RefreshToken, arg.ID)
+	_, err := q.exec(ctx, q.updateSessionExpiryStmt, updateSessionExpiry, arg.ExpiresAt, arg.RefreshToken, arg.Token)
 	return err
 }
 

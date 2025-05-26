@@ -17,7 +17,6 @@ type Querier interface {
 	DeleteSession(ctx context.Context, token string) error
 	DeleteSnippet(ctx context.Context, id string) error
 	GetSession(ctx context.Context, token string) (Session, error)
-	GetSessionByRefreshToken(ctx context.Context, refreshToken string) (Session, error)
 	GetSnippet(ctx context.Context, arg GetSnippetParams) (GetSnippetRow, error)
 	GetSnippets(ctx context.Context, userID string) ([]GetSnippetsRow, error)
 	GetUser(ctx context.Context, id string) (User, error)

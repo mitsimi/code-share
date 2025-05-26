@@ -259,7 +259,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if !claims.IsRefresh() {
+		if !claims.IsRefresh {
 			log.Error("token is not a refresh token")
 			http.Error(w, "Invalid token type", http.StatusUnauthorized)
 			return

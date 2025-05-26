@@ -394,9 +394,15 @@ func (s *SQLiteStorage) Close() error {
 }
 
 // UpdateSessionExpiry updates the expiry time and refresh token of a session
-func (s *SQLiteStorage) UpdateSessionExpiry(sessionID string, expiresAt UnixTime, refreshToken string) error {
-	err := s.q.UpdateSessionExpiry(s.ctx, db.UpdateSessionExpiryParams{
-		ID:           sessionID,
+func (s *SQLiteStorage) UpdateSessionExpiry(token string, expiresAt UnixTime, refreshToken string) error {
+	// First get the session to verify it exists
+	session, err := s.GetSession(token)
+	if err != nil {
+		return err
+	}
+
+	err = s.q.UpdateSessionExpiry(s.ctx, db.UpdateSessionExpiryParams{
+		Token:        session.Token,
 		ExpiresAt:    expiresAt,
 		RefreshToken: refreshToken,
 	})

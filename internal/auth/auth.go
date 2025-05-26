@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"time"
 
@@ -40,40 +41,39 @@ func CheckPasswordHash(password, hash string) bool {
 
 // GenerateToken generates a new JWT token for a user
 func GenerateToken(userID, secretKey string, isRefreshToken bool) (TokenResponse, error) {
-	var expiration time.Duration
-	if isRefreshToken {
-		expiration = RefreshTokenExpiration
-	} else {
-		expiration = AccessTokenExpiration
-	}
-
-	var tokenType string
-	if isRefreshToken {
-		tokenType = "refresh"
-	} else {
-		tokenType = "access"
-	}
-
 	now := time.Now()
-	claims := JWTClaims{
-		UserID: userID,
-		Exp:    now.Add(expiration).Unix(),
-		Iat:    now.Unix(),
-		Type:   tokenType,
+	var expiresAt time.Time
+	if isRefreshToken {
+		expiresAt = now.Add(RefreshTokenExpiration)
+	} else {
+		expiresAt = now.Add(AccessTokenExpiration)
 	}
 
-	// Create a new token object
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Generate a random string to ensure uniqueness
+	randomBytes := make([]byte, 16)
+	rand.Read(randomBytes)
+	jti := hex.EncodeToString(randomBytes)
 
-	// Sign the token with the secret key
-	signedToken, err := token.SignedString([]byte(secretKey))
+	claims := JWTClaims{
+		UserID:    userID,
+		IsRefresh: isRefreshToken,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			ID:        jti,
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return TokenResponse{}, err
 	}
 
 	return TokenResponse{
-		Token:     signedToken,
-		ExpiresAt: claims.Exp,
+		Token:     tokenString,
+		ExpiresAt: expiresAt.Unix(),
 	}, nil
 }
 

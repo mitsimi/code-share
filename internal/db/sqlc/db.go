@@ -48,9 +48,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getSessionStmt, err = db.PrepareContext(ctx, getSession); err != nil {
 		return nil, fmt.Errorf("error preparing query GetSession: %w", err)
 	}
-	if q.getSessionByRefreshTokenStmt, err = db.PrepareContext(ctx, getSessionByRefreshToken); err != nil {
-		return nil, fmt.Errorf("error preparing query GetSessionByRefreshToken: %w", err)
-	}
 	if q.getSnippetStmt, err = db.PrepareContext(ctx, getSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query GetSnippet: %w", err)
 	}
@@ -127,11 +124,6 @@ func (q *Queries) Close() error {
 	if q.getSessionStmt != nil {
 		if cerr := q.getSessionStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getSessionStmt: %w", cerr)
-		}
-	}
-	if q.getSessionByRefreshTokenStmt != nil {
-		if cerr := q.getSessionByRefreshTokenStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getSessionByRefreshTokenStmt: %w", cerr)
 		}
 	}
 	if q.getSnippetStmt != nil {
@@ -226,53 +218,51 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                           DBTX
-	tx                           *sql.Tx
-	createSessionStmt            *sql.Stmt
-	createSnippetStmt            *sql.Stmt
-	createUserStmt               *sql.Stmt
-	decrementLikesCountStmt      *sql.Stmt
-	deleteExpiredSessionsStmt    *sql.Stmt
-	deleteSessionStmt            *sql.Stmt
-	deleteSnippetStmt            *sql.Stmt
-	getSessionStmt               *sql.Stmt
-	getSessionByRefreshTokenStmt *sql.Stmt
-	getSnippetStmt               *sql.Stmt
-	getSnippetsStmt              *sql.Stmt
-	getUserStmt                  *sql.Stmt
-	getUserByEmailStmt           *sql.Stmt
-	getUserByUsernameStmt        *sql.Stmt
-	incrementLikesCountStmt      *sql.Stmt
-	likeSnippetStmt              *sql.Stmt
-	unlikeSnippetStmt            *sql.Stmt
-	updateLikesCountStmt         *sql.Stmt
-	updateSessionExpiryStmt      *sql.Stmt
-	updateSnippetStmt            *sql.Stmt
+	db                        DBTX
+	tx                        *sql.Tx
+	createSessionStmt         *sql.Stmt
+	createSnippetStmt         *sql.Stmt
+	createUserStmt            *sql.Stmt
+	decrementLikesCountStmt   *sql.Stmt
+	deleteExpiredSessionsStmt *sql.Stmt
+	deleteSessionStmt         *sql.Stmt
+	deleteSnippetStmt         *sql.Stmt
+	getSessionStmt            *sql.Stmt
+	getSnippetStmt            *sql.Stmt
+	getSnippetsStmt           *sql.Stmt
+	getUserStmt               *sql.Stmt
+	getUserByEmailStmt        *sql.Stmt
+	getUserByUsernameStmt     *sql.Stmt
+	incrementLikesCountStmt   *sql.Stmt
+	likeSnippetStmt           *sql.Stmt
+	unlikeSnippetStmt         *sql.Stmt
+	updateLikesCountStmt      *sql.Stmt
+	updateSessionExpiryStmt   *sql.Stmt
+	updateSnippetStmt         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                           tx,
-		tx:                           tx,
-		createSessionStmt:            q.createSessionStmt,
-		createSnippetStmt:            q.createSnippetStmt,
-		createUserStmt:               q.createUserStmt,
-		decrementLikesCountStmt:      q.decrementLikesCountStmt,
-		deleteExpiredSessionsStmt:    q.deleteExpiredSessionsStmt,
-		deleteSessionStmt:            q.deleteSessionStmt,
-		deleteSnippetStmt:            q.deleteSnippetStmt,
-		getSessionStmt:               q.getSessionStmt,
-		getSessionByRefreshTokenStmt: q.getSessionByRefreshTokenStmt,
-		getSnippetStmt:               q.getSnippetStmt,
-		getSnippetsStmt:              q.getSnippetsStmt,
-		getUserStmt:                  q.getUserStmt,
-		getUserByEmailStmt:           q.getUserByEmailStmt,
-		getUserByUsernameStmt:        q.getUserByUsernameStmt,
-		incrementLikesCountStmt:      q.incrementLikesCountStmt,
-		likeSnippetStmt:              q.likeSnippetStmt,
-		unlikeSnippetStmt:            q.unlikeSnippetStmt,
-		updateLikesCountStmt:         q.updateLikesCountStmt,
-		updateSessionExpiryStmt:      q.updateSessionExpiryStmt,
-		updateSnippetStmt:            q.updateSnippetStmt,
+		db:                        tx,
+		tx:                        tx,
+		createSessionStmt:         q.createSessionStmt,
+		createSnippetStmt:         q.createSnippetStmt,
+		createUserStmt:            q.createUserStmt,
+		decrementLikesCountStmt:   q.decrementLikesCountStmt,
+		deleteExpiredSessionsStmt: q.deleteExpiredSessionsStmt,
+		deleteSessionStmt:         q.deleteSessionStmt,
+		deleteSnippetStmt:         q.deleteSnippetStmt,
+		getSessionStmt:            q.getSessionStmt,
+		getSnippetStmt:            q.getSnippetStmt,
+		getSnippetsStmt:           q.getSnippetsStmt,
+		getUserStmt:               q.getUserStmt,
+		getUserByEmailStmt:        q.getUserByEmailStmt,
+		getUserByUsernameStmt:     q.getUserByUsernameStmt,
+		incrementLikesCountStmt:   q.incrementLikesCountStmt,
+		likeSnippetStmt:           q.likeSnippetStmt,
+		unlikeSnippetStmt:         q.unlikeSnippetStmt,
+		updateLikesCountStmt:      q.updateLikesCountStmt,
+		updateSessionExpiryStmt:   q.updateSessionExpiryStmt,
+		updateSnippetStmt:         q.updateSnippetStmt,
 	}
 }

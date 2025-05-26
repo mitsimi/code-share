@@ -119,4 +119,4 @@ WHERE id = ?;
 UPDATE sessions
 SET expires_at = ?,
     refresh_token = ?
-WHERE id = ?;
+WHERE token = ?;
