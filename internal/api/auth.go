@@ -30,32 +30,12 @@ func NewAuthHandler(storage storage.Storage, secretKey string) *AuthHandler {
 	}
 }
 
-// SignupRequest represents the data needed to create a new user
-type SignupRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-// LoginRequest represents the data needed to login
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-// AuthResponse represents the response for authentication endpoints
-type AuthResponse struct {
-	Token     string      `json:"token"`
-	User      models.User `json:"user"`
-	ExpiresAt int64       `json:"expires_at"`
-}
-
 // Signup handles user registration
 func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(zap.String("request_id", requestID))
 
-	var req SignupRequest
+	var req models.SignupRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Error("failed to decode request body",
 			zap.Error(err),
@@ -126,10 +106,11 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Unix(expiresAt, 0),
 	})
 
-	response := AuthResponse{
-		Token:     token,
-		User:      user,
-		ExpiresAt: expiresAt,
+	response := models.AuthResponse{
+		Token:        accessTokenResp.Token,
+		RefreshToken: refreshTokenResp.Token,
+		User:         user,
+		ExpiresAt:    accessTokenResp.ExpiresAt,
 	}
 
 	log.Info("user signed up successfully",
@@ -144,7 +125,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(zap.String("request_id", requestID))
 
-	var req LoginRequest
+	var req models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Error("failed to decode request body",
 			zap.Error(err),
@@ -214,10 +195,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Unix(expiresAt, 0),
 	})
 
-	response := AuthResponse{
-		Token:     token,
-		User:      user,
-		ExpiresAt: expiresAt,
+	response := models.AuthResponse{
+		Token:        accessTokenResp.Token,
+		RefreshToken: refreshTokenResp.Token,
+		User:         user,
+		ExpiresAt:    accessTokenResp.ExpiresAt,
 	}
 
 	log.Info("user logged in successfully",
