@@ -16,6 +16,16 @@ var (
 	ErrExpiredToken       = errors.New("token has expired")
 )
 
+const (
+	AccessTokenExpiration  = 1 * time.Hour
+	RefreshTokenExpiration = 7 * 24 * time.Hour
+)
+
+type TokenResponse struct {
+	Token     string
+	ExpiresAt int64
+}
+
 // HashPassword creates a bcrypt hash of the password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
@@ -29,27 +39,48 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 // GenerateToken generates a new JWT token for a user
-func GenerateToken(userID string, secretKey string) (string, error) {
-	// Create a new token object
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": userID,
-		"exp": time.Now().Add(24 * time.Hour).Unix(),
-		"iat": time.Now().Unix(),
-	})
-
-	// Sign the token with the secret key
-	tokenString, err := token.SignedString([]byte(secretKey))
-	if err != nil {
-		return "", err
+func GenerateToken(userID, secretKey string, isRefreshToken bool) (TokenResponse, error) {
+	var expiration time.Duration
+	if isRefreshToken {
+		expiration = RefreshTokenExpiration
+	} else {
+		expiration = AccessTokenExpiration
 	}
 
-	return tokenString, nil
+	var tokenType string
+	if isRefreshToken {
+		tokenType = "refresh"
+	} else {
+		tokenType = "access"
+	}
+
+	now := time.Now()
+	claims := JWTClaims{
+		UserID: userID,
+		Exp:    now.Add(expiration).Unix(),
+		Iat:    now.Unix(),
+		Type:   tokenType,
+	}
+
+	// Create a new token object
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign the token with the secret key
+	signedToken, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		return TokenResponse{}, err
+	}
+
+	return TokenResponse{
+		Token:     signedToken,
+		ExpiresAt: claims.Exp,
+	}, nil
 }
 
-// ValidateToken validates a JWT token and returns the user ID
-func ValidateToken(tokenString string, secretKey string) (string, error) {
+// ValidateToken validates a JWT token and returns the claims
+func ValidateToken(tokenString string, secretKey string) (JWTClaims, error) {
 	// Parse the token
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// Validate the signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidToken
@@ -59,29 +90,23 @@ func ValidateToken(tokenString string, secretKey string) (string, error) {
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return "", ErrExpiredToken
+			return JWTClaims{}, ErrExpiredToken
 		}
-		return "", ErrInvalidToken
+		return JWTClaims{}, ErrInvalidToken
 	}
 
 	// Check if the token is valid
 	if !token.Valid {
-		return "", ErrInvalidToken
+		return JWTClaims{}, ErrInvalidToken
 	}
 
 	// Get the claims
-	claims, ok := token.Claims.(jwt.MapClaims)
+	claims, ok := token.Claims.(*JWTClaims)
 	if !ok {
-		return "", ErrInvalidToken
+		return JWTClaims{}, ErrInvalidToken
 	}
 
-	// Get the user ID
-	userID, ok := claims["sub"].(string)
-	if !ok {
-		return "", ErrInvalidToken
-	}
-
-	return userID, nil
+	return *claims, nil
 }
 
 // GenerateRandomToken generates a random token for session management

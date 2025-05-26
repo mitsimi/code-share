@@ -16,18 +16,19 @@ INSERT INTO sessions (
     id,
     user_id,
     token,
+    refresh_token,
     expires_at
 ) VALUES (
-    ?, ?, ?, ?
-)
-RETURNING id, user_id, token, expires_at, created_at
+    ?, ?, ?, ?, ?
+) RETURNING id, user_id, token, refresh_token, expires_at, created_at
 `
 
 type CreateSessionParams struct {
-	ID        string `json:"id"`
-	UserID    string `json:"user_id"`
-	Token     string `json:"token"`
-	ExpiresAt int64  `json:"expires_at"`
+	ID           string `json:"id"`
+	UserID       string `json:"user_id"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresAt    int64  `json:"expires_at"`
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
@@ -35,6 +36,7 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		arg.ID,
 		arg.UserID,
 		arg.Token,
+		arg.RefreshToken,
 		arg.ExpiresAt,
 	)
 	var i Session
@@ -42,6 +44,7 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		&i.ID,
 		&i.UserID,
 		&i.Token,
+		&i.RefreshToken,
 		&i.ExpiresAt,
 		&i.CreatedAt,
 	)
@@ -138,7 +141,7 @@ func (q *Queries) DecrementLikesCount(ctx context.Context, id string) error {
 
 const deleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
 DELETE FROM sessions
-WHERE expires_at <= strftime('%s', 'now')
+WHERE expires_at < unixepoch()
 `
 
 func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
@@ -167,8 +170,8 @@ func (q *Queries) DeleteSnippet(ctx context.Context, id string) error {
 }
 
 const getSession = `-- name: GetSession :one
-SELECT id, user_id, token, expires_at, created_at FROM sessions
-WHERE token = ? AND expires_at > strftime('%s', 'now')
+SELECT id, user_id, token, refresh_token, expires_at, created_at FROM sessions
+WHERE token = ? LIMIT 1
 `
 
 func (q *Queries) GetSession(ctx context.Context, token string) (Session, error) {
@@ -178,6 +181,26 @@ func (q *Queries) GetSession(ctx context.Context, token string) (Session, error)
 		&i.ID,
 		&i.UserID,
 		&i.Token,
+		&i.RefreshToken,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getSessionByRefreshToken = `-- name: GetSessionByRefreshToken :one
+SELECT id, user_id, token, refresh_token, expires_at, created_at FROM sessions
+WHERE refresh_token = ? LIMIT 1
+`
+
+func (q *Queries) GetSessionByRefreshToken(ctx context.Context, refreshToken string) (Session, error) {
+	row := q.queryRow(ctx, q.getSessionByRefreshTokenStmt, getSessionByRefreshToken, refreshToken)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Token,
+		&i.RefreshToken,
 		&i.ExpiresAt,
 		&i.CreatedAt,
 	)
@@ -403,29 +426,22 @@ func (q *Queries) UpdateLikesCount(ctx context.Context, arg UpdateLikesCountPara
 	return err
 }
 
-const updateSessionExpiry = `-- name: UpdateSessionExpiry :one
+const updateSessionExpiry = `-- name: UpdateSessionExpiry :exec
 UPDATE sessions
-SET expires_at = ?
+SET expires_at = ?,
+    refresh_token = ?
 WHERE id = ?
-RETURNING id, user_id, token, expires_at, created_at
 `
 
 type UpdateSessionExpiryParams struct {
-	ExpiresAt int64  `json:"expires_at"`
-	ID        string `json:"id"`
+	ExpiresAt    int64  `json:"expires_at"`
+	RefreshToken string `json:"refresh_token"`
+	ID           string `json:"id"`
 }
 
-func (q *Queries) UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) (Session, error) {
-	row := q.queryRow(ctx, q.updateSessionExpiryStmt, updateSessionExpiry, arg.ExpiresAt, arg.ID)
-	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Token,
-		&i.ExpiresAt,
-		&i.CreatedAt,
-	)
-	return i, err
+func (q *Queries) UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) error {
+	_, err := q.exec(ctx, q.updateSessionExpiryStmt, updateSessionExpiry, arg.ExpiresAt, arg.RefreshToken, arg.ID)
+	return err
 }
 
 const updateSnippet = `-- name: UpdateSnippet :one

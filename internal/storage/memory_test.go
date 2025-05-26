@@ -26,7 +26,7 @@ func TestMemoryCreateAndGetUser(t *testing.T) {
 	}
 
 	// Test getting user by ID
-	user, err := store.GetUser(userID)
+	user, err := store.GetUser(UserID(userID.ID))
 	if err != nil {
 		t.Fatalf("Failed to get user: %v", err)
 	}
@@ -35,8 +35,8 @@ func TestMemoryCreateAndGetUser(t *testing.T) {
 	if user.Username != username {
 		t.Errorf("Expected username %q, got %q", username, user.Username)
 	}
-	if user.ID != userID {
-		t.Errorf("Expected user ID %q, got %q", userID, user.ID)
+	if user.ID != userID.ID {
+		t.Errorf("Expected user ID %q, got %q", userID.ID, user.ID)
 	}
 	if user.CreatedAt.IsZero() {
 		t.Error("Expected CreatedAt to be set")
@@ -62,8 +62,8 @@ func TestMemoryGetUserByUsername(t *testing.T) {
 	}
 
 	// Verify user data
-	if user.ID != userID {
-		t.Errorf("Expected user ID %q, got %q", userID, user.ID)
+	if user.ID != userID.ID {
+		t.Errorf("Expected user ID %q, got %q", userID.ID, user.ID)
 	}
 	if user.Username != username {
 		t.Errorf("Expected username %q, got %q", username, user.Username)
@@ -233,8 +233,8 @@ func TestMemoryLogin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to login: %v", err)
 	}
-	if gotUserID != userID {
-		t.Errorf("Expected user ID %q, got %q", userID, gotUserID)
+	if gotUserID != userID.ID {
+		t.Errorf("Expected user ID %q, got %q", userID.ID, gotUserID)
 	}
 
 	// Test login with wrong password
@@ -264,8 +264,9 @@ func TestMemorySessionManagement(t *testing.T) {
 
 	// Test creating a session
 	token := "test-token"
+	refreshToken := "test-refresh-token"
 	expiresAt := time.Now().Add(24 * time.Hour).Unix()
-	err = store.CreateSession(userID, token, expiresAt)
+	err = store.CreateSession(userID.ID, token, refreshToken, expiresAt)
 	if err != nil {
 		t.Fatalf("Failed to create session: %v", err)
 	}
@@ -275,8 +276,8 @@ func TestMemorySessionManagement(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get session: %v", err)
 	}
-	if session.UserID != userID {
-		t.Errorf("Expected user ID %q, got %q", userID, session.UserID)
+	if session.UserID != userID.ID {
+		t.Errorf("Expected user ID %q, got %q", userID.ID, session.UserID)
 	}
 	if session.Token != token {
 		t.Errorf("Expected token %q, got %q", token, session.Token)
@@ -318,16 +319,18 @@ func TestMemoryDeleteExpiredSessions(t *testing.T) {
 
 	// Create an expired session (expired 1 hour ago)
 	expiredToken := "expired-token"
+	expiredRefreshToken := "expired-refresh-token"
 	expiredExpiresAt := time.Now().UTC().Add(-1 * time.Hour).Unix()
-	err = store.CreateSession(userID, expiredToken, expiredExpiresAt)
+	err = store.CreateSession(userID.ID, expiredToken, expiredRefreshToken, expiredExpiresAt)
 	if err != nil {
 		t.Fatalf("Failed to create expired session: %v", err)
 	}
 
 	// Create a valid session (expires in 1 hour)
 	validToken := "valid-token"
+	validRefreshToken := "valid-refresh-token"
 	validExpiresAt := time.Now().UTC().Add(1 * time.Hour).Unix()
-	err = store.CreateSession(userID, validToken, validExpiresAt)
+	err = store.CreateSession(userID.ID, validToken, validRefreshToken, validExpiresAt)
 	if err != nil {
 		t.Fatalf("Failed to create valid session: %v", err)
 	}

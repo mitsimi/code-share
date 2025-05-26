@@ -68,6 +68,7 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 	log.Debug("retrieved snippets",
 		zap.Int("count", len(snippets)),
 	)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -102,6 +103,7 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("title", snippet.Title),
 		zap.String("author", snippet.Author),
 	)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -145,6 +147,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("title", s.Title),
 		zap.String("author", s.Author),
 	)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(s)
 }
 
@@ -201,6 +204,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("title", snippet.Title),
 		zap.String("author", snippet.Author),
 	)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -267,5 +271,6 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		zap.String("action", action),
 		zap.Int("likes", int(snippet.Likes)),
 	)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(snippet)
 }

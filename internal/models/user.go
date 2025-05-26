@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	db "mitsimi.dev/codeShare/internal/db/sqlc"
+)
 
 // User represents a user in the system
 type User struct {
@@ -10,4 +14,18 @@ type User struct {
 	PasswordHash string    `json:"-"` // Not exposed in JSON
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+// ... existing code ...
+
+// FromDBUser converts a db.User to models.User
+func FromDBUser(user db.User) User {
+	return User{
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+	}
 }

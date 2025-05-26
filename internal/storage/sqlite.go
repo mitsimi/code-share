@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"mitsimi.dev/codeShare/internal/auth"
 	ddl "mitsimi.dev/codeShare/internal/db"
@@ -25,10 +26,16 @@ type SQLiteStorage struct {
 
 // NewSQLiteStorage creates a new SQLite storage
 func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
-	dbConn, err := sql.Open("sqlite", dbPath)
+	// Add SQLite configuration options
+	dbConn, err := sql.Open("sqlite", dbPath+"?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=temp_store(MEMORY)&_pragma=mmap_size(30000000000)&_pragma=page_size(4096)&_pragma=busy_timeout(5000)")
 	if err != nil {
 		return nil, err
 	}
+
+	// Set connection pool settings
+	dbConn.SetMaxOpenConns(1) // SQLite only supports one writer at a time
+	dbConn.SetMaxIdleConns(1)
+	dbConn.SetConnMaxLifetime(time.Hour)
 
 	// Create tables if they don't exist
 	if err := createTables(dbConn); err != nil {
@@ -49,11 +56,11 @@ func createTables(dbConn *sql.DB) error {
 }
 
 // CreateUser creates a new user
-func (s *SQLiteStorage) CreateUser(username, email, password string) (UserID, error) {
+func (s *SQLiteStorage) CreateUser(username, email, password string) (db.User, error) {
 	// Hash the password
 	passwordHash, err := auth.HashPassword(password)
 	if err != nil {
-		return "", err
+		return db.User{}, err
 	}
 
 	user, err := s.q.CreateUser(s.ctx, db.CreateUserParams{
@@ -63,69 +70,45 @@ func (s *SQLiteStorage) CreateUser(username, email, password string) (UserID, er
 		PasswordHash: passwordHash,
 	})
 	if err != nil {
-		return "", err
+		return db.User{}, err
 	}
-	return user.ID, nil
+	return user, nil
 }
 
 // GetUser gets a user by ID
-func (s *SQLiteStorage) GetUser(id string) (models.User, error) {
-	user, err := s.q.GetUser(s.ctx, id)
+func (s *SQLiteStorage) GetUser(id UserID) (db.User, error) {
+	user, err := s.q.GetUser(s.ctx, string(id))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.User{}, errors.New("user not found")
+			return db.User{}, errors.New("user not found")
 		}
-		return models.User{}, err
+		return db.User{}, err
 	}
-
-	return models.User{
-		ID:           user.ID,
-		Username:     user.Username,
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
-		CreatedAt:    user.CreatedAt,
-		UpdatedAt:    user.UpdatedAt,
-	}, nil
+	return user, nil
 }
 
 // GetUserByUsername gets a user by username
-func (s *SQLiteStorage) GetUserByUsername(username string) (models.User, error) {
+func (s *SQLiteStorage) GetUserByUsername(username string) (db.User, error) {
 	user, err := s.q.GetUserByUsername(s.ctx, username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.User{}, errors.New("user not found")
+			return db.User{}, errors.New("user not found")
 		}
-		return models.User{}, err
+		return db.User{}, err
 	}
-
-	return models.User{
-		ID:           user.ID,
-		Username:     user.Username,
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
-		CreatedAt:    user.CreatedAt,
-		UpdatedAt:    user.UpdatedAt,
-	}, nil
+	return user, nil
 }
 
 // GetUserByEmail gets a user by email
-func (s *SQLiteStorage) GetUserByEmail(email string) (models.User, error) {
+func (s *SQLiteStorage) GetUserByEmail(email string) (db.User, error) {
 	user, err := s.q.GetUserByEmail(s.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.User{}, errors.New("user not found")
+			return db.User{}, errors.New("user not found")
 		}
-		return models.User{}, err
+		return db.User{}, err
 	}
-
-	return models.User{
-		ID:           user.ID,
-		Username:     user.Username,
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
-		CreatedAt:    user.CreatedAt,
-		UpdatedAt:    user.UpdatedAt,
-	}, nil
+	return user, nil
 }
 
 // Login authenticates a user and returns their ID
@@ -143,12 +126,13 @@ func (s *SQLiteStorage) Login(email, password string) (UserID, error) {
 }
 
 // CreateSession creates a new session for a user
-func (s *SQLiteStorage) CreateSession(userID string, token string, expiresAt UnixTime) error {
+func (s *SQLiteStorage) CreateSession(userID string, token string, refreshToken string, expiresAt UnixTime) error {
 	_, err := s.q.CreateSession(s.ctx, db.CreateSessionParams{
-		ID:        uuid.NewString(),
-		UserID:    userID,
-		Token:     token,
-		ExpiresAt: expiresAt,
+		ID:           uuid.NewString(),
+		UserID:       userID,
+		Token:        token,
+		RefreshToken: refreshToken,
+		ExpiresAt:    expiresAt,
 	})
 	return err
 }
@@ -164,11 +148,12 @@ func (s *SQLiteStorage) GetSession(token string) (models.Session, error) {
 	}
 
 	return models.Session{
-		ID:        session.ID,
-		UserID:    session.UserID,
-		Token:     session.Token,
-		ExpiresAt: session.ExpiresAt,
-		CreatedAt: session.CreatedAt,
+		ID:           session.ID,
+		UserID:       session.UserID,
+		Token:        session.Token,
+		RefreshToken: session.RefreshToken,
+		ExpiresAt:    session.ExpiresAt,
+		CreatedAt:    session.CreatedAt,
 	}, nil
 }
 
@@ -408,11 +393,12 @@ func (s *SQLiteStorage) Close() error {
 	return s.db.Close()
 }
 
-// UpdateSessionExpiry updates the expiry time of a session
-func (s *SQLiteStorage) UpdateSessionExpiry(sessionID string, expiresAt UnixTime) error {
-	_, err := s.q.UpdateSessionExpiry(s.ctx, db.UpdateSessionExpiryParams{
-		ID:        sessionID,
-		ExpiresAt: expiresAt,
+// UpdateSessionExpiry updates the expiry time and refresh token of a session
+func (s *SQLiteStorage) UpdateSessionExpiry(sessionID string, expiresAt UnixTime, refreshToken string) error {
+	err := s.q.UpdateSessionExpiry(s.ctx, db.UpdateSessionExpiryParams{
+		ID:           sessionID,
+		ExpiresAt:    expiresAt,
+		RefreshToken: refreshToken,
 	})
 	return err
 }

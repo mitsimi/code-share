@@ -26,15 +26,15 @@ INSERT INTO sessions (
     id,
     user_id,
     token,
+    refresh_token,
     expires_at
 ) VALUES (
-    ?, ?, ?, ?
-)
-RETURNING *;
+    ?, ?, ?, ?, ?
+) RETURNING *;
 
 -- name: GetSession :one
 SELECT * FROM sessions
-WHERE token = ? AND expires_at > strftime('%s', 'now');
+WHERE token = ? LIMIT 1;
 
 -- name: DeleteSession :exec
 DELETE FROM sessions
@@ -42,7 +42,7 @@ WHERE token = ?;
 
 -- name: DeleteExpiredSessions :exec
 DELETE FROM sessions
-WHERE expires_at <= strftime('%s', 'now');
+WHERE expires_at < unixepoch();
 
 -- name: GetSnippets :many
 SELECT 
@@ -115,8 +115,8 @@ SET likes = (
 )
 WHERE id = ?;
 
--- name: UpdateSessionExpiry :one
+-- name: UpdateSessionExpiry :exec
 UPDATE sessions
-SET expires_at = ?
-WHERE id = ?
-RETURNING *;
+SET expires_at = ?,
+    refresh_token = ?
+WHERE id = ?;
