@@ -34,3 +34,9 @@ export interface AuthResponse {
   user: User
   expires_at: number
 }
+
+export interface ApiResponse<T> {
+  data: T
+  message?: string
+  error?: string
+}

@@ -6,12 +6,13 @@ import SnippetModal from '@/components/SnippetModal.vue'
 import { toast } from 'vue-sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useCustomFetch } from '@/composables/useCustomFetch'
-import { useLikeSnippet } from '@/composables/useLikeSnippet'
 import type { Snippet } from '@/types'
+
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
 
 const showModal = ref(false)
 const queryClient = useQueryClient()
-const { updateLike } = useLikeSnippet()
 
 const getSnippets = async (): Promise<Snippet[]> => {
   const { data, error } = await useCustomFetch<Snippet[]>('/snippets', {
@@ -98,7 +99,7 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
     />
   </main>
 
-  <FloatingActionButton @click="showModal = true" />
+  <FloatingActionButton v-show="authStore.isAuthenticated()" @click="showModal = true" />
 
   <SnippetModal
     :show="showModal"

@@ -4,34 +4,31 @@
     @click="$emit('click')"
   >
     <h2 class="mb-3 border-b-4 border-black pb-2 text-xl font-bold break-words">
-      {{ title }}
+      {{ snippet.title }}
     </h2>
     <div class="bg-muted grow overflow-hidden border-4 border-black p-4">
-      <pre class="m-0 p-0"><code class="text-sm leading-relaxed">{{ content }}</code></pre>
+      <pre class="m-0 p-0"><code class="text-sm leading-relaxed">{{ snippet.content }}</code></pre>
     </div>
     <div class="mt-4 flex items-center justify-between border-t-4 border-black pt-2 font-bold">
-      <span>{{ author }}</span>
-      <Button variant="outline" @click.stop="$emit('toggle-like')">
-        <span>{{ likes }}</span>
-        <Heart class="size-5" :fill="is_liked ? 'red' : 'none'" />
-      </Button>
+      <span>{{ snippet.author }}</span>
+      <LikeButton 
+        :likes="snippet.likes" 
+        :is_liked="snippet.is_liked" 
+        :snippetId="snippet.id" 
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Heart } from 'lucide-vue-next'
-import { Button } from './ui/button'
+import LikeButton from '@/components/LikeButton.vue'
+import type { Snippet } from '@/types'
+
 defineProps<{
-  title: string
-  content: string
-  author: string
-  likes: number
-  is_liked: boolean
+  snippet: Snippet
 }>()
 
 defineEmits<{
   (e: 'click'): void
-  (e: 'toggle-like'): void
 }>()
 </script>

@@ -1,61 +1,3 @@
-<script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { Heart, ArrowLeft } from 'lucide-vue-next'
-import { useQuery } from '@tanstack/vue-query'
-import { useCustomFetch } from '@/composables/useCustomFetch'
-import { onMounted } from 'vue'
-
-import { Button } from '@/components/ui/button'
-import { useLikeSnippet } from '@/composables/useLikeSnippet'
-import type { Snippet } from '@/types'
-
-const route = useRoute()
-const router = useRouter()
-
-const getSnippet = async (): Promise<Snippet> => {
-  const snippetId = route.params.snippetId as string
-  const { data, error } = await useCustomFetch<Snippet>(`/snippets/${snippetId}`, {
-    timeout: 1000,
-  }).json()
-
-  if (error.value) {
-    throw new Error('Failed to fetch snippet')
-  }
-
-  if (!data.value) {
-    throw new Error('Snippet not found')
-  }
-
-  return data.value
-}
-
-const {
-  data: snippet,
-  isPending,
-  isError,
-  error,
-} = useQuery({
-  queryKey: ['snippet', route.params.snippetId],
-  queryFn: getSnippet,
-})
-
-const { updateLike } = useLikeSnippet()
-
-const toggleLike = () => {
-  if (!snippet.value) {
-    console.error('Cannot toggle like: snippet is null')
-    return
-  }
-  const action = snippet.value.is_liked ? 'unlike' : 'like'
-  console.log(`Toggling ${action} (${snippet.value.is_liked}) for snippet:`, snippet.value.id)
-  updateLike({ snippetId: snippet.value.id, action })
-}
-
-onMounted(() => {
-  window.scrollTo({ top: 0, behavior: 'auto' })
-})
-</script>
-
 <template>
   <main class="mx-auto my-12 max-w-7xl px-4 lg:w-fit lg:min-w-4xl">
     <!-- Back button -->
@@ -98,10 +40,7 @@ onMounted(() => {
       <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <Button variant="outline" @click="toggleLike">
-            <Heart class="size-5" :fill="snippet.is_liked ? 'red' : 'none'" />
-            {{ snippet.likes }}
-          </Button>
+          <LikeButton :likes="snippet.likes" :is_liked="snippet.is_liked" :snippetId="snippet.id" />
         </div>
         <p class="text-lg text-gray-600">By {{ snippet.author }}</p>
       </div>
@@ -115,3 +54,50 @@ onMounted(() => {
     </div>
   </main>
 </template>
+
+<script setup lang="ts">
+import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeft } from 'lucide-vue-next'
+import { useQuery } from '@tanstack/vue-query'
+import { useCustomFetch } from '@/composables/useCustomFetch'
+import { onMounted } from 'vue'
+
+import { Button } from '@/components/ui/button'
+import LikeButton from '@/components/LikeButton.vue'
+
+import type { Snippet } from '@/types'
+
+const route = useRoute()
+const router = useRouter()
+
+const getSnippet = async (): Promise<Snippet> => {
+  const snippetId = route.params.snippetId as string
+  const { data, error } = await useCustomFetch<Snippet>(`/snippets/${snippetId}`, {
+    timeout: 1000,
+  }).json()
+
+  if (error.value) {
+    throw new Error('Failed to fetch snippet')
+  }
+
+  if (!data.value) {
+    throw new Error('Snippet not found')
+  }
+
+  return data.value
+}
+
+const {
+  data: snippet,
+  isPending,
+  isError,
+  error,
+} = useQuery({
+  queryKey: ['snippet', route.params.snippetId],
+  queryFn: getSnippet,
+})
+
+onMounted(() => {
+  window.scrollTo({ top: 0, behavior: 'auto' })
+})
+</script>

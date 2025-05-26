@@ -53,15 +53,8 @@
       :class="{ 'rotate-1': index % 2 === 0, '-rotate-1': index % 2 !== 0 }"
     >
       <CodeCard
-        :title="card.title"
-        :content="card.content"
-        :author="card.author"
-        :likes="card.likes"
-        :is_liked="card.is_liked"
+        :snippet="card"
         @click="handleCardClick(card)"
-        @toggle-like="
-          () => updateLike({ snippetId: card.id, action: card.is_liked ? 'unlike' : 'like' })
-        "
       />
     </div>
   </div>
@@ -70,9 +63,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { Button } from './ui/button'
-import { useLikeSnippet } from '@/composables/useLikeSnippet'
 import CodeCard from './CodeCard.vue'
-import type { Snippet } from '@/models'
+import type { Snippet } from '@/types'
 
 defineProps<{
   cards: Snippet[]
@@ -87,6 +79,4 @@ const router = useRouter()
 const handleCardClick = (card: Snippet) => {
   router.push(`/snippets/${card.id}`)
 }
-
-const { updateLike } = useLikeSnippet()
 </script>
