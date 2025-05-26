@@ -1,12 +1,13 @@
 package api
 
 import (
-	"codeShare/internal/logger"
-	"codeShare/internal/models"
-	"codeShare/internal/storage"
 	"encoding/json"
 	"net/http"
 	"slices"
+
+	"mitsimi.dev/codeShare/internal/logger"
+	"mitsimi.dev/codeShare/internal/models"
+	"mitsimi.dev/codeShare/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

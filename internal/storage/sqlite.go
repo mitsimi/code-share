@@ -1,13 +1,14 @@
 package storage
 
 import (
-	"codeShare/internal/auth"
-	ddl "codeShare/internal/db"
-	db "codeShare/internal/db/sqlc"
-	"codeShare/internal/models"
 	"context"
 	"database/sql"
 	"errors"
+
+	"mitsimi.dev/codeShare/internal/auth"
+	ddl "mitsimi.dev/codeShare/internal/db"
+	db "mitsimi.dev/codeShare/internal/db/sqlc"
+	"mitsimi.dev/codeShare/internal/models"
 
 	"github.com/google/uuid"
 	_ "modernc.org/sqlite"

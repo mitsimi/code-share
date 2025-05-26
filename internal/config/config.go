@@ -2,61 +2,59 @@ package config
 
 import (
 	"os"
-	"path/filepath"
-	"strings"
 )
 
-// Config holds application configuration
+// Config holds the application configuration
 type Config struct {
-	DBPath string
-	Port   string
-	Seed   bool
-	// Logger configuration
-	LogLevel    string
 	Environment string
+	Port        string
+	DBPath      string
+	LogLevel    string
+	Seed        bool
+	JWTSecret   string
 }
 
-// New creates a new Config instance
+// New creates a new configuration
 func New() (*Config, error) {
-	// Get database path from environment variable or use default
-	dbPath := os.Getenv("DB_PATH")
-	if dbPath == "" {
-		dbPath = filepath.Join(".", "data", "sqlite.db")
+	// Get environment
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development"
 	}
 
-	// Ensure the database directory exists
-	dbDir := filepath.Dir(dbPath)
-	if err := os.MkdirAll(dbDir, 0755); err != nil {
-		return nil, err
-	}
-
-	// Get port from environment variable or use default
+	// Get port
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	// Get seed bool from environment variable or use default
-	seedEnv := os.Getenv("SEED")
-	seed := strings.ToLower(seedEnv) == "true"
+	// Get database path
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "data/codeshare.db"
+	}
 
-	// Get log level from environment variable or use default
+	// Get log level
 	logLevel := os.Getenv("LOG_LEVEL")
 	if logLevel == "" {
 		logLevel = "info"
 	}
 
-	// Determine environment
-	environment := "development"
-	if env := os.Getenv("ENVIRONMENT"); env == "production" || env == "prod" {
-		environment = "production"
+	// Get seed flag
+	seed := os.Getenv("SEED") == "true"
+
+	// Get JWT secret
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "your-secret-key" // In production, this should be a secure random key
 	}
 
 	return &Config{
-		DBPath:      dbPath,
+		Environment: env,
 		Port:        port,
-		Seed:        seed,
+		DBPath:      dbPath,
 		LogLevel:    logLevel,
-		Environment: environment,
+		Seed:        seed,
+		JWTSecret:   jwtSecret,
 	}, nil
 }

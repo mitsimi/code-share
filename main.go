@@ -1,11 +1,12 @@
 package main
 
 import (
-	"codeShare/internal/config"
-	"codeShare/internal/logger"
-	"codeShare/internal/server"
-	"codeShare/internal/storage"
 	"log"
+
+	"mitsimi.dev/codeShare/internal/config"
+	"mitsimi.dev/codeShare/internal/logger"
+	"mitsimi.dev/codeShare/internal/server"
+	"mitsimi.dev/codeShare/internal/storage"
 
 	"go.uber.org/zap"
 )
@@ -42,7 +43,7 @@ func main() {
 	}
 
 	// Create and start server
-	srv := server.New(store)
+	srv := server.New(store, cfg.JWTSecret)
 	if err := srv.Start(":"+cfg.Port, cfg.Environment); err != nil {
 		logger.Fatal("Server failed to start", zap.Error(err))
 	}

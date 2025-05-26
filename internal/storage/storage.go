@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"codeShare/internal/models"
+	"mitsimi.dev/codeShare/internal/models"
 )
 
 type (
