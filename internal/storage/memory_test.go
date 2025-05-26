@@ -2,34 +2,18 @@ package storage
 
 import (
 	"codeShare/internal/models"
-	"os"
 	"testing"
 	"time"
 )
 
-// setupTestDB creates a temporary database for testing
-func setupTestDB(t *testing.T) (*SQLiteStorage, func()) {
+// setupTestMemory creates a new memory storage for testing
+func setupTestMemory(t *testing.T) *MemoryStorage {
 	t.Helper()
-
-	// Create a temporary database file
-	dbPath := "test.db"
-	store, err := NewSQLiteStorage(dbPath)
-	if err != nil {
-		t.Fatalf("Failed to create SQLite storage: %v", err)
-	}
-
-	// Return cleanup function
-	cleanup := func() {
-		store.Close()
-		os.Remove(dbPath)
-	}
-
-	return store, cleanup
+	return NewMemoryStorage()
 }
 
-func TestSQLiteCreateAndGetUser(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemoryCreateAndGetUser(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Test creating a user
 	username := "testuser"
@@ -58,9 +42,8 @@ func TestSQLiteCreateAndGetUser(t *testing.T) {
 	}
 }
 
-func TestSQLiteGetUserByUsername(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemoryGetUserByUsername(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Create a user
 	username := "testuser"
@@ -92,9 +75,8 @@ func TestSQLiteGetUserByUsername(t *testing.T) {
 	}
 }
 
-func TestSQLiteCreateAndGetSnippet(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemoryCreateAndGetSnippet(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Create a user first
 	username := "testuser"
@@ -144,9 +126,8 @@ func TestSQLiteCreateAndGetSnippet(t *testing.T) {
 	}
 }
 
-func TestSQLiteUpdateSnippet(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemoryUpdateSnippet(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Create a user first
 	username := "testuser"
@@ -197,31 +178,8 @@ func TestSQLiteUpdateSnippet(t *testing.T) {
 	}
 }
 
-// retryWithBackoff retries the given operation with exponential backoff
-func retryWithBackoff(operation func() error) error {
-	var err error
-	for i := 0; i < 5; i++ { // Try up to 5 times
-		err = operation()
-		if err == nil {
-			return nil
-		}
-
-		// Check if it's a busy error or transaction error
-		if err.Error() == "database is locked (5) (SQLITE_BUSY)" ||
-			err.Error() == "SQL logic error: cannot start a transaction within a transaction (1)" {
-			// Wait with exponential backoff
-			time.Sleep(time.Duration(1<<uint(i)) * 10 * time.Millisecond)
-			continue
-		}
-		// If it's not a busy error, return immediately
-		return err
-	}
-	return err
-}
-
-func TestSQLiteDeleteSnippet(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemoryDeleteSnippet(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Create a user first
 	username := "testuser"
@@ -257,9 +215,8 @@ func TestSQLiteDeleteSnippet(t *testing.T) {
 	}
 }
 
-func TestSQLiteLogin(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemoryLogin(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Create a user first
 	username := "testuser"
@@ -292,9 +249,8 @@ func TestSQLiteLogin(t *testing.T) {
 	}
 }
 
-func TestSQLiteSessionManagement(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemorySessionManagement(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Create a user first
 	username := "testuser"
@@ -347,9 +303,8 @@ func TestSQLiteSessionManagement(t *testing.T) {
 	}
 }
 
-func TestSQLiteDeleteExpiredSessions(t *testing.T) {
-	store, cleanup := setupTestDB(t)
-	defer cleanup()
+func TestMemoryDeleteExpiredSessions(t *testing.T) {
+	store := setupTestMemory(t)
 
 	// Create a user first
 	username := "testuser"
@@ -362,7 +317,6 @@ func TestSQLiteDeleteExpiredSessions(t *testing.T) {
 
 	// Create an expired session (expired 1 hour ago)
 	expiredToken := "expired-token"
-	// Add a small buffer to account for SQLite's timestamp precision
 	expiredExpiresAt := time.Now().UTC().Add(-1 * time.Hour).Unix()
 	err = store.CreateSession(userID, expiredToken, expiredExpiresAt)
 	if err != nil {
@@ -371,7 +325,6 @@ func TestSQLiteDeleteExpiredSessions(t *testing.T) {
 
 	// Create a valid session (expires in 1 hour)
 	validToken := "valid-token"
-	// Add a small buffer to ensure the session is considered valid
 	validExpiresAt := time.Now().UTC().Add(1 * time.Hour).Unix()
 	err = store.CreateSession(userID, validToken, validExpiresAt)
 	if err != nil {
