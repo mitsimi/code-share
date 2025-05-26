@@ -14,6 +14,10 @@ import (
 	"go.uber.org/zap"
 )
 
+type contextKey string
+
+const userIDKey contextKey = "user_id"
+
 // AuthMiddleware is a middleware that checks for valid authentication
 type AuthMiddleware struct {
 	storage   storage.Storage
@@ -44,7 +48,7 @@ func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 			if err == nil {
 				if session.ExpiresAt > time.Now().Unix() {
 					// Add user ID to context
-					ctx := context.WithValue(r.Context(), "user_id", session.UserID)
+					ctx := context.WithValue(r.Context(), userIDKey, session.UserID)
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
@@ -82,13 +86,13 @@ func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 		}
 
 		// Add user ID to context
-		ctx := context.WithValue(r.Context(), "user_id", userID)
+		ctx := context.WithValue(r.Context(), userIDKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
 // GetUserID gets the user ID from the context
-func GetUserID(r *http.Request) string {
-	userID, _ := r.Context().Value("user_id").(string)
+func GetUserID(r *http.Request) storage.UserID {
+	userID, _ := r.Context().Value(userIDKey).(storage.UserID)
 	return userID
 }
