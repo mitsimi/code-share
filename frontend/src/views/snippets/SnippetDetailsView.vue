@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { useCustomFetch } from '@/composables/useCustomFetch'
 import { onMounted } from 'vue'
 
-import { Button } from '../components/ui/button'
+import { Button } from '@/components/ui/button'
 import { useLikeSnippet } from '@/composables/useLikeSnippet'
 import type { Snippet } from '@/models'
 
