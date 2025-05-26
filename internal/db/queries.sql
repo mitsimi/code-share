@@ -34,7 +34,7 @@ RETURNING *;
 
 -- name: GetSession :one
 SELECT * FROM sessions
-WHERE token = ? AND expires_at > CURRENT_TIMESTAMP;
+WHERE token = ? AND expires_at > strftime('%s', 'now');
 
 -- name: DeleteSession :exec
 DELETE FROM sessions
@@ -42,7 +42,7 @@ WHERE token = ?;
 
 -- name: DeleteExpiredSessions :exec
 DELETE FROM sessions
-WHERE expires_at <= CURRENT_TIMESTAMP;
+WHERE expires_at <= strftime('%s', 'now');
 
 -- name: GetSnippets :many
 SELECT 

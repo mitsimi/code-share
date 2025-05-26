@@ -108,7 +108,7 @@ func (s *MemoryStorage) Login(email, password string) (string, error) {
 }
 
 // CreateSession creates a new session
-func (s *MemoryStorage) CreateSession(userID string, token string, expiresAt time.Time) error {
+func (s *MemoryStorage) CreateSession(userID string, token string, expiresAt UnixTime) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -149,9 +149,8 @@ func (s *MemoryStorage) DeleteExpiredSessions() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	now := time.Now()
 	for token, session := range s.sessions {
-		if session.ExpiresAt.Before(now) {
+		if session.ExpiresAt < time.Now().Unix() {
 			delete(s.sessions, token)
 		}
 	}

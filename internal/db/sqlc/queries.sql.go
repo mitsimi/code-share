@@ -24,10 +24,10 @@ RETURNING id, user_id, token, expires_at, created_at
 `
 
 type CreateSessionParams struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	Token     string    `json:"token"`
-	ExpiresAt time.Time `json:"expires_at"`
+	ID        string `json:"id"`
+	UserID    string `json:"user_id"`
+	Token     string `json:"token"`
+	ExpiresAt int64  `json:"expires_at"`
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
@@ -138,7 +138,7 @@ func (q *Queries) DecrementLikesCount(ctx context.Context, id string) error {
 
 const deleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
 DELETE FROM sessions
-WHERE expires_at <= CURRENT_TIMESTAMP
+WHERE expires_at <= strftime('%s', 'now')
 `
 
 func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
@@ -168,7 +168,7 @@ func (q *Queries) DeleteSnippet(ctx context.Context, id string) error {
 
 const getSession = `-- name: GetSession :one
 SELECT id, user_id, token, expires_at, created_at FROM sessions
-WHERE token = ? AND expires_at > CURRENT_TIMESTAMP
+WHERE token = ? AND expires_at > strftime('%s', 'now')
 `
 
 func (q *Queries) GetSession(ctx context.Context, token string) (Session, error) {

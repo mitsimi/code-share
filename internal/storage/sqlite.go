@@ -8,7 +8,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
@@ -143,7 +142,7 @@ func (s *SQLiteStorage) Login(email, password string) (UserID, error) {
 }
 
 // CreateSession creates a new session for a user
-func (s *SQLiteStorage) CreateSession(userID string, token string, expiresAt time.Time) error {
+func (s *SQLiteStorage) CreateSession(userID string, token string, expiresAt UnixTime) error {
 	_, err := s.q.CreateSession(s.ctx, db.CreateSessionParams{
 		ID:        uuid.NewString(),
 		UserID:    userID,

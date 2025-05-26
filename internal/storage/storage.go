@@ -2,12 +2,13 @@ package storage
 
 import (
 	"codeShare/internal/models"
-	"time"
 )
 
 type (
 	UserID    = string
 	SnippetID = string
+
+	UnixTime = int64
 )
 
 // Storage defines the interface for data storage
@@ -20,7 +21,7 @@ type Storage interface {
 	Login(email, password string) (UserID, error)
 
 	// Session management
-	CreateSession(id UserID, token string, expiresAt time.Time) error
+	CreateSession(id UserID, token string, expiresAt UnixTime) error
 	GetSession(token string) (models.Session, error)
 	DeleteSession(token string) error
 	DeleteExpiredSessions() error

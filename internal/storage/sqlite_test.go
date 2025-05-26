@@ -307,7 +307,7 @@ func TestSessionManagement(t *testing.T) {
 
 	// Test creating a session
 	token := "test-token"
-	expiresAt := time.Now().Add(24 * time.Hour)
+	expiresAt := time.Now().Add(24 * time.Hour).Unix()
 	err = store.CreateSession(userID, token, expiresAt)
 	if err != nil {
 		t.Fatalf("Failed to create session: %v", err)
@@ -324,7 +324,7 @@ func TestSessionManagement(t *testing.T) {
 	if session.Token != token {
 		t.Errorf("Expected token %q, got %q", token, session.Token)
 	}
-	if !session.ExpiresAt.Equal(expiresAt) {
+	if session.ExpiresAt != expiresAt {
 		t.Errorf("Expected expires at %v, got %v", expiresAt, session.ExpiresAt)
 	}
 
@@ -363,7 +363,7 @@ func TestDeleteExpiredSessions(t *testing.T) {
 	// Create an expired session (expired 1 hour ago)
 	expiredToken := "expired-token"
 	// Add a small buffer to account for SQLite's timestamp precision
-	expiredExpiresAt := time.Now().UTC().Add(-1 * time.Hour)
+	expiredExpiresAt := time.Now().UTC().Add(-1 * time.Hour).Unix()
 	err = store.CreateSession(userID, expiredToken, expiredExpiresAt)
 	if err != nil {
 		t.Fatalf("Failed to create expired session: %v", err)
@@ -372,7 +372,7 @@ func TestDeleteExpiredSessions(t *testing.T) {
 	// Create a valid session (expires in 1 hour)
 	validToken := "valid-token"
 	// Add a small buffer to ensure the session is considered valid
-	validExpiresAt := time.Now().UTC().Add(1 * time.Hour)
+	validExpiresAt := time.Now().UTC().Add(1 * time.Hour).Unix()
 	err = store.CreateSession(userID, validToken, validExpiresAt)
 	if err != nil {
 		t.Fatalf("Failed to create valid session: %v", err)
