@@ -37,10 +37,8 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 
 	var req models.SignupRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Error("failed to decode request body", zap.Error(err))
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
@@ -52,70 +50,26 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 			zap.String("username", req.Username),
 			zap.String("email", req.Email),
 		)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Failed to create user", http.StatusBadRequest)
 		return
 	}
 
-	// Generate access token
-	accessTokenResp, err := auth.GenerateToken(user.ID, h.secretKey, false)
+	// Create tokens and session
+	response, sessionToken, err := h.createTokensAndSession(user.ID)
 	if err != nil {
-		log.Error("failed to generate access token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Generate refresh token
-	refreshTokenResp, err := auth.GenerateToken(user.ID, h.secretKey, true)
-	if err != nil {
-		log.Error("failed to generate refresh token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Create session
-	sessionToken, err := auth.GenerateRandomToken()
-	if err != nil {
-		log.Error("failed to generate session token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err := h.storage.CreateSession(user.ID, sessionToken, refreshTokenResp.Token, refreshTokenResp.ExpiresAt); err != nil {
-		log.Error("failed to create session",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error("failed to create tokens and session", zap.Error(err))
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	// Set session cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
-		Value:    sessionToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteStrictMode,
-		Expires:  time.Unix(refreshTokenResp.ExpiresAt, 0),
-	})
-
-	response := models.AuthResponse{
-		Token:        accessTokenResp.Token,
-		RefreshToken: refreshTokenResp.Token,
-		User:         models.FromDBUser(user),
-		ExpiresAt:    accessTokenResp.ExpiresAt,
-	}
+	h.setCookie(w, r, sessionToken, response.ExpiresAt)
 
 	log.Info("user signed up successfully",
-		zap.String("username", user.Username),
-		zap.String("email", user.Email),
+		zap.String("username", response.User.Username),
+		zap.String("email", response.User.Email),
 	)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -127,10 +81,8 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	var req models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Error("failed to decode request body", zap.Error(err))
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
@@ -145,76 +97,22 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user details
-	user, err := h.storage.GetUser(userID)
+	// Create tokens and session
+	response, sessionToken, err := h.createTokensAndSession(userID)
 	if err != nil {
-		log.Error("failed to get user",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Generate access token
-	accessTokenResp, err := auth.GenerateToken(userID, h.secretKey, false)
-	if err != nil {
-		log.Error("failed to generate access token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Generate refresh token
-	refreshTokenResp, err := auth.GenerateToken(userID, h.secretKey, true)
-	if err != nil {
-		log.Error("failed to generate refresh token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Create session
-	sessionToken, err := auth.GenerateRandomToken()
-	if err != nil {
-		log.Error("failed to generate session token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err := h.storage.CreateSession(userID, sessionToken, refreshTokenResp.Token, refreshTokenResp.ExpiresAt); err != nil {
-		log.Error("failed to create session",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error("failed to create tokens and session", zap.Error(err))
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	// Set session cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
-		Value:    sessionToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteStrictMode,
-		Expires:  time.Unix(refreshTokenResp.ExpiresAt, 0),
-	})
-
-	response := models.AuthResponse{
-		Token:        accessTokenResp.Token,
-		RefreshToken: refreshTokenResp.Token,
-		User:         models.FromDBUser(user),
-		ExpiresAt:    accessTokenResp.ExpiresAt,
-	}
+	h.setCookie(w, r, sessionToken, response.ExpiresAt)
 
 	log.Info("user logged in successfully",
-		zap.String("username", user.Username),
-		zap.String("email", user.Email),
+		zap.String("username", response.User.Username),
+		zap.String("email", response.User.Email),
 	)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -236,10 +134,12 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	// Delete session
 	if err := h.storage.DeleteSession(cookie.Value); err != nil {
-		log.Error("failed to delete session",
+		log.Warn("failed to delete session from storage",
 			zap.Error(err),
+			zap.String("session_token", cookie.Value[:8]+"..."), // Only log first 8 chars for security
 		)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		// Continue anyway because if the deletion failed which means that there is no session
+		// We delete the cookie so its not dangling around
 	}
 
 	// Clear session cookie
@@ -320,196 +220,71 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		RefreshToken string `json:"refresh_token"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body",
-			zap.Error(err),
-		)
+		log.Error("failed to decode request body", zap.Error(err))
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	// Try to get session cookie first
-	cookie, err := r.Cookie("session")
-	if err == nil {
-		// Session cookie exists, try to use it
-		session, err := h.storage.GetSession(cookie.Value)
-		if err == nil && session.ExpiresAt > time.Now().Unix() {
-			// check if the provided refresh tokens matches the sessions one
+	var userID string
+	var logMessage string
+
+	// Try session-based refresh first
+	if cookie, err := r.Cookie("session"); err == nil {
+		if session, err := h.storage.GetSession(cookie.Value); err == nil && session.ExpiresAt > time.Now().Unix() {
+			// Validate refresh token matches session
 			if req.RefreshToken != session.RefreshToken {
 				log.Error("refresh token mismatch")
 				http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
 				return
 			}
 
-			// Valid session found, use it to refresh tokens
-			user, err := h.storage.GetUser(session.UserID)
-			if err != nil {
-				log.Error("failed to get user from session",
-					zap.Error(err),
-				)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			// Generate new tokens
-			accessTokenResp, err := auth.GenerateToken(user.ID, h.secretKey, false)
-			if err != nil {
-				log.Error("failed to generate access token",
-					zap.Error(err),
-				)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			refreshTokenResp, err := auth.GenerateToken(user.ID, h.secretKey, true)
-			if err != nil {
-				log.Error("failed to generate refresh token",
-					zap.Error(err),
-				)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			// Create new session
-			sessionToken, err := auth.GenerateRandomToken()
-			if err != nil {
-				log.Error("failed to generate session token",
-					zap.Error(err),
-				)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			// Delete old session and create new one
+			// Delete old session before creating new one
 			if err := h.storage.DeleteSession(cookie.Value); err != nil {
-				log.Error("failed to delete old session",
-					zap.Error(err),
-				)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				log.Error("failed to delete old session", zap.Error(err))
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			}
 
-			if err := h.storage.CreateSession(user.ID, sessionToken, refreshTokenResp.Token, refreshTokenResp.ExpiresAt); err != nil {
-				log.Error("failed to create new session",
-					zap.Error(err),
-				)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+			userID = session.UserID
+			logMessage = "token refreshed successfully via session"
+		}
+	}
 
-			// Set new session cookie
-			http.SetCookie(w, &http.Cookie{
-				Name:     "session",
-				Value:    sessionToken,
-				Path:     "/",
-				HttpOnly: true,
-				Secure:   r.TLS != nil,
-				SameSite: http.SameSiteStrictMode,
-				Expires:  time.Unix(refreshTokenResp.ExpiresAt, 0),
-			})
-
-			response := models.AuthResponse{
-				Token:        accessTokenResp.Token,
-				RefreshToken: refreshTokenResp.Token,
-				User:         models.FromDBUser(user),
-				ExpiresAt:    accessTokenResp.ExpiresAt,
-			}
-
-			log.Info("token refreshed successfully via session",
-				zap.String("username", user.Username),
-				zap.String("email", user.Email),
-			)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(response)
+	// Fallback to JWT-based refresh
+	if userID == "" {
+		claims, err := auth.ValidateToken(req.RefreshToken, h.secretKey)
+		if err != nil {
+			log.Error("invalid refresh token", zap.Error(err))
+			http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
 			return
 		}
-		// If we get here, either session not found or expired, fall through to JWT refresh
+
+		if !claims.IsRefresh() {
+			log.Error("token is not a refresh token")
+			http.Error(w, "Invalid token type", http.StatusUnauthorized)
+			return
+		}
+
+		userID = claims.UserID
+		logMessage = "token refreshed successfully via JWT"
 	}
 
-	// Fallback: Try to refresh using JWT token
-	claims, err := auth.ValidateToken(req.RefreshToken, h.secretKey)
+	// Create new tokens and session
+	response, sessionToken, err := h.createTokensAndSession(userID)
 	if err != nil {
-		log.Error("invalid refresh token",
-			zap.Error(err),
-		)
-		http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
-		return
-	}
-
-	if !claims.IsRefresh() {
-		log.Error("token is not a refresh token")
-		http.Error(w, "Invalid token type", http.StatusUnauthorized)
-		return
-	}
-
-	// Get user from JWT claims
-	user, err := h.storage.GetUser(claims.UserID)
-	if err != nil {
-		log.Error("failed to get user from JWT",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Generate new tokens
-	accessTokenResp, err := auth.GenerateToken(user.ID, h.secretKey, false)
-	if err != nil {
-		log.Error("failed to generate access token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	refreshTokenResp, err := auth.GenerateToken(user.ID, h.secretKey, true)
-	if err != nil {
-		log.Error("failed to generate refresh token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Create new session
-	sessionToken, err := auth.GenerateRandomToken()
-	if err != nil {
-		log.Error("failed to generate session token",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err := h.storage.CreateSession(user.ID, sessionToken, refreshTokenResp.Token, refreshTokenResp.ExpiresAt); err != nil {
-		log.Error("failed to create new session",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error("failed to create tokens and session", zap.Error(err))
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	// Set new session cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
-		Value:    sessionToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteStrictMode,
-		Expires:  time.Unix(refreshTokenResp.ExpiresAt, 0),
-	})
+	h.setCookie(w, r, sessionToken, response.ExpiresAt)
 
-	response := models.AuthResponse{
-		Token:        accessTokenResp.Token,
-		RefreshToken: refreshTokenResp.Token,
-		User:         models.FromDBUser(user),
-		ExpiresAt:    accessTokenResp.ExpiresAt,
-	}
-
-	log.Info("token refreshed successfully via JWT",
-		zap.String("username", user.Username),
-		zap.String("email", user.Email),
+	log.Info(logMessage,
+		zap.String("username", response.User.Username),
+		zap.String("email", response.User.Email),
 	)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
