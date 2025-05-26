@@ -111,8 +111,10 @@ func (s *Server) setupRoutes() {
 		handler := api.NewSnippetHandler(s.storage)
 
 		// Public routes
-		r.Get("/", handler.GetSnippets)
-		r.Get("/{id}", handler.GetSnippet)
+		r.Group(func(r chi.Router) {
+			r.Get("/", handler.GetSnippets)
+			r.Get("/{id}", handler.GetSnippet)
+		})
 
 		// Protected routes
 		r.Group(func(r chi.Router) {
