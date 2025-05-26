@@ -3,12 +3,14 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Config holds application configuration
 type Config struct {
 	DBPath string
 	Port   string
+	Seed   bool
 }
 
 // New creates a new Config instance
@@ -31,8 +33,13 @@ func New() (*Config, error) {
 		port = "8080"
 	}
 
+	// Get seed bool from environment variable or use default
+	seedEnv := os.Getenv("SEED")
+	seed := strings.ToLower(seedEnv) == "true"
+
 	return &Config{
 		DBPath: dbPath,
 		Port:   port,
+		Seed:   seed,
 	}, nil
 }

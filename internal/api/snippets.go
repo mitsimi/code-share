@@ -28,10 +28,6 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// For now, we'll use a dummy user ID since we don't have authentication
-	// In a real application, this would come from the authenticated user
-	userID := "current_user"
-
 	// Add isLiked field to each snippet
 	response := make([]struct {
 		models.Snippet
@@ -44,10 +40,8 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 			IsLiked bool `json:"is_liked"`
 		}{
 			Snippet: snippet,
-			IsLiked: snippet.UserLikes[userID],
+			IsLiked: snippet.IsLiked,
 		}
-		// Clear the UserLikes map before sending
-		response[i].UserLikes = nil
 	}
 
 	slices.SortFunc(response, func(a, b struct {
@@ -69,20 +63,14 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// For now, we'll use a dummy user ID since we don't have authentication
-	// In a real application, this would come from the authenticated user
-	userID := "current_user"
-
 	// Add isLiked field to the response
 	response := struct {
 		models.Snippet
 		IsLiked bool `json:"is_liked"`
 	}{
 		Snippet: snippet,
-		IsLiked: snippet.UserLikes[userID],
+		IsLiked: snippet.IsLiked,
 	}
-	// Clear the UserLikes map before sending
-	response.UserLikes = nil
 
 	json.NewEncoder(w).Encode(response)
 }
@@ -96,10 +84,11 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	snippet := models.Snippet{
-		Title:     req.Title,
-		Content:   req.Content,
-		Author:    req.Author,
-		UserLikes: make(map[string]bool),
+		Title:   req.Title,
+		Content: req.Content,
+		Author:  req.Author,
+		Likes:   0,
+		IsLiked: false,
 	}
 
 	id, err := h.storage.CreateSnippet(snippet)
@@ -137,7 +126,15 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(snippet)
+	response := struct {
+		models.Snippet
+		IsLiked bool `json:"is_liked"`
+	}{
+		Snippet: snippet,
+		IsLiked: snippet.IsLiked,
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
 // DeleteSnippet deletes a snippet
@@ -162,10 +159,6 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// For now, we'll use a dummy user ID since we don't have authentication
-	// In a real application, this would come from the authenticated user
-	userID := "current_user"
-
 	if err := h.storage.ToggleLikeSnippet(id, action == "like"); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -178,16 +171,5 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Add isLiked field to the response
-	response := struct {
-		models.Snippet
-		IsLiked bool `json:"is_liked"`
-	}{
-		Snippet: snippet,
-		IsLiked: snippet.UserLikes[userID],
-	}
-	// Clear the UserLikes map before sending
-	response.UserLikes = nil
-
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(snippet)
 }

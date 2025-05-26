@@ -21,9 +21,13 @@ func main() {
 	}
 	defer store.Close()
 
-	// Seed the database with sample data
-	if err := store.Seed(); err != nil {
-		log.Printf("Warning: Failed to seed database: %v", err)
+	if cfg.Seed {
+		log.Default().Println("Seeding")
+		// Seed the database with sample data
+		if err := store.Seed(); err != nil {
+			log.Printf("Warning: Failed to seed database: %v", err)
+		}
+		log.Default().Println("Seeding done")
 	}
 
 	// Create and start server

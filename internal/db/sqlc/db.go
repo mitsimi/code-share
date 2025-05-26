@@ -24,14 +24,29 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.createSessionStmt, err = db.PrepareContext(ctx, createSession); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateSession: %w", err)
+	}
 	if q.createSnippetStmt, err = db.PrepareContext(ctx, createSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateSnippet: %w", err)
 	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
+	if q.decrementLikesCountStmt, err = db.PrepareContext(ctx, decrementLikesCount); err != nil {
+		return nil, fmt.Errorf("error preparing query DecrementLikesCount: %w", err)
+	}
+	if q.deleteExpiredSessionsStmt, err = db.PrepareContext(ctx, deleteExpiredSessions); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteExpiredSessions: %w", err)
+	}
+	if q.deleteSessionStmt, err = db.PrepareContext(ctx, deleteSession); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteSession: %w", err)
+	}
 	if q.deleteSnippetStmt, err = db.PrepareContext(ctx, deleteSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteSnippet: %w", err)
+	}
+	if q.getSessionStmt, err = db.PrepareContext(ctx, getSession); err != nil {
+		return nil, fmt.Errorf("error preparing query GetSession: %w", err)
 	}
 	if q.getSnippetStmt, err = db.PrepareContext(ctx, getSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query GetSnippet: %w", err)
@@ -42,8 +57,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
 	}
+	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
+	}
 	if q.getUserByUsernameStmt, err = db.PrepareContext(ctx, getUserByUsername); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByUsername: %w", err)
+	}
+	if q.incrementLikesCountStmt, err = db.PrepareContext(ctx, incrementLikesCount); err != nil {
+		return nil, fmt.Errorf("error preparing query IncrementLikesCount: %w", err)
 	}
 	if q.likeSnippetStmt, err = db.PrepareContext(ctx, likeSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query LikeSnippet: %w", err)
@@ -62,6 +83,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.createSessionStmt != nil {
+		if cerr := q.createSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createSessionStmt: %w", cerr)
+		}
+	}
 	if q.createSnippetStmt != nil {
 		if cerr := q.createSnippetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createSnippetStmt: %w", cerr)
@@ -72,9 +98,29 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
 		}
 	}
+	if q.decrementLikesCountStmt != nil {
+		if cerr := q.decrementLikesCountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing decrementLikesCountStmt: %w", cerr)
+		}
+	}
+	if q.deleteExpiredSessionsStmt != nil {
+		if cerr := q.deleteExpiredSessionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteExpiredSessionsStmt: %w", cerr)
+		}
+	}
+	if q.deleteSessionStmt != nil {
+		if cerr := q.deleteSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteSessionStmt: %w", cerr)
+		}
+	}
 	if q.deleteSnippetStmt != nil {
 		if cerr := q.deleteSnippetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteSnippetStmt: %w", cerr)
+		}
+	}
+	if q.getSessionStmt != nil {
+		if cerr := q.getSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getSessionStmt: %w", cerr)
 		}
 	}
 	if q.getSnippetStmt != nil {
@@ -92,9 +138,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
 		}
 	}
+	if q.getUserByEmailStmt != nil {
+		if cerr := q.getUserByEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
+		}
+	}
 	if q.getUserByUsernameStmt != nil {
 		if cerr := q.getUserByUsernameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserByUsernameStmt: %w", cerr)
+		}
+	}
+	if q.incrementLikesCountStmt != nil {
+		if cerr := q.incrementLikesCountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing incrementLikesCountStmt: %w", cerr)
 		}
 	}
 	if q.likeSnippetStmt != nil {
@@ -154,35 +210,49 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	createSnippetStmt     *sql.Stmt
-	createUserStmt        *sql.Stmt
-	deleteSnippetStmt     *sql.Stmt
-	getSnippetStmt        *sql.Stmt
-	getSnippetsStmt       *sql.Stmt
-	getUserStmt           *sql.Stmt
-	getUserByUsernameStmt *sql.Stmt
-	likeSnippetStmt       *sql.Stmt
-	unlikeSnippetStmt     *sql.Stmt
-	updateLikesCountStmt  *sql.Stmt
-	updateSnippetStmt     *sql.Stmt
+	db                        DBTX
+	tx                        *sql.Tx
+	createSessionStmt         *sql.Stmt
+	createSnippetStmt         *sql.Stmt
+	createUserStmt            *sql.Stmt
+	decrementLikesCountStmt   *sql.Stmt
+	deleteExpiredSessionsStmt *sql.Stmt
+	deleteSessionStmt         *sql.Stmt
+	deleteSnippetStmt         *sql.Stmt
+	getSessionStmt            *sql.Stmt
+	getSnippetStmt            *sql.Stmt
+	getSnippetsStmt           *sql.Stmt
+	getUserStmt               *sql.Stmt
+	getUserByEmailStmt        *sql.Stmt
+	getUserByUsernameStmt     *sql.Stmt
+	incrementLikesCountStmt   *sql.Stmt
+	likeSnippetStmt           *sql.Stmt
+	unlikeSnippetStmt         *sql.Stmt
+	updateLikesCountStmt      *sql.Stmt
+	updateSnippetStmt         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		createSnippetStmt:     q.createSnippetStmt,
-		createUserStmt:        q.createUserStmt,
-		deleteSnippetStmt:     q.deleteSnippetStmt,
-		getSnippetStmt:        q.getSnippetStmt,
-		getSnippetsStmt:       q.getSnippetsStmt,
-		getUserStmt:           q.getUserStmt,
-		getUserByUsernameStmt: q.getUserByUsernameStmt,
-		likeSnippetStmt:       q.likeSnippetStmt,
-		unlikeSnippetStmt:     q.unlikeSnippetStmt,
-		updateLikesCountStmt:  q.updateLikesCountStmt,
-		updateSnippetStmt:     q.updateSnippetStmt,
+		db:                        tx,
+		tx:                        tx,
+		createSessionStmt:         q.createSessionStmt,
+		createSnippetStmt:         q.createSnippetStmt,
+		createUserStmt:            q.createUserStmt,
+		decrementLikesCountStmt:   q.decrementLikesCountStmt,
+		deleteExpiredSessionsStmt: q.deleteExpiredSessionsStmt,
+		deleteSessionStmt:         q.deleteSessionStmt,
+		deleteSnippetStmt:         q.deleteSnippetStmt,
+		getSessionStmt:            q.getSessionStmt,
+		getSnippetStmt:            q.getSnippetStmt,
+		getSnippetsStmt:           q.getSnippetsStmt,
+		getUserStmt:               q.getUserStmt,
+		getUserByEmailStmt:        q.getUserByEmailStmt,
+		getUserByUsernameStmt:     q.getUserByUsernameStmt,
+		incrementLikesCountStmt:   q.incrementLikesCountStmt,
+		likeSnippetStmt:           q.likeSnippetStmt,
+		unlikeSnippetStmt:         q.unlikeSnippetStmt,
+		updateLikesCountStmt:      q.updateLikesCountStmt,
+		updateSnippetStmt:         q.updateSnippetStmt,
 	}
 }

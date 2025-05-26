@@ -1,16 +1,20 @@
 package storage
 
 import (
+	"codeShare/internal/auth"
 	ddl "codeShare/internal/db"
 	db "codeShare/internal/db/sqlc"
 	"codeShare/internal/models"
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 )
+
+var _ Storage = (*SQLiteStorage)(nil)
 
 // SQLiteStorage implements Storage interface with SQLite
 type SQLiteStorage struct {
@@ -40,16 +44,23 @@ func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
 
 func createTables(dbConn *sql.DB) error {
 	ctx := context.Background()
-
-	_, err := dbConn.ExecContext(ctx, ddl.DDL)
+	_, err := dbConn.ExecContext(ctx, ddl.SchemaDDL)
 	return err
 }
 
 // CreateUser creates a new user
-func (s *SQLiteStorage) CreateUser(username string) (string, error) {
+func (s *SQLiteStorage) CreateUser(username, email, password string) (UserID, error) {
+	// Hash the password
+	passwordHash, err := auth.HashPassword(password)
+	if err != nil {
+		return "", err
+	}
+
 	user, err := s.q.CreateUser(s.ctx, db.CreateUserParams{
-		ID:       uuid.NewString(),
-		Username: username,
+		ID:           uuid.NewString(),
+		Username:     username,
+		Email:        email,
+		PasswordHash: passwordHash,
 	})
 	if err != nil {
 		return "", err
@@ -68,9 +79,12 @@ func (s *SQLiteStorage) GetUser(id string) (models.User, error) {
 	}
 
 	return models.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		CreatedAt: user.CreatedAt,
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	}, nil
 }
 
@@ -85,10 +99,87 @@ func (s *SQLiteStorage) GetUserByUsername(username string) (models.User, error) 
 	}
 
 	return models.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		CreatedAt: user.CreatedAt,
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	}, nil
+}
+
+// GetUserByEmail gets a user by email
+func (s *SQLiteStorage) GetUserByEmail(email string) (models.User, error) {
+	user, err := s.q.GetUserByEmail(s.ctx, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.User{}, errors.New("user not found")
+		}
+		return models.User{}, err
+	}
+
+	return models.User{
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+	}, nil
+}
+
+// Login authenticates a user and returns their ID
+func (s *SQLiteStorage) Login(email, password string) (UserID, error) {
+	user, err := s.GetUserByEmail(email)
+	if err != nil {
+		return "", auth.ErrInvalidCredentials
+	}
+
+	if !auth.CheckPasswordHash(password, user.PasswordHash) {
+		return "", auth.ErrInvalidCredentials
+	}
+
+	return user.ID, nil
+}
+
+// CreateSession creates a new session for a user
+func (s *SQLiteStorage) CreateSession(userID string, token string, expiresAt time.Time) error {
+	_, err := s.q.CreateSession(s.ctx, db.CreateSessionParams{
+		ID:        uuid.NewString(),
+		UserID:    userID,
+		Token:     token,
+		ExpiresAt: expiresAt,
+	})
+	return err
+}
+
+// GetSession gets a session by token
+func (s *SQLiteStorage) GetSession(token string) (models.Session, error) {
+	session, err := s.q.GetSession(s.ctx, token)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Session{}, errors.New("session not found")
+		}
+		return models.Session{}, err
+	}
+
+	return models.Session{
+		ID:        session.ID,
+		UserID:    session.UserID,
+		Token:     session.Token,
+		ExpiresAt: session.ExpiresAt,
+		CreatedAt: session.CreatedAt,
+	}, nil
+}
+
+// DeleteSession deletes a session by token
+func (s *SQLiteStorage) DeleteSession(token string) error {
+	return s.q.DeleteSession(s.ctx, token)
+}
+
+// DeleteExpiredSessions deletes all expired sessions
+func (s *SQLiteStorage) DeleteExpiredSessions() error {
+	return s.q.DeleteExpiredSessions(s.ctx)
 }
 
 func (s *SQLiteStorage) GetSnippets() ([]models.Snippet, error) {
@@ -110,9 +201,7 @@ func (s *SQLiteStorage) GetSnippets() ([]models.Snippet, error) {
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,
 			Likes:     int(snippet.Likes),
-			UserLikes: map[string]bool{
-				userID: snippet.IsLiked == 1,
-			},
+			IsLiked:   snippet.IsLiked == 1,
 		}
 	}
 
@@ -142,13 +231,11 @@ func (s *SQLiteStorage) GetSnippet(id string) (models.Snippet, error) {
 		CreatedAt: snippet.CreatedAt,
 		UpdatedAt: snippet.UpdatedAt,
 		Likes:     int(snippet.Likes),
-		UserLikes: map[string]bool{
-			userID: snippet.IsLiked == 1,
-		},
+		IsLiked:   snippet.IsLiked == 1,
 	}, nil
 }
 
-func (s *SQLiteStorage) CreateSnippet(snippet models.Snippet) (string, error) {
+func (s *SQLiteStorage) CreateSnippet(snippet models.Snippet) (SnippetID, error) {
 	// Get the user ID from the username
 	user, err := s.q.GetUserByUsername(s.ctx, snippet.Author)
 	if err != nil {
@@ -177,11 +264,11 @@ func (s *SQLiteStorage) UpdateSnippet(snippet models.Snippet) error {
 	return err
 }
 
-func (s *SQLiteStorage) DeleteSnippet(id string) error {
+func (s *SQLiteStorage) DeleteSnippet(id SnippetID) error {
 	return s.q.DeleteSnippet(s.ctx, id)
 }
 
-func (s *SQLiteStorage) ToggleLikeSnippet(id string, isLike bool) error {
+func (s *SQLiteStorage) ToggleLikeSnippet(id SnippetID, isLike bool) error {
 	// For now, we'll use a dummy user ID since we don't have authentication
 	userID := "current_user"
 
@@ -202,6 +289,9 @@ func (s *SQLiteStorage) ToggleLikeSnippet(id string, isLike bool) error {
 		}); err != nil {
 			return err
 		}
+		if err := qtx.IncrementLikesCount(s.ctx, id); err != nil {
+			return err
+		}
 	} else {
 		if err := qtx.UnlikeSnippet(s.ctx, db.UnlikeSnippetParams{
 			SnippetID: id,
@@ -209,14 +299,9 @@ func (s *SQLiteStorage) ToggleLikeSnippet(id string, isLike bool) error {
 		}); err != nil {
 			return err
 		}
-	}
-
-	// Update the likes count
-	if err := qtx.UpdateLikesCount(s.ctx, db.UpdateLikesCountParams{
-		SnippetID: id,
-		ID:        id,
-	}); err != nil {
-		return err
+		if err := qtx.DecrementLikesCount(s.ctx, id); err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()
@@ -257,7 +342,7 @@ func (s *SQLiteStorage) Seed() error {
 
 	// Create users and store their IDs
 	userIDs := make(map[string]string)
-	for username := range users {
+	for username, email := range users {
 		// Check if user already exists
 		existingUser, err := qtx.GetUserByUsername(s.ctx, username)
 		if err == nil {
@@ -265,10 +350,17 @@ func (s *SQLiteStorage) Seed() error {
 			continue
 		}
 
-		// Create new user
+		// Create new user with a default password
+		passwordHash, err := auth.HashPassword("password123") // Default password for seeded users
+		if err != nil {
+			return err
+		}
+
 		user, err := qtx.CreateUser(s.ctx, db.CreateUserParams{
-			ID:       uuid.NewString(),
-			Username: username,
+			ID:           uuid.NewString(),
+			Username:     username,
+			Email:        email,
+			PasswordHash: passwordHash,
 		})
 		if err != nil {
 			return err
@@ -278,9 +370,9 @@ func (s *SQLiteStorage) Seed() error {
 
 	// Create sample snippets
 	for _, sampleSnippet := range sampleSnippets {
-		// Check if snippet already exists
+		// Check if snippet already exists using the actual author's ID
 		_, err := qtx.GetSnippet(s.ctx, db.GetSnippetParams{
-			UserID: "current_user",
+			UserID: userIDs[sampleSnippet.Author],
 			ID:     sampleSnippet.ID,
 		})
 		if err == nil {
@@ -296,19 +388,6 @@ func (s *SQLiteStorage) Seed() error {
 		})
 		if err != nil {
 			return err
-		}
-
-		// Add likes if any
-		for userID, liked := range sampleSnippet.UserLikes {
-			if liked {
-				err = qtx.LikeSnippet(s.ctx, db.LikeSnippetParams{
-					SnippetID: sampleSnippet.ID,
-					UserID:    userID,
-				})
-				if err != nil {
-					return err
-				}
-			}
 		}
 
 		// Update likes count

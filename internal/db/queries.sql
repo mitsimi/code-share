@@ -1,9 +1,11 @@
 -- name: CreateUser :one
 INSERT INTO users (
     id,
-    username
+    username,
+    email,
+    password_hash
 ) VALUES (
-    ?, ?
+    ?, ?, ?, ?
 )
 RETURNING *;
 
@@ -14,6 +16,33 @@ WHERE id = ?;
 -- name: GetUserByUsername :one
 SELECT * FROM users
 WHERE username = ?;
+
+-- name: GetUserByEmail :one
+SELECT * FROM users
+WHERE email = ?;
+
+-- name: CreateSession :one
+INSERT INTO sessions (
+    id,
+    user_id,
+    token,
+    expires_at
+) VALUES (
+    ?, ?, ?, ?
+)
+RETURNING *;
+
+-- name: GetSession :one
+SELECT * FROM sessions
+WHERE token = ? AND expires_at > CURRENT_TIMESTAMP;
+
+-- name: DeleteSession :exec
+DELETE FROM sessions
+WHERE token = ?;
+
+-- name: DeleteExpiredSessions :exec
+DELETE FROM sessions
+WHERE expires_at <= CURRENT_TIMESTAMP;
 
 -- name: GetSnippets :many
 SELECT 
@@ -63,9 +92,19 @@ WHERE id = ?;
 INSERT OR IGNORE INTO user_likes (snippet_id, user_id)
 VALUES (?, ?);
 
+-- name: IncrementLikesCount :exec
+UPDATE snippets 
+SET likes = likes + 1 
+WHERE id = ?;
+
 -- name: UnlikeSnippet :exec
 DELETE FROM user_likes
 WHERE snippet_id = ? AND user_id = ?;
+
+-- name: DecrementLikesCount :exec
+UPDATE snippets 
+SET likes = likes - 1 
+WHERE id = ?;
 
 -- name: UpdateLikesCount :exec
 UPDATE snippets
@@ -74,4 +113,4 @@ SET likes = (
     FROM user_likes
     WHERE snippet_id = ?
 )
-WHERE id = ?; 
+WHERE id = ?

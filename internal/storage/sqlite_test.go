@@ -33,7 +33,9 @@ func TestCreateAndGetUser(t *testing.T) {
 
 	// Test creating a user
 	username := "testuser"
-	userID, err := store.CreateUser(username)
+	email := "testuser@example.com"
+	password := "password123"
+	userID, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}
@@ -62,7 +64,9 @@ func TestGetUserByUsername(t *testing.T) {
 
 	// Create a user
 	username := "testuser"
-	userID, err := store.CreateUser(username)
+	email := "testuser@example.com"
+	password := "password123"
+	userID, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}
@@ -94,7 +98,9 @@ func TestCreateAndGetSnippet(t *testing.T) {
 
 	// Create a user first
 	username := "testuser"
-	_, err := store.CreateUser(username)
+	email := "testuser@example.com"
+	password := "password123"
+	_, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}
@@ -144,7 +150,9 @@ func TestUpdateSnippet(t *testing.T) {
 
 	// Create a user first
 	username := "testuser"
-	_, err := store.CreateUser(username)
+	email := "testuser@example.com"
+	password := "password123"
+	_, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}
@@ -217,7 +225,9 @@ func TestDeleteSnippet(t *testing.T) {
 
 	// Create a user first
 	username := "testuser"
-	_, err := store.CreateUser(username)
+	email := "testuser@example.com"
+	password := "password123"
+	_, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}

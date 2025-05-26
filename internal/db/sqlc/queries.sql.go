@@ -11,6 +11,43 @@ import (
 	"time"
 )
 
+const createSession = `-- name: CreateSession :one
+INSERT INTO sessions (
+    id,
+    user_id,
+    token,
+    expires_at
+) VALUES (
+    ?, ?, ?, ?
+)
+RETURNING id, user_id, token, expires_at, created_at
+`
+
+type CreateSessionParams struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	Token     string    `json:"token"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
+	row := q.queryRow(ctx, q.createSessionStmt, createSession,
+		arg.ID,
+		arg.UserID,
+		arg.Token,
+		arg.ExpiresAt,
+	)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Token,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createSnippet = `-- name: CreateSnippet :one
 INSERT INTO snippets (
     id,
@@ -53,28 +90,70 @@ func (q *Queries) CreateSnippet(ctx context.Context, arg CreateSnippetParams) (S
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
     id,
-    username
+    username,
+    email,
+    password_hash
 ) VALUES (
-    ?, ?
+    ?, ?, ?, ?
 )
-RETURNING id, username, created_at, updated_at
+RETURNING id, username, email, password_hash, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
+	ID           string `json:"id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.queryRow(ctx, q.createUserStmt, createUser, arg.ID, arg.Username)
+	row := q.queryRow(ctx, q.createUserStmt, createUser,
+		arg.ID,
+		arg.Username,
+		arg.Email,
+		arg.PasswordHash,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const decrementLikesCount = `-- name: DecrementLikesCount :exec
+UPDATE snippets 
+SET likes = likes - 1 
+WHERE id = ?
+`
+
+func (q *Queries) DecrementLikesCount(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.decrementLikesCountStmt, decrementLikesCount, id)
+	return err
+}
+
+const deleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
+DELETE FROM sessions
+WHERE expires_at <= CURRENT_TIMESTAMP
+`
+
+func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
+	_, err := q.exec(ctx, q.deleteExpiredSessionsStmt, deleteExpiredSessions)
+	return err
+}
+
+const deleteSession = `-- name: DeleteSession :exec
+DELETE FROM sessions
+WHERE token = ?
+`
+
+func (q *Queries) DeleteSession(ctx context.Context, token string) error {
+	_, err := q.exec(ctx, q.deleteSessionStmt, deleteSession, token)
+	return err
 }
 
 const deleteSnippet = `-- name: DeleteSnippet :exec
@@ -85,6 +164,24 @@ WHERE id = ?
 func (q *Queries) DeleteSnippet(ctx context.Context, id string) error {
 	_, err := q.exec(ctx, q.deleteSnippetStmt, deleteSnippet, id)
 	return err
+}
+
+const getSession = `-- name: GetSession :one
+SELECT id, user_id, token, expires_at, created_at FROM sessions
+WHERE token = ? AND expires_at > CURRENT_TIMESTAMP
+`
+
+func (q *Queries) GetSession(ctx context.Context, token string) (Session, error) {
+	row := q.queryRow(ctx, q.getSessionStmt, getSession, token)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Token,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const getSnippet = `-- name: GetSnippet :one
@@ -189,7 +286,7 @@ func (q *Queries) GetSnippets(ctx context.Context, userID string) ([]GetSnippets
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, created_at, updated_at FROM users
+SELECT id, username, email, password_hash, created_at, updated_at FROM users
 WHERE id = ?
 `
 
@@ -199,6 +296,27 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, username, email, password_hash, created_at, updated_at FROM users
+WHERE email = ?
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.queryRow(ctx, q.getUserByEmailStmt, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -206,7 +324,7 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, created_at, updated_at FROM users
+SELECT id, username, email, password_hash, created_at, updated_at FROM users
 WHERE username = ?
 `
 
@@ -216,10 +334,23 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const incrementLikesCount = `-- name: IncrementLikesCount :exec
+UPDATE snippets 
+SET likes = likes + 1 
+WHERE id = ?
+`
+
+func (q *Queries) IncrementLikesCount(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.incrementLikesCountStmt, incrementLikesCount, id)
+	return err
 }
 
 const likeSnippet = `-- name: LikeSnippet :exec
