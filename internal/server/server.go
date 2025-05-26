@@ -94,6 +94,7 @@ func (s *Server) setupRoutes() {
 		r.Post("/signup", handler.Signup)
 		r.Post("/login", handler.Login)
 		r.Post("/logout", handler.Logout)
+		r.Post("/refresh", handler.RefreshToken)
 		r.Get("/me", handler.GetCurrentUser)
 	})
 

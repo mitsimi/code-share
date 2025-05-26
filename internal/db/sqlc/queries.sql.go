@@ -95,7 +95,7 @@ INSERT INTO users (
     password_hash
 ) VALUES (
     ?, ?, ?, ?
-)
+) 
 RETURNING id, username, email, password_hash, created_at, updated_at
 `
 
@@ -401,6 +401,31 @@ type UpdateLikesCountParams struct {
 func (q *Queries) UpdateLikesCount(ctx context.Context, arg UpdateLikesCountParams) error {
 	_, err := q.exec(ctx, q.updateLikesCountStmt, updateLikesCount, arg.SnippetID, arg.ID)
 	return err
+}
+
+const updateSessionExpiry = `-- name: UpdateSessionExpiry :one
+UPDATE sessions
+SET expires_at = ?
+WHERE id = ?
+RETURNING id, user_id, token, expires_at, created_at
+`
+
+type UpdateSessionExpiryParams struct {
+	ExpiresAt int64  `json:"expires_at"`
+	ID        string `json:"id"`
+}
+
+func (q *Queries) UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) (Session, error) {
+	row := q.queryRow(ctx, q.updateSessionExpiryStmt, updateSessionExpiry, arg.ExpiresAt, arg.ID)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Token,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const updateSnippet = `-- name: UpdateSnippet :one

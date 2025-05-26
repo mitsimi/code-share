@@ -75,6 +75,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateLikesCountStmt, err = db.PrepareContext(ctx, updateLikesCount); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateLikesCount: %w", err)
 	}
+	if q.updateSessionExpiryStmt, err = db.PrepareContext(ctx, updateSessionExpiry); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateSessionExpiry: %w", err)
+	}
 	if q.updateSnippetStmt, err = db.PrepareContext(ctx, updateSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateSnippet: %w", err)
 	}
@@ -168,6 +171,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateLikesCountStmt: %w", cerr)
 		}
 	}
+	if q.updateSessionExpiryStmt != nil {
+		if cerr := q.updateSessionExpiryStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateSessionExpiryStmt: %w", cerr)
+		}
+	}
 	if q.updateSnippetStmt != nil {
 		if cerr := q.updateSnippetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateSnippetStmt: %w", cerr)
@@ -229,6 +237,7 @@ type Queries struct {
 	likeSnippetStmt           *sql.Stmt
 	unlikeSnippetStmt         *sql.Stmt
 	updateLikesCountStmt      *sql.Stmt
+	updateSessionExpiryStmt   *sql.Stmt
 	updateSnippetStmt         *sql.Stmt
 }
 
@@ -253,6 +262,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		likeSnippetStmt:           q.likeSnippetStmt,
 		unlikeSnippetStmt:         q.unlikeSnippetStmt,
 		updateLikesCountStmt:      q.updateLikesCountStmt,
+		updateSessionExpiryStmt:   q.updateSessionExpiryStmt,
 		updateSnippetStmt:         q.updateSnippetStmt,
 	}
 }

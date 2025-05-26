@@ -317,3 +317,91 @@ func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	)
 	json.NewEncoder(w).Encode(user)
 }
+
+// RefreshToken handles token refresh requests
+func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(zap.String("request_id", requestID))
+
+	// Get session cookie
+	cookie, err := r.Cookie("session")
+	if err != nil {
+		log.Error("failed to get session cookie",
+			zap.Error(err),
+		)
+		http.Error(w, "Not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	// Get session
+	session, err := h.storage.GetSession(cookie.Value)
+	if err != nil {
+		log.Error("failed to get session",
+			zap.Error(err),
+		)
+		http.Error(w, "Not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	// Check if session is expired
+	if session.ExpiresAt < time.Now().Unix() {
+		log.Error("session expired",
+			zap.Int64("expires_at", session.ExpiresAt),
+		)
+		http.Error(w, "Session expired", http.StatusUnauthorized)
+		return
+	}
+
+	// Get user
+	user, err := h.storage.GetUser(session.UserID)
+	if err != nil {
+		log.Error("failed to get user",
+			zap.Error(err),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Generate new JWT token
+	expiresAt := time.Now().Add(24 * time.Hour).Unix()
+	token, err := auth.GenerateToken(user.ID, h.secretKey)
+	if err != nil {
+		log.Error("failed to generate token",
+			zap.Error(err),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Update session expiry
+	if err := h.storage.UpdateSessionExpiry(session.ID, expiresAt); err != nil {
+		log.Error("failed to update session expiry",
+			zap.Error(err),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Update session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session",
+		Value:    session.Token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteStrictMode,
+		Expires:  time.Unix(expiresAt, 0),
+	})
+
+	response := AuthResponse{
+		Token:     token,
+		User:      user,
+		ExpiresAt: expiresAt,
+	}
+
+	log.Info("token refreshed successfully",
+		zap.String("username", user.Username),
+		zap.String("email", user.Email),
+	)
+	json.NewEncoder(w).Encode(response)
+}

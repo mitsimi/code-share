@@ -158,6 +158,21 @@ func (s *MemoryStorage) DeleteExpiredSessions() error {
 	return nil
 }
 
+// UpdateSessionExpiry updates the expiration time of a session
+func (s *MemoryStorage) UpdateSessionExpiry(token string, expiresAt UnixTime) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	session, exists := s.sessions[token]
+	if !exists {
+		return errors.New("session not found")
+	}
+
+	session.ExpiresAt = expiresAt
+	s.sessions[token] = session
+	return nil
+}
+
 func (s *MemoryStorage) GetSnippets() ([]models.Snippet, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

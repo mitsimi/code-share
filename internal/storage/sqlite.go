@@ -407,3 +407,12 @@ func (s *SQLiteStorage) Seed() error {
 func (s *SQLiteStorage) Close() error {
 	return s.db.Close()
 }
+
+// UpdateSessionExpiry updates the expiry time of a session
+func (s *SQLiteStorage) UpdateSessionExpiry(sessionID string, expiresAt UnixTime) error {
+	_, err := s.q.UpdateSessionExpiry(s.ctx, db.UpdateSessionExpiryParams{
+		ID:        sessionID,
+		ExpiresAt: expiresAt,
+	})
+	return err
+}

@@ -24,7 +24,7 @@ type Storage interface {
 	CreateSession(id UserID, token string, expiresAt UnixTime) error
 	GetSession(token string) (models.Session, error)
 	DeleteSession(token string) error
-	DeleteExpiredSessions() error
+	UpdateSessionExpiry(sessionID string, expiresAt UnixTime) error
 
 	// Snippet management
 	GetSnippets() ([]models.Snippet, error)

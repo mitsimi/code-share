@@ -6,7 +6,7 @@ INSERT INTO users (
     password_hash
 ) VALUES (
     ?, ?, ?, ?
-)
+) 
 RETURNING *;
 
 -- name: GetUser :one
@@ -113,4 +113,10 @@ SET likes = (
     FROM user_likes
     WHERE snippet_id = ?
 )
+WHERE id = ?;
+
+-- name: UpdateSessionExpiry :one
+UPDATE sessions
+SET expires_at = ?
 WHERE id = ?
+RETURNING *;
