@@ -43,7 +43,7 @@ func main() {
 
 	// Create and start server
 	srv := server.New(store)
-	if err := srv.Start(":" + cfg.Port); err != nil {
+	if err := srv.Start(":"+cfg.Port, cfg.Environment); err != nil {
 		logger.Fatal("Server failed to start", zap.Error(err))
 	}
 }

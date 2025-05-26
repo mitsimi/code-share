@@ -114,10 +114,10 @@ func (s *Server) setupRoutes() {
 }
 
 // Start starts the server
-func (s *Server) Start(port string) error {
+func (s *Server) Start(port, env string) error {
 	s.logger.Info("server starting",
 		zap.String("port", port),
-		zap.String("environment", "development"),
+		zap.String("environment", env),
 	)
 	return http.ListenAndServe(port, s.router)
 }

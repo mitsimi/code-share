@@ -48,7 +48,7 @@ func New() (*Config, error) {
 
 	// Determine environment
 	environment := "development"
-	if os.Getenv("ENVIRONMENT") == "production" {
+	if env := os.Getenv("ENVIRONMENT"); env == "production" || env == "prod" {
 		environment = "production"
 	}
 
