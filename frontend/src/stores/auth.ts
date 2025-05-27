@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { User } from '@/types'
 import { authService } from '@/services/auth'
-import { toast } from 'sonner'
+import { toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
 
 interface AuthState {
