@@ -5,7 +5,7 @@
     :class="{ 'pointer-events-none': !authStore.isAuthenticated() }"
   >
     <span>{{ likes }}</span>
-    <Heart v-if="isLoading" class="size-5" :fill="is_liked ? 'red' : 'none'" />
+    <Heart v-if="!isLoading" class="size-5" :fill="is_liked ? 'red' : 'none'" />
     <div v-else class="flex items-center gap-2">
       <svg
         class="text-primary h-5 w-5 animate-spin"
