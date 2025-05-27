@@ -32,7 +32,7 @@ const isLoading = ref(false)
 
 // Inline implementation of like functionality instead of using useLikeSnippet
 const { mutate: updateLike } = useMutation({
-  mutationKey: ['likeMutation'],
+  mutationKey: ['likeMutation', props.snippetId],
   mutationFn: async ({ snippetId, action }: { snippetId: string; action: 'like' | 'unlike' }) => {
     console.log(`Starting ${action} mutation for snippet:`, snippetId)
     try {
