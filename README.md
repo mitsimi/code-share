@@ -1,6 +1,6 @@
 # Code Share
 
-A web application for sharing and managing code snippets, built with Go and Vue.js.
+A modern web application for sharing and managing code snippets, built with Go and Vue.js.
 
 ## Project Structure
 
@@ -8,34 +8,44 @@ A web application for sharing and managing code snippets, built with Go and Vue.
 .
 ├── frontend/          # Vue.js frontend application
 │   ├── src/          # Source files
+│   │   ├── components/  # Vue components
+│   │   ├── stores/     # Pinia stores
+│   │   ├── views/      # Page components
+│   │   └── ...
 │   ├── dist/         # Built frontend files
 │   └── ...
 ├── internal/         # Backend application
 │   ├── api/         # HTTP handlers
-│   │   └── snippets.go
 │   ├── models/      # Data models
-│   │   └── snippet.go
 │   ├── server/      # Server setup and routing
-│   │   └── server.go
 │   └── storage/     # Storage interfaces and implementations
-│       ├── storage.go
-│       └── memory.go
-├── pkg/             # Shared packages
-│   ├── middleware/  # Custom middleware
-│   └── utils/       # Utility functions
+├── data/            # Database migrations and seeds
+├── yaak/           # Yaak configuration files
 └── main.go         # Application entry point
 ```
 
 ## Features
 
+- User authentication and authorization
 - Share code snippets with others
 - Like and unlike snippets with real-time updates
 - Modern, responsive UI with loading states
 - RESTful API with proper error handling
 - Client-side caching with TanStack Query
 - Secure API responses that protect user data
+- Form validation with Zod and VeeValidate
+- Toast notifications with Vue Sonner
+- Database integration with SQLC
 
 ## API Endpoints
+
+### Authentication
+
+- `POST /api/auth/login` - User login
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/logout` - User logout
+- `POST /api/auth/refresh` - Refresh access token
+- `GET /api/auth/me` - Get current user
 
 ### Snippets
 
@@ -45,35 +55,6 @@ A web application for sharing and managing code snippets, built with Go and Vue.
 - `PUT /api/snippets/{id}` - Update a snippet
 - `DELETE /api/snippets/{id}` - Delete a snippet
 - `PATCH /api/snippets/{id}/like?action=like|unlike` - Like or unlike a snippet
-
-### Request/Response Format
-
-#### Create/Update Snippet
-
-```json
-{
-  "title": "string",
-  "content": "string",
-  "author": "string"
-}
-```
-
-#### Snippet Response
-
-```json
-{
-  "id": "string",
-  "title": "string",
-  "content": "string",
-  "author": "string",
-  "created_at": "timestamp",
-  "updated_at": "timestamp",
-  "likes": "number",
-  "is_liked": "boolean"
-}
-```
-
-The `is_liked` field indicates whether the current user has liked the snippet. This is the only user-specific like information exposed by the API, ensuring user privacy and data security.
 
 ## Development
 
@@ -93,6 +74,9 @@ The `is_liked` field indicates whether the current user has liked the snippet. T
 
 2. Run the server:
    ```bash
+   # Using Air for hot reload
+   air
+   # Or directly
    go run main.go
    ```
 
@@ -126,6 +110,7 @@ The backend follows a clean architecture pattern:
 - **Storage**: Data persistence interface and implementations
 - **API**: HTTP handlers and request/response handling
 - **Server**: Routing and middleware setup
+- **Database**: PostgreSQL with SQLC for type-safe queries
 
 ### Frontend
 
@@ -135,11 +120,37 @@ The frontend is built with Vue.js and uses:
 - TypeScript for type safety
 - Vite for build tooling
 - Tailwind CSS for styling
+- Pinia for state management
+- TanStack Query for data fetching
+- VeeValidate with Zod for form validation
+- Vue Sonner for toast notifications
+
+## Technologies Used
+
+### Backend
+
+- Go
+- PostgreSQL
+- SQLC
+- Air (for hot reload)
+- Docker
+
+### Frontend
+
+- Vue 3
+- TypeScript
+- Vite
+- Tailwind CSS
+- Pinia
+- TanStack Query
+- VeeValidate
+- Zod
+- Vue Sonner
 
 ## Future Improvements
 
 - [x] Add database integration
-- [ ] Add user authentication
+- [x] Add user authentication
 - [ ] Add syntax highlighting
 
 Optional:
