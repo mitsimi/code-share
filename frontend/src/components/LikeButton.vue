@@ -71,7 +71,7 @@ const { mutate: updateLike } = useMutation({
       if (!oldData) return [updatedSnippet]
       return oldData.map((snippet) =>
         snippet.id === updatedSnippet.id
-          ? { ...updatedSnippet, isLiked: !snippet.is_liked }
+          ? { ...updatedSnippet, is_liked: !snippet.is_liked }
           : snippet,
       )
     })
