@@ -30,6 +30,41 @@ const props = defineProps<{
 
 const isLoading = ref(false)
 
+// Manage loading state during mutation lifecycle
+const { mutate: updateLike } = useMutation({
+  mutationKey: ['likeMutation'],
+  mutationFn: async ({ snippetId, action }: { snippetId: string; action: 'like' | 'unlike' }) => {
+    isLoading.value = true
+    console.log(`Starting ${action} mutation for snippet:`, snippetId)
+    try {
+      const { data, error } = await useCustomFetch<Snippet>(
+        `/snippets/${snippetId}/like?action=${action}`,
+        {
+          method: 'PATCH',
+        },
+      ).json()
+
+      console.log('Response data:', data.value)
+      console.log('Response error:', error.value)
+
+      if (error.value) {
+        console.error('Error in mutation:', error.value)
+        throw new Error(`Failed to ${action}: ${error.value.message || 'Unknown error'}`)
+      }
+
+      if (!data.value) {
+        console.error('No data received from server')
+        throw new Error('No data received from server')
+      }
+
+      return data.value
+    } catch (err) {
+      console.error('Caught error in mutation:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  },
 // Inline implementation of like functionality instead of using useLikeSnippet
 const { mutate: updateLike } = useMutation({
   mutationKey: ['likeMutation', props.snippetId],
