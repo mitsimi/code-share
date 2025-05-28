@@ -1,9 +1,13 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
+	"unicode"
 
 	"mitsimi.dev/codeShare/internal/auth"
 	"mitsimi.dev/codeShare/internal/models"
@@ -61,4 +65,52 @@ func (h *AuthHandler) setCookie(w http.ResponseWriter, r *http.Request, sessionT
 		SameSite: http.SameSiteStrictMode,
 		Expires:  time.Unix(expiresAt, 0),
 	})
+}
+
+// isValidEmail checks if the email is valid
+func isValidEmail(email string) bool {
+	// Basic email validation regex
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	match, _ := regexp.MatchString(emailRegex, email)
+	return match
+}
+
+// validatePassword checks if the password meets the requirements
+func validatePassword(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+
+	hasUpper := false
+	hasLower := false
+	hasNumber := false
+	hasSpecial := false
+
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsNumber(char):
+			hasNumber = true
+		case strings.ContainsRune("!@#$%^&*(),.?\":{}|<>", char):
+			hasSpecial = true
+		}
+	}
+
+	if !hasUpper {
+		return errors.New("password must contain at least one uppercase letter")
+	}
+	if !hasLower {
+		return errors.New("password must contain at least one lowercase letter")
+	}
+	if !hasNumber {
+		return errors.New("password must contain at least one number")
+	}
+	if !hasSpecial {
+		return errors.New("password must contain at least one special character")
+	}
+
+	return nil
 }

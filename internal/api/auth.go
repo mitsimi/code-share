@@ -42,6 +42,20 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate email
+	if !isValidEmail(req.Email) {
+		log.Error("invalid email format", zap.String("email", req.Email))
+		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		return
+	}
+
+	// Validate password
+	if err := validatePassword(req.Password); err != nil {
+		log.Error("invalid password", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	// Create user
 	user, err := h.storage.CreateUser(req.Username, req.Email, req.Password)
 	if err != nil {
