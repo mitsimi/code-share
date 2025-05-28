@@ -7,53 +7,77 @@
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" class="space-y-4">
-          <FormField v-slot="{ componentField }" name="username">
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input v-bind="componentField" type="text" placeholder="Enter your username" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+          <TooltipProvider>
+            <FormField v-slot="{ componentField }" name="username">
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input v-bind="componentField" type="text" placeholder="Enter your username" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField }" name="email">
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input v-bind="componentField" type="email" placeholder="Enter your email" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField }" name="email">
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input v-bind="componentField" type="email" placeholder="Enter your email" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField }" name="password">
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input v-bind="componentField" type="password" placeholder="Create a password" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField }" name="password">
+              <FormItem>
+                <Tooltip>
+                  <FormLabel>
+                    Password
+                    <TooltipTrigger>
+                      <InfoIcon class="text-muted-foreground size-4" />
+                    </TooltipTrigger>
+                  </FormLabel>
+                  <TooltipContent side="top">
+                    <p>Password must contain:</p>
+                    <ul class="mt-1 list-disc pl-4">
+                      <li>At least 8 characters</li>
+                      <li>At least one uppercase letter</li>
+                      <li>At least one lowercase letter</li>
+                      <li>At least one number</li>
+                      <li>At least one special character</li>
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    type="password"
+                    placeholder="Create a password"
+                    class="pr-8"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField }" name="confirmPassword">
-            <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <Input
-                  v-bind="componentField"
-                  type="password"
-                  placeholder="Confirm your password"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField }" name="confirmPassword">
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    type="password"
+                    placeholder="Confirm your password"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
 
-          <Button type="submit" class="w-full" :disabled="isLoading">
-            {{ isLoading ? 'Creating account...' : 'Sign Up' }}
-          </Button>
+            <Button type="submit" class="w-full" :disabled="isLoading">
+              {{ isLoading ? 'Creating account...' : 'Sign Up' }}
+            </Button>
+          </TooltipProvider>
         </form>
       </CardContent>
       <CardFooter class="flex justify-center">
@@ -88,6 +112,8 @@ import {
 } from '@/components/ui/card'
 import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { InfoIcon } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
