@@ -107,10 +107,10 @@ const onSubmit = handleSubmit(async (values) => {
       refreshToken: response.refresh_token,
       expiresAt: response.expires_at,
     })
-    toast.success('You have been logged in successfully')
     const redirectPath = route.query.redirect as string
     router.push(redirectPath || '/snippets')
   } catch (error) {
+    console.log(error)
     toast.error(error instanceof Error ? error.message : 'Failed to login')
   } finally {
     isLoading.value = false
