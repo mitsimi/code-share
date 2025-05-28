@@ -4,10 +4,7 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
     @click="$emit('close')"
   >
-    <div
-      class="bg-card w-full max-w-2xl rounded-lg border-4 border-black p-6 shadow-[8px_8px_0_0_#000]"
-      @click.stop
-    >
+    <div class="bg-card w-full max-w-2xl rounded-lg border-2 p-6 shadow" @click.stop>
       <div class="mb-6 flex items-center justify-between">
         <h2 class="text-2xl font-bold">Add New Snippet</h2>
         <Button variant="outline" size="icon" @click="$emit('close')">
@@ -40,7 +37,7 @@
 
         <div class="flex justify-end gap-4">
           <Button variant="outline" type="button" @click="$emit('close')"> Cancel </Button>
-          <Button type="submit"> Submit </Button>
+          <Button variant="noShadow" type="submit"> Submit </Button>
         </div>
       </form>
     </div>

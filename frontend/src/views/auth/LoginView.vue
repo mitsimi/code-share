@@ -1,8 +1,6 @@
 <template>
   <div class="bg-background flex min-h-[calc(100vh-4rem)] items-start justify-center p-4 pt-16">
-    <Card
-      class="w-full max-w-md border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
-    >
+    <Card class="w-full max-w-md">
       <CardHeader>
         <CardTitle class="text-3xl font-bold">Login</CardTitle>
         <CardDescription>Enter your credentials to access your account</CardDescription>
@@ -13,12 +11,7 @@
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
-                  v-bind="componentField"
-                  type="email"
-                  placeholder="Enter your email"
-                  class="border-2 border-black focus:ring-2 focus:ring-black"
-                />
+                <Input v-bind="componentField" type="email" placeholder="Enter your email" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -28,22 +21,13 @@
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input
-                  v-bind="componentField"
-                  type="password"
-                  placeholder="Enter your password"
-                  class="border-2 border-black focus:ring-2 focus:ring-black"
-                />
+                <Input v-bind="componentField" type="password" placeholder="Enter your password" />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
 
-          <Button
-            type="submit"
-            class="bg-primary text-primary-foreground hover:bg-primary/90 w-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
-            :disabled="isLoading"
-          >
+          <Button type="submit" class="w-full" :disabled="isLoading">
             {{ isLoading ? 'Logging in...' : 'Login' }}
           </Button>
         </form>

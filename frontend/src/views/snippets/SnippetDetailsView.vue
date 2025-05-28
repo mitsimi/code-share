@@ -9,7 +9,7 @@
     <!-- Loading state -->
     <div v-if="isPending" class="mt-6 space-y-6">
       <!-- Snippet header skeleton -->
-      <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
+      <div class="rounded-lg border-2 bg-white p-6 shadow">
         <div class="mb-4 flex items-center justify-between">
           <div class="h-8 w-3/4 animate-pulse rounded-lg bg-gray-200"></div>
           <div class="h-10 w-20 animate-pulse rounded-lg bg-gray-200"></div>
@@ -18,7 +18,7 @@
       </div>
 
       <!-- Code block skeleton -->
-      <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
+      <div class="rounded-lg border-2 bg-white p-6 shadow">
         <div class="space-y-2">
           <div class="h-80 w-full animate-pulse rounded-lg bg-gray-200"></div>
         </div>
@@ -28,7 +28,7 @@
     <!-- Error state -->
     <div
       v-else-if="isError"
-      class="border-destructive bg-destructive/10 mt-6 rounded-lg border-4 p-6"
+      class="border-destructive bg-destructive/10 mt-6 rounded-lg border-2 p-6"
     >
       <h2 class="text-destructive text-xl font-bold">Error</h2>
       <p class="text-destructive mt-2">{{ error?.message || 'An unexpected error occurred' }}</p>
@@ -37,18 +37,18 @@
     <!-- Snippet content -->
     <div v-else-if="snippet" class="mt-6 space-y-6">
       <!-- Snippet header -->
-      <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
+      <div class="bg-card text-card-foreground rounded-lg border-2 p-6 shadow">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
           <LikeButton :likes="snippet.likes" :is_liked="snippet.is_liked" :snippetId="snippet.id" />
         </div>
-        <p class="text-lg text-gray-600">By {{ snippet.author }}</p>
+        <p class="text-accent-foreground text-lg">By {{ snippet.author }}</p>
       </div>
 
       <!-- Code block -->
-      <div class="rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]">
+      <div class="bg-card rounded-lg border-2 p-6 shadow">
         <pre
-          class="overflow-x-auto rounded-lg bg-gray-100 p-4 font-mono text-sm"
+          class="bg-muted overflow-x-auto rounded-lg p-4 font-mono text-sm"
         ><code>{{ snippet.content }}</code></pre>
       </div>
     </div>

@@ -1,8 +1,6 @@
 <template>
   <div class="bg-background flex min-h-[calc(100vh-4rem)] items-start justify-center p-4 pt-16">
-    <Card
-      class="w-full max-w-md border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
-    >
+    <Card class="w-full max-w-md border-2 shadow">
       <CardHeader>
         <CardTitle class="text-3xl font-bold">Sign Up</CardTitle>
         <CardDescription>Create a new account to get started</CardDescription>
@@ -13,12 +11,7 @@
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input
-                  v-bind="componentField"
-                  type="text"
-                  placeholder="Enter your username"
-                  class="border-2 border-black focus:ring-2 focus:ring-black"
-                />
+                <Input v-bind="componentField" type="text" placeholder="Enter your username" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -28,12 +21,7 @@
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
-                  v-bind="componentField"
-                  type="email"
-                  placeholder="Enter your email"
-                  class="border-2 border-black focus:ring-2 focus:ring-black"
-                />
+                <Input v-bind="componentField" type="email" placeholder="Enter your email" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -43,12 +31,7 @@
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input
-                  v-bind="componentField"
-                  type="password"
-                  placeholder="Create a password"
-                  class="border-2 border-black focus:ring-2 focus:ring-black"
-                />
+                <Input v-bind="componentField" type="password" placeholder="Create a password" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -62,18 +45,13 @@
                   v-bind="componentField"
                   type="password"
                   placeholder="Confirm your password"
-                  class="border-2 border-black focus:ring-2 focus:ring-black"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
 
-          <Button
-            type="submit"
-            class="bg-primary text-primary-foreground hover:bg-primary/90 w-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
-            :disabled="isLoading"
-          >
+          <Button type="submit" class="w-full" :disabled="isLoading">
             {{ isLoading ? 'Creating account...' : 'Sign Up' }}
           </Button>
         </form>

@@ -24,18 +24,23 @@ const router = createRouter({
       path: '/snippets',
       name: 'snippets',
       component: () => import('@/views/snippets/SnippetsView.vue'),
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: '/snippets/:snippetId',
       name: 'snippet-details',
       component: () => import('@/views/snippets/SnippetDetailsView.vue'),
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: '/about',
       name: 'about',
       component: () => import('@/views/AboutView.vue'),
+    },
+    {
+      path: '/_/sandbox',
+      name: 'sandbox',
+      component: () => import('@/views/Sandbox.vue'),
     },
   ],
 })
