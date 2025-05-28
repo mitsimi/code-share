@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 	"unicode"
 
@@ -94,7 +93,7 @@ func validatePassword(password string) error {
 			hasLower = true
 		case unicode.IsNumber(char):
 			hasNumber = true
-		case strings.ContainsRune("!@#$%^&*(),.?\":{}|<>", char):
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
 			hasSpecial = true
 		}
 	}

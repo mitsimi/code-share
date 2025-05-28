@@ -7,77 +7,146 @@
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" class="space-y-4">
-          <TooltipProvider>
-            <FormField v-slot="{ componentField }" name="username">
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input v-bind="componentField" type="text" placeholder="Enter your username" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
+          <FormField v-slot="{ componentField }" name="username">
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input v-bind="componentField" type="text" placeholder="Enter your username" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-            <FormField v-slot="{ componentField }" name="email">
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input v-bind="componentField" type="email" placeholder="Enter your email" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
+          <FormField v-slot="{ componentField }" name="email">
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input v-bind="componentField" type="email" placeholder="Enter your email" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-            <FormField v-slot="{ componentField }" name="password">
-              <FormItem>
-                <Tooltip>
-                  <FormLabel>
-                    Password
-                    <TooltipTrigger>
-                      <InfoIcon class="text-muted-foreground size-4" />
-                    </TooltipTrigger>
-                  </FormLabel>
-                  <TooltipContent side="top">
-                    <p>Password must contain:</p>
-                    <ul class="mt-1 list-disc pl-4">
-                      <li>At least 8 characters</li>
-                      <li>At least one uppercase letter</li>
-                      <li>At least one lowercase letter</li>
-                      <li>At least one number</li>
-                      <li>At least one special character</li>
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-                <FormControl>
-                  <Input
-                    v-bind="componentField"
-                    type="password"
-                    placeholder="Create a password"
-                    class="pr-8"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
+          <FormField v-slot="{ componentField }" name="password">
+            <FormItem>
+              <FormLabel> Password </FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  type="password"
+                  placeholder="Create a password"
+                  class="pr-8"
+                  @focus="showRequirements = true"
+                  @blur="showRequirements = false"
+                  v-model="password"
+                />
+              </FormControl>
+              <div v-show="showRequirements" class="mt-2 text-sm">
+                <p class="text-muted-foreground font-medium">Password must contain:</p>
+                <ul class="mt-1 space-y-1">
+                  <li class="flex items-center gap-2">
+                    <template v-if="password.length >= 8">
+                      <CheckCircle2Icon class="size-4 text-green-500" />
+                    </template>
+                    <template v-else>
+                      <CircleIcon class="text-muted-foreground size-4" />
+                    </template>
+                    <span
+                      :class="{
+                        'text-green-500': password.length >= 8,
+                        'text-muted-foreground': password.length < 8,
+                      }"
+                    >
+                      At least 8 characters
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <template v-if="hasUpperCase(password)">
+                      <CheckCircle2Icon class="size-4 text-green-500" />
+                    </template>
+                    <template v-else>
+                      <CircleIcon class="text-muted-foreground size-4" />
+                    </template>
+                    <span
+                      :class="{
+                        'text-green-500': hasUpperCase(password),
+                        'text-muted-foreground': !hasUpperCase(password),
+                      }"
+                    >
+                      At least one uppercase letter
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <template v-if="hasLowerCase(password)">
+                      <CheckCircle2Icon class="size-4 text-green-500" />
+                    </template>
+                    <template v-else>
+                      <CircleIcon class="text-muted-foreground size-4" />
+                    </template>
+                    <span
+                      :class="{
+                        'text-green-500': hasLowerCase(password),
+                        'text-muted-foreground': !hasLowerCase(password),
+                      }"
+                    >
+                      At least one lowercase letter
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <template v-if="hasNumber(password)">
+                      <CheckCircle2Icon class="size-4 text-green-500" />
+                    </template>
+                    <template v-else>
+                      <CircleIcon class="text-muted-foreground size-4" />
+                    </template>
+                    <span
+                      :class="{
+                        'text-green-500': hasNumber(password),
+                        'text-muted-foreground': !hasNumber(password),
+                      }"
+                    >
+                      At least one number
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <template v-if="specialCharRegex.test(password)">
+                      <CheckCircle2Icon class="size-4 text-green-500" />
+                    </template>
+                    <template v-else>
+                      <CircleIcon class="text-muted-foreground size-4" />
+                    </template>
+                    <span
+                      :class="{
+                        'text-green-500': specialCharRegex.test(password),
+                        'text-muted-foreground': !specialCharRegex.test(password),
+                      }"
+                    >
+                      At least one special character
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-            <FormField v-slot="{ componentField }" name="confirmPassword">
-              <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <FormControl>
-                  <Input
-                    v-bind="componentField"
-                    type="password"
-                    placeholder="Confirm your password"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
+          <FormField v-slot="{ componentField }" name="confirmPassword">
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  type="password"
+                  placeholder="Confirm your password"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-            <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? 'Creating account...' : 'Sign Up' }}
-            </Button>
-          </TooltipProvider>
+          <Button type="submit" class="w-full" :disabled="isLoading">
+            {{ isLoading ? 'Creating account...' : 'Sign Up' }}
+          </Button>
         </form>
       </CardContent>
       <CardFooter class="flex justify-center">
@@ -112,12 +181,21 @@ import {
 } from '@/components/ui/card'
 import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { InfoIcon } from 'lucide-vue-next'
+import { CheckCircle2Icon, CircleIcon } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const isLoading = ref(false)
+const password = ref('')
+const showRequirements = ref(false)
+
+const specialCharRegex = /[\p{P}\p{S}]/u
+const uppercaseRegex = /\p{Lu}/u
+const lowercaseRegex = /\p{Ll}/u
+const numberRegex = /\p{N}/u
+const hasUpperCase = (str: string) => uppercaseRegex.test(str)
+const hasLowerCase = (str: string) => lowercaseRegex.test(str)
+const hasNumber = (str: string) => numberRegex.test(str)
 
 const formSchema = toTypedSchema(
   z
@@ -127,10 +205,10 @@ const formSchema = toTypedSchema(
       password: z
         .string()
         .min(8, 'Password must be at least 8 characters')
-        .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-        .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-        .regex(/[0-9]/, 'Password must contain at least one number')
-        .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
+        .regex(uppercaseRegex, 'Password must contain at least one uppercase letter')
+        .regex(lowercaseRegex, 'Password must contain at least one lowercase letter')
+        .regex(numberRegex, 'Password must contain at least one number')
+        .regex(specialCharRegex, 'Password must contain at least one special character'),
       confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
