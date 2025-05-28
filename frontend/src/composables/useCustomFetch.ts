@@ -25,8 +25,19 @@ export const useCustomFetch = createFetch({
 
       return { options }
     },
-    async onFetchError({ data, error }) {
-      return { data, error }
+    async onFetchError({ data, error, response }) {
+      // Try to parse as JSON first, if that fails, use the text response
+      let errorMessage = error
+      if (response) {
+        try {
+          const jsonError = await response.text()
+          errorMessage = jsonError
+        } catch {
+          // If parsing fails, use the original error
+          errorMessage = error
+        }
+      }
+      return { data, error: errorMessage }
     },
     async afterFetch(ctx) {
       const { data, response } = ctx

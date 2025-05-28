@@ -3,15 +3,15 @@ import type { AuthResponse, LoginRequest, SignupRequest, User } from '@/types'
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await useCustomFetch<AuthResponse>('/auth/login', {
+    const { data, error } = await useCustomFetch<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     }).json()
 
-    const { data, error } = response
-
     if (error.value) {
-      throw new Error(error.value.message || 'Failed to login')
+      const errorMessage =
+        typeof error.value === 'string' ? error.value : error.value.message || 'Failed to login'
+      throw new Error(errorMessage)
     }
 
     if (!data.value) {
