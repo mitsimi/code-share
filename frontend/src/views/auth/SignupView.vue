@@ -7,27 +7,37 @@
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" class="space-y-4">
-          <FormField v-slot="{ componentField }" name="username">
+          <FormField v-slot="{ componentField, errorMessage }" name="username">
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input v-bind="componentField" type="text" placeholder="Enter your username" />
+                <Input
+                  v-bind="componentField"
+                  type="text"
+                  placeholder="Enter your username"
+                  :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField }" name="email">
+          <FormField v-slot="{ componentField, errorMessage }" name="email">
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input v-bind="componentField" type="email" placeholder="Enter your email" />
+                <Input
+                  v-bind="componentField"
+                  type="email"
+                  placeholder="Enter your email"
+                  :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField }" name="password">
+          <FormField v-slot="{ componentField, errorMessage }" name="password">
             <FormItem>
               <FormLabel> Password </FormLabel>
               <FormControl>
@@ -36,6 +46,7 @@
                   type="password"
                   placeholder="Create a password"
                   class="pr-8"
+                  :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
                   @focus="showRequirements = true"
                   @blur="showRequirements = false"
                   v-model="password"
@@ -130,7 +141,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField }" name="confirmPassword">
+          <FormField v-slot="{ componentField, errorMessage }" name="confirmPassword">
             <FormItem>
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
@@ -138,6 +149,7 @@
                   v-bind="componentField"
                   type="password"
                   placeholder="Confirm your password"
+                  :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
                 />
               </FormControl>
               <FormMessage />
