@@ -8,10 +8,10 @@ type Snippet struct {
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	Author    string    `json:"author"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 	Likes     int       `json:"likes"`
-	IsLiked   bool      `json:"is_liked"`
+	IsLiked   bool      `json:"isLiked"`
 }
 
 // SnippetRequest represents the data needed to create/update a snippet

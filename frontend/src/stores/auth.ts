@@ -12,6 +12,13 @@ interface AuthState {
   expiresAt: number | null
 }
 
+interface AuthenticatedUser {
+  user: User
+  token: string
+  refreshToken: string
+  expiresAt: number
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const token = ref<string | null>(null)
@@ -19,8 +26,9 @@ export const useAuthStore = defineStore('auth', () => {
   const expiresAt = ref<number | null>(null)
   const router = useRouter()
 
-  // Load auth state from localStorage
-  const loadAuthFromStorage = () => {
+  // Load auth state from localStorage.
+  // Returns true if it could load from local storage.
+  const loadAuthFromStorage = (): boolean => {
     const storedToken = localStorage.getItem('token')
     const storedRefreshToken = localStorage.getItem('refreshToken')
     const storedExpiresAt = localStorage.getItem('expiresAt')
@@ -39,10 +47,13 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Save auth state to localStorage
-  const saveAuthToStorage = (auth: AuthState) => {
-    localStorage.setItem('token', auth.token || '')
-    localStorage.setItem('refreshToken', auth.refreshToken || '')
-    localStorage.setItem('expiresAt', auth.expiresAt?.toString() || '')
+  const saveAuthToStorage = (auth: AuthenticatedUser) => {
+    if (!auth || !auth.token || !auth.refreshToken || !auth.expiresAt || !auth.user) {
+      throw new Error('Invalid auth data provided to store in local storage')
+    }
+    localStorage.setItem('token', auth.token)
+    localStorage.setItem('refreshToken', auth.refreshToken)
+    localStorage.setItem('expiresAt', String(auth.expiresAt))
     localStorage.setItem('user', JSON.stringify(auth.user))
   }
 
@@ -54,7 +65,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('user')
   }
 
-  const setAuth = (auth: AuthState) => {
+  const setAuth = (auth: AuthenticatedUser) => {
     user.value = auth.user
     token.value = auth.token
     refreshToken.value = auth.refreshToken
@@ -100,12 +111,13 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         // Verify and update user data
         const currentUser = await authService.getCurrentUser()
+        if (!token.value || !refreshToken.value || !expiresAt.value) {
+          throw new Error('Missing auth data')
+        }
         setAuth({
-          ...{
-            token: token.value,
-            refreshToken: refreshToken.value,
-            expiresAt: expiresAt.value,
-          },
+          token: token.value,
+          refreshToken: refreshToken.value,
+          expiresAt: expiresAt.value,
           user: currentUser,
         })
       } catch (error) {

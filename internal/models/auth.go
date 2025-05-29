@@ -16,7 +16,7 @@ type LoginRequest struct {
 // AuthResponse represents the response for authentication endpoints
 type AuthResponse struct {
 	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"refreshToken"`
 	User         User   `json:"user"`
-	ExpiresAt    int64  `json:"expires_at"`
+	ExpiresAt    int64  `json:"expiresAt"`
 }
