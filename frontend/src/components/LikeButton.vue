@@ -21,7 +21,7 @@ import { type Snippet } from '@/types'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useCustomFetch } from '@/composables/useCustomFetch'
+import { useFetch } from '@/composables/useCustomFetch'
 import { toast } from 'vue-sonner'
 
 const authStore = useAuthStore()
@@ -45,7 +45,7 @@ const { mutate: updateLike } = useMutation<
     isLoading.value = true
     console.log(`Starting ${action} mutation for snippet:`, snippetId)
     try {
-      const { data, error } = await useCustomFetch<Snippet>(
+      const { data, error } = await useFetch<Snippet>(
         `/snippets/${snippetId}/like?action=${action}`,
         {
           method: 'PATCH',

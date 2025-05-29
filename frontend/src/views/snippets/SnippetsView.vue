@@ -5,7 +5,7 @@ import FloatingActionButton from '@/components/FloatingActionButton.vue'
 import SnippetModal from '@/components/SnippetModal.vue'
 import { toast } from 'vue-sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useCustomFetch } from '@/composables/useCustomFetch'
+import { useFetch } from '@/composables/useCustomFetch'
 import type { Snippet } from '@/types'
 
 import { useAuthStore } from '@/stores/auth'
@@ -15,7 +15,7 @@ const showModal = ref(false)
 const queryClient = useQueryClient()
 
 const getSnippets = async (): Promise<Snippet[]> => {
-  const { data, error } = await useCustomFetch<Snippet[]>('/snippets', {
+  const { data, error } = await useFetch<Snippet[]>('/snippets', {
     timeout: 1000,
     afterFetch: (ctx) => {
       ctx.data = ctx.data.map((snippet: Snippet) => ({
@@ -51,7 +51,7 @@ const createSnippet = async (formData: {
   code: string
   author: string
 }): Promise<Snippet> => {
-  const { data, error } = await useCustomFetch<Snippet>('/snippets', {
+  const { data, error } = await useFetch<Snippet>('/snippets', {
     method: 'POST',
     body: JSON.stringify({
       title: formData.title,

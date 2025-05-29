@@ -1,9 +1,9 @@
-import { useCustomFetch } from '@/composables/useCustomFetch'
+import { useFetch } from '@/composables/useCustomFetch'
 import type { AuthResponse, LoginRequest, SignupRequest, User } from '@/types'
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const { data, error } = await useCustomFetch<AuthResponse>('/auth/login', {
+    const { data, error } = await useFetch<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     }).json()
@@ -22,7 +22,7 @@ export const authService = {
   },
 
   async signup(userData: SignupRequest): Promise<AuthResponse> {
-    const { data, error } = await useCustomFetch<AuthResponse>('/auth/signup', {
+    const { data, error } = await useFetch<AuthResponse>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(userData),
     }).json()
@@ -39,7 +39,7 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
-    const { error } = await useCustomFetch('/auth/logout', {
+    const { error } = await useFetch('/auth/logout', {
       method: 'POST',
     }).json()
 
@@ -49,7 +49,7 @@ export const authService = {
   },
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
-    const { data, error } = await useCustomFetch<AuthResponse>('/auth/refresh', {
+    const { data, error } = await useFetch<AuthResponse>('/auth/refresh', {
       method: 'POST',
       body: JSON.stringify({ refreshToken: refreshToken }),
     }).json()
@@ -66,7 +66,7 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<User> {
-    const { data, error } = await useCustomFetch<User>('/auth/me').json()
+    const { data, error } = await useFetch<User>('/auth/me').json()
 
     if (error.value) {
       throw new Error('Not authenticated')

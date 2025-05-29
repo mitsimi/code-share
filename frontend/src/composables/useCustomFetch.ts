@@ -2,7 +2,7 @@ import { createFetch } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
-export const useCustomFetch = createFetch({
+export const useFetch = createFetch({
   fetchOptions: {
     mode: 'cors',
     headers: {

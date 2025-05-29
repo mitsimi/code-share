@@ -59,7 +59,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
 import { useQuery } from '@tanstack/vue-query'
-import { useCustomFetch } from '@/composables/useCustomFetch'
+import { useFetch } from '@/composables/useCustomFetch'
 import { onMounted } from 'vue'
 
 import { Button } from '@/components/ui/button'
@@ -72,7 +72,7 @@ const router = useRouter()
 
 const getSnippet = async (): Promise<Snippet> => {
   const snippetId = route.params.snippetId as string
-  const { data, error } = await useCustomFetch<Snippet>(`/snippets/${snippetId}`, {
+  const { data, error } = await useFetch<Snippet>(`/snippets/${snippetId}`, {
     timeout: 1000,
   }).json()
 
