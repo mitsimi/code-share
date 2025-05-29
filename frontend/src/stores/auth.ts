@@ -24,7 +24,36 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
   const expiresAt = ref<number | null>(null)
+
   const router = useRouter()
+
+  // Add a ref to store the refresh timer
+  const refreshTimer = ref<number | null>(null)
+
+  // Function to schedule token refresh
+  const scheduleTokenRefresh = (expiresAt: number) => {
+    if (refreshTimer.value) {
+      window.clearTimeout(refreshTimer.value)
+    }
+
+    // Calculate time until 5 minutes before expiration
+    const refreshTime = expiresAt * 1000 - 5 * 60 * 1000 - Date.now()
+
+    // Only schedule if the refresh time is in the future
+    if (refreshTime > 0) {
+      refreshTimer.value = window.setTimeout(async () => {
+        try {
+          await refreshAccessToken()
+        } catch (error) {
+          clearAuth()
+          router.push({
+            name: 'login',
+            query: { redirect: router.currentRoute.value.fullPath },
+          })
+        }
+      }, refreshTime)
+    }
+  }
 
   // Load auth state from localStorage.
   // Returns true if it could load from local storage.
@@ -71,9 +100,15 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = auth.refreshToken
     expiresAt.value = auth.expiresAt
     saveAuthToStorage(auth)
+    scheduleTokenRefresh(auth.expiresAt)
   }
 
   const clearAuth = () => {
+    if (refreshTimer.value) {
+      window.clearTimeout(refreshTimer.value)
+      refreshTimer.value = null
+    }
+
     user.value = null
     token.value = null
     refreshToken.value = null
