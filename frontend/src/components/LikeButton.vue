@@ -2,14 +2,25 @@
   <Button
     variant="outline"
     @click.stop="authStore.isAuthenticated() && toggleLike()"
-    :class="{ 'pointer-events-none': !authStore.isAuthenticated() }"
+    :class="[
+      { 'pointer-events-none': !authStore.isAuthenticated() },
+      isLiked
+        ? 'text-primary border-primary hover:bg-primary/10'
+        : 'text-secondary-foreground border-secondary-foreground hover:bg-secondary/10',
+    ]"
   >
     <span>{{ likes }}</span>
     <template v-if="isLoading">
       <LoaderCircleIcon class="animate-spin" />
     </template>
     <template v-else>
-      <Heart class="size-5" :fill="isLiked ? 'red' : 'none'" />
+      <Heart
+        class="size-4 transition-transform duration-200"
+        :class="{ 'scale-110': isLiked }"
+        :fill="isLiked ? 'currentColor' : 'none'"
+        :stroke="isLiked ? 'currentColor' : 'currentColor'"
+        stroke-width="2"
+      />
     </template>
   </Button>
 </template>
