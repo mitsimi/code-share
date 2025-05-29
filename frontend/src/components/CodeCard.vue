@@ -10,7 +10,7 @@
     </CardContent>
     <CardFooter class="mt-4 flex justify-between border-t-2 px-0 pt-2 font-bold">
       <span>{{ snippet.author }}</span>
-      <LikeButton :likes="snippet.likes" :is_liked="snippet.is_liked" :snippetId="snippet.id" />
+      <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
     </CardFooter>
   </Card>
 </template>

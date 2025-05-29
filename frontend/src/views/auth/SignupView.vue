@@ -241,8 +241,8 @@ const onSubmit = handleSubmit(async (values) => {
     authStore.setAuth({
       user: response.user,
       token: response.token,
-      refreshToken: response.refresh_token,
-      expiresAt: response.expires_at,
+      refreshToken: response.refreshToken,
+      expiresAt: response.expiresAt,
     })
     router.push('/snippets')
   } catch (error) {

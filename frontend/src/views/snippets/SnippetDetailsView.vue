@@ -40,7 +40,7 @@
       <div class="bg-card text-card-foreground rounded-lg border-2 p-6 shadow">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <LikeButton :likes="snippet.likes" :is_liked="snippet.is_liked" :snippetId="snippet.id" />
+          <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
         </div>
         <p class="text-accent-foreground text-lg">By {{ snippet.author }}</p>
       </div>

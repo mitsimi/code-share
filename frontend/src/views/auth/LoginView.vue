@@ -88,8 +88,8 @@ const onSubmit = handleSubmit(async (values) => {
     authStore.setAuth({
       user: response.user,
       token: response.token,
-      refreshToken: response.refresh_token,
-      expiresAt: response.expires_at,
+      refreshToken: response.refreshToken,
+      expiresAt: response.expiresAt,
     })
     const redirectPath = route.query.redirect as string
     router.push(redirectPath || '/snippets')

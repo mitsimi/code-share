@@ -4,17 +4,17 @@ export interface Snippet {
   content: string
   author: string
   likes: number
-  is_liked: boolean
-  created_at: string
-  updated_at: string
+  isLiked: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface User {
   id: string
   username: string
   email: string
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface LoginRequest {
@@ -30,9 +30,9 @@ export interface SignupRequest {
 
 export interface AuthResponse {
   token: string
-  refresh_token: string
+  refreshToken: string
   user: User
-  expires_at: number
+  expiresAt: number
 }
 
 export interface ApiResponse<T> {

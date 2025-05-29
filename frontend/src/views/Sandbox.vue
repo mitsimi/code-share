@@ -23,9 +23,9 @@ import CardHeader from '@/components/ui/card/CardHeader.vue'
           'def calculate_sum(a, b):\n    return a + b\n\nresult = calculate_sum(5, 3)\nprint(result)',
         author: 'Alex Johnson',
         likes: 15,
-        is_liked: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        isLiked: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }"
       @click="() => {}"
     />

@@ -84,8 +84,8 @@ export const useAuthStore = defineStore('auth', () => {
       setAuth({
         user: response.user,
         token: response.token,
-        refreshToken: response.refresh_token,
-        expiresAt: response.expires_at,
+        refreshToken: response.refreshToken,
+        expiresAt: response.expiresAt,
       })
       return response
     } catch (error) {

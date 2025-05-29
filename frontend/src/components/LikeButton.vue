@@ -9,7 +9,7 @@
       <LoaderCircleIcon class="animate-spin" />
     </template>
     <template v-else>
-      <Heart class="size-5" :fill="is_liked ? 'red' : 'none'" />
+      <Heart class="size-5" :fill="isLiked ? 'red' : 'none'" />
     </template>
   </Button>
 </template>
@@ -30,7 +30,7 @@ const queryClient = useQueryClient()
 const props = defineProps<{
   snippetId: string
   likes: number
-  is_liked: boolean
+  isLiked: boolean
 }>()
 
 const isLoading = ref(false)
@@ -82,7 +82,7 @@ const { mutate: updateLike } = useMutation<
       if (!oldData) return [updatedSnippet]
       return oldData.map((snippet) =>
         snippet.id === updatedSnippet.id
-          ? { ...updatedSnippet, is_liked: !snippet.is_liked }
+          ? { ...updatedSnippet, isLiked: !snippet.isLiked }
           : snippet,
       )
     })
@@ -103,7 +103,7 @@ const toggleLike = () => {
     return
   }
 
-  const action = props.is_liked ? 'unlike' : 'like'
+  const action = props.isLiked ? 'unlike' : 'like'
   updateLike({ snippetId: props.snippetId, action })
 }
 </script>
