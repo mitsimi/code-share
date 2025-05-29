@@ -1,6 +1,6 @@
 <template>
   <div class="bg-background flex min-h-screen flex-col">
-    <AppHeader />
+    <AppHeader_v2 />
     <main class="grow">
       <RouterView />
     </main>
@@ -14,8 +14,8 @@
 import { RouterView } from 'vue-router'
 import { Toaster } from 'vue-sonner'
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
-import AppHeader from './components/AppHeader.vue'
 import AppFooter from './components/AppFooter.vue'
+import AppHeader_v2 from './components/AppHeader_v2.vue'
 </script>
 
 <style>
