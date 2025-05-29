@@ -48,9 +48,10 @@ export const authService = {
     }
   },
 
-  async refreshToken(): Promise<AuthResponse> {
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
     const { data, error } = await useCustomFetch<AuthResponse>('/auth/refresh', {
       method: 'POST',
+      body: JSON.stringify({ refreshToken: refreshToken }),
     }).json()
 
     if (error.value) {

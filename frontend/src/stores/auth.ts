@@ -91,7 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     try {
-      const response = await authService.refreshToken()
+      const response = await authService.refreshToken(refreshToken.value)
       setAuth({
         user: response.user,
         token: response.token,

@@ -16,6 +16,8 @@ export const useCustomFetch = createFetch({
       options.headers = options.headers || {}
 
       const authStore = useAuthStore()
+
+      // We include the JWT token with every request
       if (authStore.token) {
         options.headers = {
           ...options.headers,
