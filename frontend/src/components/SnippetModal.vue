@@ -1,46 +1,62 @@
 <template>
-  <div
-    v-if="show"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-    @click="$emit('close')"
-  >
-    <div class="bg-card w-full max-w-2xl rounded-lg border-2 p-6 shadow" @click.stop>
-      <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-2xl font-bold">Add New Snippet</h2>
-        <Button variant="outline" size="icon" @click="$emit('close')">
-          <X class="size-4" />
-        </Button>
+  <div v-show="show" class="fixed inset-0 z-50" @click="$emit('close')">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-xs" />
+
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
+      <div v-if="show" class="absolute inset-0 flex items-center justify-center">
+        <div class="bg-card w-full max-w-2xl rounded-lg border-2 p-6 shadow" @click.stop>
+          <div class="mb-6 flex items-center justify-between">
+            <h2 class="text-2xl font-bold">Add New Snippet</h2>
+            <Button variant="outline" size="icon" @click="$emit('close')">
+              <X class="size-4" />
+            </Button>
+          </div>
+
+          <form @submit.prevent="handleSubmit" class="space-y-4">
+            <div>
+              <Label for="title" class="mb-2 block font-bold">Title</Label>
+              <Input id="title" v-model="title" type="text" required />
+            </div>
+
+            <div>
+              <Label for="code" class="mb-2 block font-bold">Code</Label>
+              <Textarea
+                id="code"
+                v-model="code"
+                required
+                :rows="8"
+                class="resize-none font-mono"
+                @keydown="handleTab"
+              />
+            </div>
+
+            <div>
+              <Label for="author" class="mb-2 block font-bold">Author</Label>
+              <Input id="author" v-model="author" type="text" required />
+            </div>
+
+            <div class="flex justify-end gap-4">
+              <Button
+                variant="reverse"
+                class="bg-background text-foreground"
+                type="button"
+                @click="$emit('close')"
+              >
+                Cancel
+              </Button>
+              <Button variant="reverse" type="submit"> Submit </Button>
+            </div>
+          </form>
+        </div>
       </div>
-
-      <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div>
-          <Label for="title" class="mb-2 block font-bold">Title</Label>
-          <Input id="title" v-model="title" type="text" required />
-        </div>
-
-        <div>
-          <Label for="code" class="mb-2 block font-bold">Code</Label>
-          <Textarea
-            id="code"
-            v-model="code"
-            required
-            :rows="8"
-            class="resize-none font-mono"
-            @keydown="handleTab"
-          />
-        </div>
-
-        <div>
-          <Label for="author" class="mb-2 block font-bold">Author</Label>
-          <Input id="author" v-model="author" type="text" required />
-        </div>
-
-        <div class="flex justify-end gap-4">
-          <Button variant="outline" type="button" @click="$emit('close')"> Cancel </Button>
-          <Button variant="noShadow" type="submit"> Submit </Button>
-        </div>
-      </form>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -127,3 +143,16 @@ const handleSubmit = () => {
   author.value = ''
 }
 </script>
+
+<style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: all 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+</style>
