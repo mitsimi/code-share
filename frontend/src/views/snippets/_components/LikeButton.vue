@@ -1,17 +1,17 @@
 <template>
   <Button
-    variant="outline"
+    variant="ghost"
     @click.stop="authStore.isAuthenticated() && toggleLike()"
     :class="[
       { 'pointer-events-none': !authStore.isAuthenticated() },
       isLiked
         ? 'text-primary border-primary hover:bg-primary/10'
-        : 'text-secondary-foreground border-secondary-foreground hover:bg-secondary/10',
+        : 'text-muted-foreground border-secondary-foreground hover:bg-secondary/10',
     ]"
   >
     <span>{{ likes }}</span>
     <template v-if="isLoading">
-      <LoaderCircleIcon class="animate-spin" />
+      <LoaderCircleIcon class="size-4 animate-spin" />
     </template>
     <template v-else>
       <Heart
@@ -27,7 +27,6 @@
 
 <script setup lang="ts">
 import { Heart, LoaderCircleIcon } from 'lucide-vue-next'
-import { Button } from './ui/button'
 import { type Snippet } from '@/types'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'

@@ -30,7 +30,7 @@
           <h2 class="mb-4 border-b-2 pb-2 text-xl font-bold">Features</h2>
           <ul class="list-inside list-disc space-y-2 pl-4">
             <li>Share code snippets with the community</li>
-            <li>Like and save your favorite snippets</li>
+            <li>Like your favorite snippets</li>
             <li>Clean, modern interface with a playful design</li>
             <li>Instant feedback with toast notifications</li>
           </ul>
@@ -40,7 +40,7 @@
           <h2 class="mb-4 border-b-2 pb-2 text-xl font-bold">Technology Stack</h2>
           <p>
             Built with Vue 3, TypeScript, and Tailwind CSS. The retro-inspired design features crisp
-            black borders and playful shadows to create an engaging user experience.
+            borders and playful shadows to create an engaging user experience.
           </p>
         </div>
 

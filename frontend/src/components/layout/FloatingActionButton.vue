@@ -6,7 +6,6 @@
 
 <script setup lang="ts">
 import { Plus } from 'lucide-vue-next'
-import Button from './ui/button/Button.vue'
 
 defineEmits<{
   (e: 'click'): void

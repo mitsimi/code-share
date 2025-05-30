@@ -56,16 +56,12 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft } from 'lucide-vue-next'
+import type { Snippet } from '@/types'
 import { useQuery } from '@tanstack/vue-query'
 import { useFetch } from '@/composables/useCustomFetch'
 import { onMounted } from 'vue'
-
-import { Button } from '@/components/ui/button'
-import LikeButton from '@/components/LikeButton.vue'
-
-import type { Snippet } from '@/types'
+import { useRoute, useRouter } from 'vue-router'
+import LikeButton from './_components/LikeButton.vue'
 
 const route = useRoute()
 const router = useRouter()

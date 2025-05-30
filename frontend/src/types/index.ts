@@ -7,6 +7,8 @@ export interface Snippet {
   isLiked: boolean
   createdAt: string
   updatedAt: string
+  language?: string
+  isSaved?: boolean
 }
 
 export interface User {

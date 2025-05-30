@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import CardGrid from '@/components/CardGrid.vue'
-import FloatingActionButton from '@/components/FloatingActionButton.vue'
-import SnippetModal from '@/components/SnippetModal.vue'
-import { toast } from 'vue-sonner'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useFetch } from '@/composables/useCustomFetch'
-import type { Snippet } from '@/types'
-
 import { useAuthStore } from '@/stores/auth'
+import { type Snippet } from '@/types'
+import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
+import { useFetch } from '@/composables/useCustomFetch'
+import { ref } from 'vue'
+import { toast } from 'vue-sonner'
+import SnippetGrid from './_components/SnippetGrid.vue'
+import SnippetModal from './_components/SnippetModal.vue'
+
 const authStore = useAuthStore()
 
 const showModal = ref(false)
@@ -46,17 +45,12 @@ const { isPending, isError, data, error, refetch } = useQuery({
   }
 }) */
 
-const createSnippet = async (formData: {
-  title: string
-  code: string
-  author: string
-}): Promise<Snippet> => {
+const createSnippet = async (formData: { title: string; code: string }): Promise<Snippet> => {
   const { data, error } = await useFetch<Snippet>('/snippets', {
     method: 'POST',
     body: JSON.stringify({
       title: formData.title,
       content: formData.code,
-      author: formData.author,
     }),
   }).json()
 
@@ -88,8 +82,8 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
 </script>
 
 <template>
-  <main class="mx-auto my-12 max-w-7xl px-4">
-    <CardGrid
+  <main class="mx-auto max-w-7xl px-4">
+    <SnippetGrid
       :cards="data || []"
       :is-loading="isPending"
       :is-empty="!isPending && (!data || data.length === 0)"

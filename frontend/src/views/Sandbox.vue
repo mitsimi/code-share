@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CodeCardv2 from '@/components/CodeCard.vue'
+import CodeCardv2 from '@/views/snippets/_components/SnippetCard.vue'
 import CardContent from '@/components/ui/card/CardContent.vue'
 import CardFooter from '@/components/ui/card/CardFooter.vue'
 import CardHeader from '@/components/ui/card/CardHeader.vue'
