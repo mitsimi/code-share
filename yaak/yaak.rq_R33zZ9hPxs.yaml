@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_R33zZ9hPxs
 createdAt: 2025-05-19T15:03:26.389485
-updatedAt: 2025-05-26T16:24:08.285914
+updatedAt: 2025-05-30T23:20:19.338432
 workspaceId: wk_gJPTxkB9Tw
 folderId: fl_kb6ND2zGAX
 authentication: {}
@@ -11,8 +11,7 @@ body:
   text: |-
     {
       "title": "some title",
-      "content": "cat file1 file2 file3",
-      "author": "mitsimi"
+      "content": "cat file1 file2 file3 &> /dev/null"
     }
 bodyType: application/json
 description: ''

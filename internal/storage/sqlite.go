@@ -221,8 +221,8 @@ func (s *SQLiteStorage) GetSnippet(id string) (models.Snippet, error) {
 }
 
 func (s *SQLiteStorage) CreateSnippet(snippet models.Snippet) (SnippetID, error) {
-	// Get the user ID from the username
-	user, err := s.q.GetUserByUsername(s.ctx, snippet.Author)
+	// Get the user by ID to verify it exists
+	_, err := s.q.GetUser(s.ctx, snippet.Author)
 	if err != nil {
 		return "", errors.New("author not found")
 	}
@@ -231,7 +231,7 @@ func (s *SQLiteStorage) CreateSnippet(snippet models.Snippet) (SnippetID, error)
 		ID:      uuid.NewString(),
 		Title:   snippet.Title,
 		Content: snippet.Content,
-		Author:  user.ID, // Use the user ID instead of username
+		Author:  snippet.Author, // Use the user ID directly
 	})
 	if err != nil {
 		return "", err

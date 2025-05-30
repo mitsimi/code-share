@@ -112,7 +112,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(zap.String("request_id", requestID))
 
-	var req models.SnippetRequest
+	var req models.SnippetCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Error("failed to decode request body",
 			zap.Error(err),
@@ -121,20 +121,34 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get user ID from context
+	userID := GetUserID(r)
+	if userID == "" {
+		log.Error("no user ID in context")
+		http.Error(w, "Not authenticated", http.StatusUnauthorized)
+		return
+	}
+
 	snippet := models.Snippet{
 		Title:   req.Title,
 		Content: req.Content,
-		Author:  req.Author,
+		Author:  userID,
 		Likes:   0,
 		IsLiked: false,
 	}
+
+	log.Debug("creating new snippet",
+		zap.String("title", snippet.Title),
+		zap.String("content", snippet.Content),
+		zap.String("author", snippet.Author),
+	)
 
 	id, err := h.storage.CreateSnippet(snippet)
 	if err != nil {
 		log.Error("failed to create snippet",
 			zap.Error(err),
 			zap.String("title", snippet.Title),
-			zap.String("author", snippet.Author),
+			zap.String("userId", snippet.Author),
 		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -160,7 +174,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("snippet_id", id),
 	)
 
-	var req models.SnippetRequest
+	var req models.SnippetCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Error("failed to decode request body",
 			zap.Error(err),
@@ -180,7 +194,6 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 
 	snippet.Title = req.Title
 	snippet.Content = req.Content
-	snippet.Author = req.Author
 
 	if err := h.storage.UpdateSnippet(snippet); err != nil {
 		log.Error("failed to update snippet",

@@ -14,9 +14,8 @@ type Snippet struct {
 	IsLiked   bool      `json:"isLiked"`
 }
 
-// SnippetRequest represents the data needed to create/update a snippet
-type SnippetRequest struct {
+// SnippetCreateRequest represents the data needed to create/update a snippet
+type SnippetCreateRequest struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
-	Author  string `json:"author"`
 }
