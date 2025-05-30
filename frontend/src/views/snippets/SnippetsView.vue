@@ -1,20 +1,20 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+import { type Snippet } from '@/types'
+import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
+import { useFetch } from '@/composables/useCustomFetch'
 import { ref } from 'vue'
-import CardGrid from '@/components/CardGrid.vue'
-import FloatingActionButton from '@/components/FloatingActionButton.vue'
-import SnippetModal from '@/components/SnippetModal.vue'
 import { toast } from 'vue-sonner'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useCustomFetch } from '@/composables/useCustomFetch'
-import { useLikeSnippet } from '@/composables/useLikeSnippet'
-import type { Snippet } from '@/models'
+import SnippetGrid from './_components/SnippetGrid.vue'
+import SnippetModal from './_components/SnippetModal.vue'
+
+const authStore = useAuthStore()
 
 const showModal = ref(false)
 const queryClient = useQueryClient()
-const { updateLike } = useLikeSnippet()
 
 const getSnippets = async (): Promise<Snippet[]> => {
-  const { data, error } = await useCustomFetch<Snippet[]>('/snippets', {
+  const { data, error } = await useFetch<Snippet[]>('/snippets', {
     timeout: 1000,
     afterFetch: (ctx) => {
       ctx.data = ctx.data.map((snippet: Snippet) => ({
@@ -45,17 +45,12 @@ const { isPending, isError, data, error, refetch } = useQuery({
   }
 }) */
 
-const createSnippet = async (formData: {
-  title: string
-  code: string
-  author: string
-}): Promise<Snippet> => {
-  const { data, error } = await useCustomFetch<Snippet>('/snippets', {
+const createSnippet = async (formData: { title: string; code: string }): Promise<Snippet> => {
+  const { data, error } = await useFetch<Snippet>('/snippets', {
     method: 'POST',
     body: JSON.stringify({
       title: formData.title,
       content: formData.code,
-      author: formData.author,
     }),
   }).json()
 
@@ -87,8 +82,8 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
 </script>
 
 <template>
-  <main class="mx-auto my-12 max-w-7xl px-4">
-    <CardGrid
+  <main class="mx-auto max-w-7xl px-4">
+    <SnippetGrid
       :cards="data || []"
       :is-loading="isPending"
       :is-empty="!isPending && (!data || data.length === 0)"
@@ -98,7 +93,7 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
     />
   </main>
 
-  <FloatingActionButton @click="showModal = true" />
+  <FloatingActionButton v-show="authStore.isAuthenticated()" @click="showModal = true" />
 
   <SnippetModal
     :show="showModal"

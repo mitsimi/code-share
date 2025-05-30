@@ -1,8 +1,9 @@
 package storage
 
 import (
-	"codeShare/internal/models"
 	"time"
+
+	"mitsimi.dev/codeShare/internal/models"
 )
 
 // In-memory storage for snippets (to be replaced with a database later)

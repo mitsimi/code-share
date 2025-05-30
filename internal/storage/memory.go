@@ -1,10 +1,12 @@
 package storage
 
 import (
-	"codeShare/internal/models"
 	"errors"
 	"sync"
 	"time"
+
+	db "mitsimi.dev/codeShare/internal/db/sqlc"
+	"mitsimi.dev/codeShare/internal/models"
 
 	"github.com/google/uuid"
 )
@@ -33,65 +35,93 @@ func NewMemoryStorage() *MemoryStorage {
 }
 
 // CreateUser creates a new user
-func (s *MemoryStorage) CreateUser(username, email, password string) (string, error) {
+func (s *MemoryStorage) CreateUser(username, email, password string) (db.User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// Check if username or email already exists
 	for _, user := range s.users {
 		if user.Username == username || user.Email == email {
-			return "", errors.New("username or email already exists")
+			return db.User{}, errors.New("username or email already exists")
 		}
 	}
 
-	user := models.User{
+	user := db.User{
 		ID:           uuid.NewString(),
 		Username:     username,
 		Email:        email,
-		PasswordHash: password, // In a real app, this should be hashed
+		PasswordHash: password,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
-	s.users[user.ID] = user
-	return user.ID, nil
-}
-
-// GetUser gets a user by ID
-func (s *MemoryStorage) GetUser(id string) (models.User, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	user, exists := s.users[id]
-	if !exists {
-		return models.User{}, errors.New("user not found")
+	s.users[user.ID] = models.User{
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	}
 	return user, nil
 }
 
+// GetUser gets a user by ID
+func (s *MemoryStorage) GetUser(id UserID) (db.User, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	user, exists := s.users[string(id)]
+	if !exists {
+		return db.User{}, errors.New("user not found")
+	}
+	return db.User{
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+	}, nil
+}
+
 // GetUserByUsername gets a user by username
-func (s *MemoryStorage) GetUserByUsername(username string) (models.User, error) {
+func (s *MemoryStorage) GetUserByUsername(username string) (db.User, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	for _, user := range s.users {
 		if user.Username == username {
-			return user, nil
+			return db.User{
+				ID:           user.ID,
+				Username:     user.Username,
+				Email:        user.Email,
+				PasswordHash: user.PasswordHash,
+				CreatedAt:    user.CreatedAt,
+				UpdatedAt:    user.UpdatedAt,
+			}, nil
 		}
 	}
-	return models.User{}, errors.New("user not found")
+	return db.User{}, errors.New("user not found")
 }
 
 // GetUserByEmail gets a user by email
-func (s *MemoryStorage) GetUserByEmail(email string) (models.User, error) {
+func (s *MemoryStorage) GetUserByEmail(email string) (db.User, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	for _, user := range s.users {
 		if user.Email == email {
-			return user, nil
+			return db.User{
+				ID:           user.ID,
+				Username:     user.Username,
+				Email:        user.Email,
+				PasswordHash: user.PasswordHash,
+				CreatedAt:    user.CreatedAt,
+				UpdatedAt:    user.UpdatedAt,
+			}, nil
 		}
 	}
-	return models.User{}, errors.New("user not found")
+	return db.User{}, errors.New("user not found")
 }
 
 // Login authenticates a user
@@ -108,16 +138,17 @@ func (s *MemoryStorage) Login(email, password string) (string, error) {
 }
 
 // CreateSession creates a new session
-func (s *MemoryStorage) CreateSession(userID string, token string, expiresAt UnixTime) error {
+func (s *MemoryStorage) CreateSession(userID string, token string, refreshToken string, expiresAt UnixTime) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	session := models.Session{
-		ID:        uuid.NewString(),
-		UserID:    userID,
-		Token:     token,
-		ExpiresAt: expiresAt,
-		CreatedAt: time.Now(),
+		ID:           uuid.NewString(),
+		UserID:       userID,
+		Token:        token,
+		RefreshToken: refreshToken,
+		ExpiresAt:    expiresAt,
+		CreatedAt:    time.Now(),
 	}
 	s.sessions[token] = session
 	return nil
@@ -154,6 +185,22 @@ func (s *MemoryStorage) DeleteExpiredSessions() error {
 			delete(s.sessions, token)
 		}
 	}
+	return nil
+}
+
+// UpdateSessionExpiry updates the expiration time and refresh token of a session
+func (s *MemoryStorage) UpdateSessionExpiry(token string, expiresAt UnixTime, refreshToken string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	session, exists := s.sessions[token]
+	if !exists {
+		return errors.New("session not found")
+	}
+
+	session.ExpiresAt = expiresAt
+	session.RefreshToken = refreshToken
+	s.sessions[token] = session
 	return nil
 }
 

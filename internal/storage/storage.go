@@ -1,7 +1,8 @@
 package storage
 
 import (
-	"codeShare/internal/models"
+	db "mitsimi.dev/codeShare/internal/db/sqlc"
+	"mitsimi.dev/codeShare/internal/models"
 )
 
 type (
@@ -14,17 +15,17 @@ type (
 // Storage defines the interface for data storage
 type Storage interface {
 	// User management
-	CreateUser(username, email, password string) (UserID, error)
-	GetUser(id UserID) (models.User, error)
-	GetUserByUsername(username string) (models.User, error)
-	GetUserByEmail(email string) (models.User, error)
+	CreateUser(username, email, password string) (db.User, error)
+	GetUser(id UserID) (db.User, error)
+	GetUserByUsername(username string) (db.User, error)
+	GetUserByEmail(email string) (db.User, error)
 	Login(email, password string) (UserID, error)
 
 	// Session management
-	CreateSession(id UserID, token string, expiresAt UnixTime) error
+	CreateSession(id UserID, token string, refreshToken string, expiresAt UnixTime) error
 	GetSession(token string) (models.Session, error)
 	DeleteSession(token string) error
-	DeleteExpiredSessions() error
+	UpdateSessionExpiry(sessionID string, expiresAt UnixTime, refreshToken string) error
 
 	// Snippet management
 	GetSnippets() ([]models.Snippet, error)

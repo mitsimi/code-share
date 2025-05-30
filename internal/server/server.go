@@ -1,15 +1,16 @@
 package server
 
 import (
-	"codeShare/frontend"
-	"codeShare/internal/api"
-	"codeShare/internal/logger"
-	"codeShare/internal/storage"
 	"io"
 	"mime"
 	"net/http"
 	"path/filepath"
 	"time"
+
+	"mitsimi.dev/codeShare/frontend"
+	"mitsimi.dev/codeShare/internal/api"
+	"mitsimi.dev/codeShare/internal/logger"
+	"mitsimi.dev/codeShare/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -19,17 +20,19 @@ import (
 
 // Server represents the application server
 type Server struct {
-	router  *chi.Mux
-	storage storage.Storage
-	logger  *zap.Logger
+	router    *chi.Mux
+	storage   storage.Storage
+	logger    *zap.Logger
+	secretKey string
 }
 
 // New creates a new server instance
-func New(storage storage.Storage) *Server {
+func New(storage storage.Storage, secretKey string) *Server {
 	s := &Server{
-		router:  chi.NewRouter(),
-		storage: storage,
-		logger:  logger.Log,
+		router:    chi.NewRouter(),
+		storage:   storage,
+		logger:    logger.Log,
+		secretKey: secretKey,
 	}
 	s.setupMiddleware()
 	s.setupRoutes()
@@ -73,6 +76,28 @@ func (s *Server) setupRoutes() {
 		fs.ServeHTTP(w, r)
 	})
 
+	// Create auth middleware
+	authMiddleware := api.NewAuthMiddleware(s.storage, s.secretKey)
+
+	// Auth routes
+	s.router.Route("/api/auth", func(r chi.Router) {
+		r.Use(cors.Handler(cors.Options{
+			AllowedOrigins:   []string{"http://localhost:5173"}, // Development server
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: true,
+			MaxAge:           300, // Maximum value not ignored by any of major browsers
+		}))
+
+		handler := api.NewAuthHandler(s.storage, s.secretKey)
+		r.Post("/signup", handler.Signup)
+		r.Post("/login", handler.Login)
+		r.Post("/logout", handler.Logout)
+		r.Post("/refresh", handler.RefreshToken)
+		r.Get("/me", handler.GetCurrentUser)
+	})
+
 	// API routes
 	s.router.Route("/api/snippets", func(r chi.Router) {
 		r.Use(cors.Handler(cors.Options{
@@ -85,14 +110,20 @@ func (s *Server) setupRoutes() {
 		}))
 
 		handler := api.NewSnippetHandler(s.storage)
-		r.Get("/", handler.GetSnippets)
-		r.Post("/", handler.CreateSnippet)
 
-		r.Route("/{id}", func(r chi.Router) {
-			r.Get("/", handler.GetSnippet)
-			r.Put("/", handler.UpdateSnippet)
-			r.Delete("/", handler.DeleteSnippet)
-			r.Patch("/like", handler.ToggleLikeSnippet)
+		// Public routes
+		r.Group(func(r chi.Router) {
+			r.Get("/", handler.GetSnippets)
+			r.Get("/{id}", handler.GetSnippet)
+		})
+
+		// Protected routes
+		r.Group(func(r chi.Router) {
+			r.Use(authMiddleware.RequireAuth)
+			r.Post("/", handler.CreateSnippet)
+			r.Put("/{id}", handler.UpdateSnippet)
+			r.Delete("/{id}", handler.DeleteSnippet)
+			r.Patch("/{id}/like", handler.ToggleLikeSnippet)
 		})
 	})
 

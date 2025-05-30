@@ -26,6 +26,7 @@ type Querier interface {
 	LikeSnippet(ctx context.Context, arg LikeSnippetParams) error
 	UnlikeSnippet(ctx context.Context, arg UnlikeSnippetParams) error
 	UpdateLikesCount(ctx context.Context, arg UpdateLikesCountParams) error
+	UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) error
 	UpdateSnippet(ctx context.Context, arg UpdateSnippetParams) (Snippet, error)
 }
 
