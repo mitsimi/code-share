@@ -5,7 +5,7 @@
     ></div>
     <div class="mx-auto p-8">
       <!-- Bottom Section -->
-      <div class="text-secondary-foreground/60 text-center font-mono text-sm">
+      <div class="text-muted-foreground/60 text-center font-mono text-sm">
         © 2025 CodeShare. All rights reserved.
       </div>
     </div>
