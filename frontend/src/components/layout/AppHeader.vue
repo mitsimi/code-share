@@ -30,7 +30,7 @@
         <div class="hidden items-center space-x-2 md:flex">
           <template v-if="!authStore.isAuthenticated()">
             <Button variant="ghost" size="sm" @click="handleLogin"> Login </Button>
-            <Button variant="default" size="sm" @click="handleSignup"> Sign Up </Button>
+            <Button variant="reverse" size="sm" @click="handleSignup"> Sign Up </Button>
           </template>
           <template v-else>
             <Button variant="ghost" size="sm" @click="handleLogout">
