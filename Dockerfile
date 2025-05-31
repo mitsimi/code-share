@@ -26,6 +26,9 @@ RUN go mod download
 # Copy the rest of the application
 COPY . .
 
+# Copy the built frontend files
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+
 # Build the Go application
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
@@ -38,8 +41,6 @@ RUN apk add --no-cache ca-certificates
 
 # Copy the built Go binary
 COPY --from=go-builder /app/main .
-# Copy the built frontend files
-COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Expose the port the app runs on
 EXPOSE 8080
