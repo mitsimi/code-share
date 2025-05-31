@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Sun, Moon, Menu, X, LogOut, CodepenIcon } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
@@ -159,27 +159,13 @@ const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
 }
 
-// Close mobile menu when clicking outside
-const handleClickOutside = (event: Event) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('header') && isMobileMenuOpen.value) {
-    closeMobileMenu()
-  }
-}
-
 // Initialize theme on mount
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
   if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-    //document.documentElement.classList.add('dark')
+    document.documentElement.classList.add('dark')
   }
-
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
 })
 </script>
