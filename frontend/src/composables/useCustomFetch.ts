@@ -9,7 +9,7 @@ export const useFetch = createFetch({
       'Content-Type': 'application/json',
     },
   },
-  baseUrl: '/api',
+  baseUrl: import.meta.env.VITE_API_URL || '/api',
   options: {
     async beforeFetch({ options }) {
       // Ensure headers object exists

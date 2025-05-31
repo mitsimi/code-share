@@ -4,6 +4,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -82,12 +83,15 @@ func (s *Server) setupRoutes() {
 	// Auth routes
 	s.router.Route("/api/auth", func(r chi.Router) {
 		r.Use(cors.Handler(cors.Options{
-			AllowedOrigins:   []string{"http://localhost:5173"}, // Development server
+			AllowedOrigins: []string{
+				"http://localhost:3000",         // Development
+				"https://codeshare.mitsimi.dev", // Production
+			},
 			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
 			AllowCredentials: true,
-			MaxAge:           300, // Maximum value not ignored by any of major browsers
+			MaxAge:           300,
 		}))
 
 		handler := api.NewAuthHandler(s.storage, s.secretKey)
@@ -101,12 +105,15 @@ func (s *Server) setupRoutes() {
 	// API routes
 	s.router.Route("/api/snippets", func(r chi.Router) {
 		r.Use(cors.Handler(cors.Options{
-			AllowedOrigins:   []string{"http://localhost:5173"}, // Development server
+			AllowedOrigins: []string{
+				"http://localhost:3000",         // Development
+				"https://codeshare.mitsimi.dev", // Production
+			},
 			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
 			AllowCredentials: true,
-			MaxAge:           300, // Maximum value not ignored by any of major browsers
+			MaxAge:           300,
 		}))
 
 		handler := api.NewSnippetHandler(s.storage)
@@ -127,21 +134,24 @@ func (s *Server) setupRoutes() {
 		})
 	})
 
-	// Handle all other routes by serving index.html
-	s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-		indexFile, err := frontend.DistDirFS.Open("index.html")
-		if err != nil {
-			s.logger.Error("failed to load index.html",
-				zap.Error(err),
-				zap.String("request_id", middleware.GetReqID(r.Context())),
-			)
-			http.Error(w, "Error loading index.html", http.StatusInternalServerError)
-			return
-		}
-		defer indexFile.Close()
+	// Only serve static files if SERVE_STATIC is set to "true"
+	if os.Getenv("SERVE_STATIC") == "true" {
+		// Handle all other routes by serving index.html
+		s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+			indexFile, err := frontend.DistDirFS.Open("index.html")
+			if err != nil {
+				s.logger.Error("failed to load index.html",
+					zap.Error(err),
+					zap.String("request_id", middleware.GetReqID(r.Context())),
+				)
+				http.Error(w, "Error loading index.html", http.StatusInternalServerError)
+				return
+			}
+			defer indexFile.Close()
 
-		http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
-	})
+			http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
+		})
+	}
 }
 
 // Start starts the server
@@ -149,6 +159,7 @@ func (s *Server) Start(port, env string) error {
 	s.logger.Info("server starting",
 		zap.String("port", port),
 		zap.String("environment", env),
+		zap.String("serve_static", os.Getenv("SERVE_STATIC")),
 	)
 	return http.ListenAndServe(port, s.router)
 }
