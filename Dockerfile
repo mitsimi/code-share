@@ -10,6 +10,10 @@ COPY frontend/package.json frontend/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY frontend/ ./
+
+ARG BASE_URL=/
+ENV BASE_URL=${BASE_URL}
+
 RUN pnpm build
 
 # Build Go application
@@ -46,7 +50,7 @@ COPY --from=go-builder /app/main .
 EXPOSE 8080
 
 # Set environment to production
-ENV ENVIRONMENT=production
+ARG ENVIRONMENT=production
 
 # Command to run the application
 CMD ["./main"] 
