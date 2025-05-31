@@ -1,5 +1,5 @@
 <template>
-  <main class="mx-auto my-12 max-w-3xl px-4 tracking-wide">
+  <main class="mx-auto max-w-3xl px-4 tracking-wide">
     <div class="rounded-lg border-2 p-8 shadow">
       <h1 class="mb-6 text-3xl font-bold">About CodeShare</h1>
 
