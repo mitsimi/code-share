@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"io"
 	"mime"
 	"net/http"
@@ -21,10 +22,11 @@ import (
 
 // Server represents the application server
 type Server struct {
-	router    *chi.Mux
-	storage   storage.Storage
-	logger    *zap.Logger
-	secretKey string
+	router     *chi.Mux
+	httpServer *http.Server
+	storage    storage.Storage
+	logger     *zap.Logger
+	secretKey  string
 }
 
 // New creates a new server instance
@@ -156,10 +158,39 @@ func (s *Server) setupRoutes() {
 
 // Start starts the server
 func (s *Server) Start(port, env string) error {
+	s.httpServer = &http.Server{
+		Addr:    port,
+		Handler: s.router,
+		// Add reasonable timeouts
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
 	s.logger.Info("server starting",
 		zap.String("port", port),
 		zap.String("environment", env),
 		zap.String("serve_static", os.Getenv("SERVE_STATIC")),
 	)
-	return http.ListenAndServe(port, s.router)
+
+	return s.httpServer.ListenAndServe()
+}
+
+// Shutdown gracefully shuts down the server
+func (s *Server) Shutdown(ctx context.Context) error {
+	s.logger.Info("shutting down server...")
+
+	if s.httpServer == nil {
+		return nil
+	}
+
+	// Shutdown the HTTP server gracefully
+	if err := s.httpServer.Shutdown(ctx); err != nil {
+		s.logger.Error("server shutdown failed", zap.Error(err))
+		return err
+	}
+
+	s.logger.Info("server shutdown completed successfully")
+	return nil
 }
