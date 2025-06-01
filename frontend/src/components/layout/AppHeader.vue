@@ -6,8 +6,7 @@
       <!-- Logo/Brand -->
       <div class="mr-4 flex">
         <router-link to="/" class="mr-6 flex items-center space-x-2">
-          <CodepenIcon />
-          <span class="hidden font-bold sm:inline-block">CodeShare</span>
+          <span class="font-bold">CodeShare</span>
         </router-link>
       </div>
 
@@ -103,7 +102,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import { Menu, X, LogOut, CodepenIcon } from 'lucide-vue-next'
+import { Menu, X, LogOut } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 import ThemeSwitch from './ThemeSwitch.vue'
