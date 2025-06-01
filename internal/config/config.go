@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+	"log"
 	"os"
 )
 
@@ -46,7 +48,12 @@ func New() (*Config, error) {
 	// Get JWT secret
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		jwtSecret = "your-secret-key" // In production, this should be a secure random key
+		if env == "production" {
+			return nil, fmt.Errorf("JWT_SECRET environment variable is required in production")
+		}
+		// Only use default in development
+		jwtSecret = "dev-secret-key"
+		log.Printf("WARNING: Using default JWT secret in development environment. This is not secure for production use.")
 	}
 
 	return &Config{
