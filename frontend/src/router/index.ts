@@ -25,7 +25,7 @@ const router = createRouter({
       path: '/snippets',
       name: 'snippets',
       component: () => import('@/views/snippets/SnippetsView.vue'),
-      meta: { requiresAuth: true },
+      //meta: { requiresAuth: true },
     },
     {
       path: '/snippets/:snippetId',

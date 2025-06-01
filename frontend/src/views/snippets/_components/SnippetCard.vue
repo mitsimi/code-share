@@ -76,7 +76,13 @@
         <!-- Right side - Action buttons -->
         <div class="flex items-center gap-2">
           <!-- Save/Bookmark button -->
-          <Button variant="ghost" size="sm" class="h-8 w-8 p-0" @click.stop="toggleSave">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="h-8 w-8 p-0"
+            :class="{ 'pointer-events-none': !authStore.isAuthenticated() }"
+            @click.stop="authStore.isAuthenticated() && toggleSave()"
+          >
             <BookmarkIcon
               :class="[
                 'h-4 w-4 transition-colors',
@@ -109,6 +115,10 @@ import type { Snippet } from '@/types'
 import { CopyIcon, BookmarkIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
+import { toast } from 'vue-sonner'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 dayjs.extend(relativeTime)
 
@@ -118,7 +128,6 @@ defineEmits<{
 
 // TODO: Replace these hardcoded values with actual props when available
 const hardcodedLanguage = 'JavaScript' // Add to snippet type: language: string
-const hardcodedDate = '2 days ago' // Add to snippet type: createdAt: Date | string
 const hardcodedFileExtension = 'js' // Add to snippet type: filename?: string
 const hardcodedIsSaved = false // Add to snippet type or user state: isSaved: boolean
 
@@ -148,9 +157,7 @@ const getAuthorInitials = (authorName: string): string => {
 const copyToClipboard = async () => {
   try {
     await navigator.clipboard.writeText(props.snippet.content)
-    // TODO: Add toast notification for successful copy
-    // You can use: toast.success('Code copied to clipboard!')
-    console.log('Code copied to clipboard!')
+    toast.success('Code copied to clipboard!')
   } catch (err) {
     console.error('Failed to copy code:', err)
     // TODO: Add error toast
