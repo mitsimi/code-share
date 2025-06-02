@@ -57,9 +57,6 @@
         <!-- Hero Code Preview -->
         <div class="mt-16 sm:mt-24">
           <div class="relative mx-auto max-w-5xl">
-            <div
-              class="from-background via-background/20 absolute inset-0 z-10 rounded-lg bg-gradient-to-t to-transparent"
-            ></div>
             <div class="bg-card overflow-hidden rounded-lg border shadow">
               <div class="bg-muted/30 flex items-center justify-between border-b px-4 py-3">
                 <!-- Window Management Buttons -->
@@ -198,7 +195,7 @@
             </div>
             <div class="flex items-center gap-2">
               <DatabaseIcon class="h-4 w-4" />
-              Golang
+              Go + SQLite
             </div>
           </div>
         </div>
@@ -353,9 +350,7 @@ const testimonials = [
   },
 ]
 
-// Event handlers
 const handleGetStarted = () => {
-  // Navigate to signup or create snippet page
   router.push({ name: 'signup' })
 }
 
