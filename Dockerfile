@@ -49,7 +49,7 @@ COPY --from=go-builder /app/main .
 # Expose the port the app runs on
 EXPOSE 8080
 
-ENV ENV=production
+ENV GO_ENV=production
 ENV SERVE_STATIC=true
 
 # Command to run the application

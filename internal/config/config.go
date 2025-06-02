@@ -19,7 +19,7 @@ type Config struct {
 // New creates a new configuration
 func New() (*Config, error) {
 	// Get environment
-	env := os.Getenv("ENV")
+	env := os.Getenv("GO_ENV")
 	if env == "" {
 		env = "development"
 	}
