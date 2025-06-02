@@ -52,91 +52,93 @@
                   v-model="password"
                 />
               </FormControl>
-              <div v-show="showRequirements" class="mt-2 text-sm">
-                <p class="text-muted-foreground font-medium">Password must contain:</p>
-                <ul class="mt-1 space-y-1">
-                  <li class="flex items-center gap-2">
-                    <template v-if="password.length >= 8">
-                      <CheckCircle2Icon class="size-4 text-green-500" />
-                    </template>
-                    <template v-else>
-                      <CircleIcon class="text-muted-foreground size-4" />
-                    </template>
-                    <span
-                      :class="{
-                        'text-green-500': password.length >= 8,
-                        'text-muted-foreground': password.length < 8,
-                      }"
-                    >
-                      At least 8 characters
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <template v-if="hasUpperCase(password)">
-                      <CheckCircle2Icon class="size-4 text-green-500" />
-                    </template>
-                    <template v-else>
-                      <CircleIcon class="text-muted-foreground size-4" />
-                    </template>
-                    <span
-                      :class="{
-                        'text-green-500': hasUpperCase(password),
-                        'text-muted-foreground': !hasUpperCase(password),
-                      }"
-                    >
-                      At least one uppercase letter
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <template v-if="hasLowerCase(password)">
-                      <CheckCircle2Icon class="size-4 text-green-500" />
-                    </template>
-                    <template v-else>
-                      <CircleIcon class="text-muted-foreground size-4" />
-                    </template>
-                    <span
-                      :class="{
-                        'text-green-500': hasLowerCase(password),
-                        'text-muted-foreground': !hasLowerCase(password),
-                      }"
-                    >
-                      At least one lowercase letter
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <template v-if="hasNumber(password)">
-                      <CheckCircle2Icon class="size-4 text-green-500" />
-                    </template>
-                    <template v-else>
-                      <CircleIcon class="text-muted-foreground size-4" />
-                    </template>
-                    <span
-                      :class="{
-                        'text-green-500': hasNumber(password),
-                        'text-muted-foreground': !hasNumber(password),
-                      }"
-                    >
-                      At least one number
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <template v-if="specialCharRegex.test(password)">
-                      <CheckCircle2Icon class="size-4 text-green-500" />
-                    </template>
-                    <template v-else>
-                      <CircleIcon class="text-muted-foreground size-4" />
-                    </template>
-                    <span
-                      :class="{
-                        'text-green-500': specialCharRegex.test(password),
-                        'text-muted-foreground': !specialCharRegex.test(password),
-                      }"
-                    >
-                      At least one special character
-                    </span>
-                  </li>
-                </ul>
-              </div>
+              <template v-show="showRequirements">
+                <div class="mt-2 text-sm">
+                  <p class="text-muted-foreground font-medium">Password must contain:</p>
+                  <ul class="mt-1 space-y-1">
+                    <li class="flex items-center gap-2">
+                      <template v-if="password.length >= 8">
+                        <CheckCircle2Icon class="size-4 text-green-500" />
+                      </template>
+                      <template v-else>
+                        <CircleIcon class="text-muted-foreground size-4" />
+                      </template>
+                      <span
+                        :class="{
+                          'text-green-500': password.length >= 8,
+                          'text-muted-foreground': password.length < 8,
+                        }"
+                      >
+                        At least 8 characters
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <template v-if="hasUpperCase(password)">
+                        <CheckCircle2Icon class="size-4 text-green-500" />
+                      </template>
+                      <template v-else>
+                        <CircleIcon class="text-muted-foreground size-4" />
+                      </template>
+                      <span
+                        :class="{
+                          'text-green-500': hasUpperCase(password),
+                          'text-muted-foreground': !hasUpperCase(password),
+                        }"
+                      >
+                        At least one uppercase letter
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <template v-if="hasLowerCase(password)">
+                        <CheckCircle2Icon class="size-4 text-green-500" />
+                      </template>
+                      <template v-else>
+                        <CircleIcon class="text-muted-foreground size-4" />
+                      </template>
+                      <span
+                        :class="{
+                          'text-green-500': hasLowerCase(password),
+                          'text-muted-foreground': !hasLowerCase(password),
+                        }"
+                      >
+                        At least one lowercase letter
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <template v-if="hasNumber(password)">
+                        <CheckCircle2Icon class="size-4 text-green-500" />
+                      </template>
+                      <template v-else>
+                        <CircleIcon class="text-muted-foreground size-4" />
+                      </template>
+                      <span
+                        :class="{
+                          'text-green-500': hasNumber(password),
+                          'text-muted-foreground': !hasNumber(password),
+                        }"
+                      >
+                        At least one number
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <template v-if="specialCharRegex.test(password)">
+                        <CheckCircle2Icon class="size-4 text-green-500" />
+                      </template>
+                      <template v-else>
+                        <CircleIcon class="text-muted-foreground size-4" />
+                      </template>
+                      <span
+                        :class="{
+                          'text-green-500': specialCharRegex.test(password),
+                          'text-muted-foreground': !specialCharRegex.test(password),
+                        }"
+                      >
+                        At least one special character
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </template>
               <!--FormMessage /-->
             </FormItem>
           </FormField>
