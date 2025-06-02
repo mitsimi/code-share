@@ -90,6 +90,7 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
       :is-error="isError"
       :error-message="error?.message || 'An unexpected error occurred'"
       @retry="refetch"
+      @create-snippet="showModal = true"
     />
   </main>
 

@@ -72,24 +72,21 @@
   </div>
 
   <!-- Empty State -->
-  <div v-else-if="isEmpty" class="flex flex-col items-center justify-center py-16 text-center">
+  <div v-else-if="true" class="flex flex-col items-center justify-center py-16 text-center">
     <div class="bg-muted/50 mb-6 rounded-full p-6">
       <FileCode class="text-muted-foreground h-16 w-16" />
     </div>
+
     <h3 class="text-foreground mb-3 text-2xl font-bold">No code snippets found</h3>
+
     <p class="text-muted-foreground mb-6 max-w-md">
       Be the first to share your code snippet with the community! Start building something amazing.
     </p>
-    <div class="flex flex-col gap-3 sm:flex-row">
-      <Button @click="$emit('create-snippet')" size="lg" class="gap-2">
-        <Plus class="h-4 w-4" />
-        Share Your First Snippet
-      </Button>
-      <Button @click="$emit('browse-examples')" variant="outline" size="lg" class="gap-2">
-        <Search class="h-4 w-4" />
-        Browse Examples
-      </Button>
-    </div>
+
+    <Button @click="$emit('create-snippet')" size="lg" class="gap-2">
+      <Plus class="h-4 w-4" />
+      Share Your First Snippet
+    </Button>
   </div>
 
   <!-- Grid with Code Snippets -->
@@ -113,7 +110,7 @@
 import SnippetCard from './SnippetCard.vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, RotateCcw, FileCode, Plus, Search } from 'lucide-vue-next'
+import { AlertTriangle, RotateCcw, FileCode, Plus } from 'lucide-vue-next'
 import type { Snippet } from '@/types'
 
 defineProps<{
@@ -127,12 +124,11 @@ defineProps<{
 defineEmits<{
   (e: 'retry'): void
   (e: 'create-snippet'): void
-  (e: 'browse-examples'): void
 }>()
 
 const router = useRouter()
 
 const handleCardClick = (card: Snippet) => {
-  router.push(`/snippets/${card.id}`)
+  router.push({ name: 'snippet', params: { id: card.id } })
 }
 </script>
