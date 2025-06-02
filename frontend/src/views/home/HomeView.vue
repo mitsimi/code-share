@@ -263,7 +263,6 @@ import {
   TagIcon,
   GraduationCapIcon,
 } from 'lucide-vue-next'
-import { toast } from 'vue-sonner'
 
 // Features data
 const features = [
@@ -357,11 +356,10 @@ const testimonials = [
 // Event handlers
 const handleGetStarted = () => {
   // Navigate to signup or create snippet page
-  toast.info('Start Sharing code')
+  router.push({ name: 'signup' })
 }
 
 const handleBrowseSnippets = () => {
-  // Navigate to snippets browse page
-  router.push('/snippets')
+  router.push({ name: 'snippets' })
 }
 </script>
