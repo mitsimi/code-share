@@ -72,7 +72,7 @@
   </div>
 
   <!-- Empty State -->
-  <div v-else-if="true" class="flex flex-col items-center justify-center py-16 text-center">
+  <div v-else-if="isEmpty" class="flex flex-col items-center justify-center py-16 text-center">
     <div class="bg-muted/50 mb-6 rounded-full p-6">
       <FileCode class="text-muted-foreground h-16 w-16" />
     </div>
