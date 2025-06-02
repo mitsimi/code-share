@@ -77,11 +77,11 @@
         <div class="flex items-center gap-2">
           <!-- Save/Bookmark button -->
           <Button
+            v-if="authStore.isAuthenticated()"
             variant="ghost"
             size="sm"
             class="h-8 w-8 p-0"
-            :class="{ 'pointer-events-none': !authStore.isAuthenticated() }"
-            @click.stop="authStore.isAuthenticated() && toggleSave()"
+            @click.stop="toggleSave"
           >
             <BookmarkIcon
               :class="[
