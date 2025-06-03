@@ -1,0 +1,36 @@
+name: Sync Demo Branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Sync demo branch
+        run: |
+          # Create or update demo branch
+          git checkout demo || git checkout -b demo
+
+          # Fetch latest changes
+          git fetch origin main
+
+          # Rebase demo branch on top of main
+          git rebase origin/main
+
+          # Force push the rebased branch
+          git push origin demo --force-with-lease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
