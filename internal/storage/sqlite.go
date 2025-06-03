@@ -167,8 +167,8 @@ func (s *SQLiteStorage) DeleteExpiredSessions() error {
 	return s.q.DeleteExpiredSessions(s.ctx)
 }
 
-func (s *SQLiteStorage) GetSnippets(id UserID) ([]models.Snippet, error) {
-	snippets, err := s.q.GetSnippets(s.ctx, id)
+func (s *SQLiteStorage) GetSnippets(userID UserID) ([]models.Snippet, error) {
+	snippets, err := s.q.GetSnippets(s.ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -190,10 +190,7 @@ func (s *SQLiteStorage) GetSnippets(id UserID) ([]models.Snippet, error) {
 	return result, nil
 }
 
-func (s *SQLiteStorage) GetSnippet(id string) (models.Snippet, error) {
-	// For now, we'll use a dummy user ID since we don't have authentication
-	userID := "current_user"
-
+func (s *SQLiteStorage) GetSnippet(userID UserID, id string) (models.Snippet, error) {
 	snippet, err := s.q.GetSnippet(s.ctx, db.GetSnippetParams{
 		UserID: userID,
 		ID:     id,
@@ -250,10 +247,7 @@ func (s *SQLiteStorage) DeleteSnippet(id SnippetID) error {
 	return s.q.DeleteSnippet(s.ctx, id)
 }
 
-func (s *SQLiteStorage) ToggleLikeSnippet(id SnippetID, isLike bool) error {
-	// For now, we'll use a dummy user ID since we don't have authentication
-	userID := "current_user"
-
+func (s *SQLiteStorage) ToggleLikeSnippet(userID UserID, id SnippetID, isLike bool) error {
 	// Start a transaction
 	tx, err := s.db.Begin()
 	if err != nil {

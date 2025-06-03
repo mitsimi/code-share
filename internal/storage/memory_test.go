@@ -83,7 +83,7 @@ func TestMemoryCreateAndGetSnippet(t *testing.T) {
 	username := "testuser"
 	email := "testuser@example.com"
 	password := "password123"
-	_, err := store.CreateUser(username, email, password)
+	user, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestMemoryCreateAndGetSnippet(t *testing.T) {
 	}
 
 	// Get the snippet
-	gotSnippet, err := store.GetSnippet(snippetID)
+	gotSnippet, err := store.GetSnippet(user.ID, snippetID)
 	if err != nil {
 		t.Fatalf("Failed to get snippet: %v", err)
 	}
@@ -134,7 +134,7 @@ func TestMemoryUpdateSnippet(t *testing.T) {
 	username := "testuser"
 	email := "testuser@example.com"
 	password := "password123"
-	_, err := store.CreateUser(username, email, password)
+	user, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestMemoryUpdateSnippet(t *testing.T) {
 	}
 
 	// Get the updated snippet
-	gotSnippet, err := store.GetSnippet(snippetID)
+	gotSnippet, err := store.GetSnippet(user.ID, snippetID)
 	if err != nil {
 		t.Fatalf("Failed to get updated snippet: %v", err)
 	}
@@ -186,7 +186,7 @@ func TestMemoryDeleteSnippet(t *testing.T) {
 	username := "testuser"
 	email := "testuser@example.com"
 	password := "password123"
-	_, err := store.CreateUser(username, email, password)
+	user, err := store.CreateUser(username, email, password)
 	if err != nil {
 		t.Fatalf("Failed to create user: %v", err)
 	}
@@ -210,7 +210,7 @@ func TestMemoryDeleteSnippet(t *testing.T) {
 	}
 
 	// Try to get the deleted snippet
-	_, err = store.GetSnippet(snippetID)
+	_, err = store.GetSnippet(user.ID, snippetID)
 	if err == nil {
 		t.Error("Expected error when getting deleted snippet")
 	}

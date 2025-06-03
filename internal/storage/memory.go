@@ -215,7 +215,7 @@ func (s *MemoryStorage) GetSnippets(id UserID) ([]models.Snippet, error) {
 	return snippets, nil
 }
 
-func (s *MemoryStorage) GetSnippet(id string) (models.Snippet, error) {
+func (s *MemoryStorage) GetSnippet(userUd, id string) (models.Snippet, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -265,7 +265,7 @@ func (s *MemoryStorage) DeleteSnippet(id string) error {
 	return nil
 }
 
-func (s *MemoryStorage) ToggleLikeSnippet(id string, isLike bool) error {
+func (s *MemoryStorage) ToggleLikeSnippet(userID, id string, isLike bool) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
