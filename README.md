@@ -56,13 +56,14 @@ A modern web application for sharing and managing code snippets, built with Go a
 - `DELETE /api/snippets/{id}` - Delete a snippet
 - `PATCH /api/snippets/{id}/like?action=like|unlike` - Like or unlike a snippet
 
-## Development
-
-### Prerequisites
+## Prerequisites
 
 - Go 1.24 or later
-- Node.js 22.14 or later
+- Node.js 22.x or later
 - pnpm (recommended) or npm
+- Docker and Docker Compose (optional)
+
+## Development
 
 ### Backend Setup
 
@@ -123,16 +124,15 @@ The frontend is built with Vue.js and uses:
 - Pinia for state management
 - TanStack Query for data fetching
 - VeeValidate with Zod for form validation
-- Vue Sonner for toast notifications
 
 ## Technologies Used
 
 ### Backend
 
 - Go
-- PostgreSQL
+- SQLite
 - SQLC
-- Air (for hot reload)
+- Air (for live reload)
 - Docker
 
 ### Frontend
@@ -143,30 +143,21 @@ The frontend is built with Vue.js and uses:
 - Tailwind CSS
 - Pinia
 - TanStack Query
-- VeeValidate
 - Zod
-- Vue Sonner
 
 ## Future Improvements
 
 - [x] Add database integration
 - [x] Add user authentication
 - [ ] Add syntax highlighting
+- [ ] Possibility to bookmark snippets
+- [ ] Add user profiles
 
 Optional:
 
 - [ ] Add snippet categories/tags
 - [ ] Add search functionality
-- [ ] Add user profiles
 - [ ] Add comments on snippets
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
