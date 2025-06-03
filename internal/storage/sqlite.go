@@ -167,11 +167,8 @@ func (s *SQLiteStorage) DeleteExpiredSessions() error {
 	return s.q.DeleteExpiredSessions(s.ctx)
 }
 
-func (s *SQLiteStorage) GetSnippets() ([]models.Snippet, error) {
-	// For now, we'll use a dummy user ID since we don't have authentication
-	userID := "current_user"
-
-	snippets, err := s.q.GetSnippets(s.ctx, userID)
+func (s *SQLiteStorage) GetSnippets(id UserID) ([]models.Snippet, error) {
+	snippets, err := s.q.GetSnippets(s.ctx, id)
 	if err != nil {
 		return nil, err
 	}

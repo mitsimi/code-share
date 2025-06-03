@@ -33,7 +33,9 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(zap.String("request_id", requestID))
 
-	snippets, err := h.storage.GetSnippets()
+	userID := GetUserID(r)
+
+	snippets, err := h.storage.GetSnippets(userID)
 	if err != nil {
 		log.Error("failed to get snippets",
 			zap.Error(err),

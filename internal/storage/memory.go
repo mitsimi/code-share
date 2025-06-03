@@ -204,7 +204,7 @@ func (s *MemoryStorage) UpdateSessionExpiry(token string, expiresAt UnixTime, re
 	return nil
 }
 
-func (s *MemoryStorage) GetSnippets() ([]models.Snippet, error) {
+func (s *MemoryStorage) GetSnippets(id UserID) ([]models.Snippet, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

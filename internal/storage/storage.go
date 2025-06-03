@@ -29,7 +29,7 @@ type Storage interface {
 	UpdateSessionExpiry(sessionID string, expiresAt UnixTime, refreshToken string) error
 
 	// Snippet management
-	GetSnippets() ([]models.Snippet, error)
+	GetSnippets(id UserID) ([]models.Snippet, error)
 	GetSnippet(id SnippetID) (models.Snippet, error)
 	CreateSnippet(snippet models.Snippet) (SnippetID, error)
 	UpdateSnippet(snippet models.Snippet) error
