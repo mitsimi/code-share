@@ -48,3 +48,5 @@ jobs:
       contents: read
       packages: write
     uses: ./.github/workflows/demo-docker.yml
+    with:
+      ref: "demo"
