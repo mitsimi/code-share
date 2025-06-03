@@ -41,5 +41,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-demo-docker:
-    needs: sync-demo # Wait for sync to complete
-    uses: ./.github/workflows/demo-docker.yml # Call the demo-docker workflow
+    needs: sync-demo
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/demo-docker.yml
