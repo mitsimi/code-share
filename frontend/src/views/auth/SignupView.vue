@@ -193,7 +193,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { CheckCircle2Icon, CircleIcon } from 'lucide-vue-next'
 
@@ -235,23 +234,10 @@ const { handleSubmit } = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = handleSubmit(async (values) => {
-  try {
-    isLoading.value = true
-    const { confirmPassword, ...signupData } = values
-    const response = await authService.signup(signupData)
-    authStore.setAuth({
-      user: response.user,
-      token: response.token,
-      refreshToken: response.refreshToken,
-      expiresAt: response.expiresAt,
-    })
-    router.push('/snippets')
-  } catch (error) {
-    console.log(error)
-    toast.error(error instanceof Error ? error.message : 'Failed to create account')
-  } finally {
-    isLoading.value = false
-  }
+const onSubmit = handleSubmit(async () => {
+  toast.info('Signups are disabled', {
+    description:
+      'For this demo instance signups are disabled. Use the provided demo user at the login page.',
+  })
 })
 </script>

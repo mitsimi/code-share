@@ -37,13 +37,9 @@ func main() {
 		logger.Fatal("Failed to initialize SQLite storage", zap.Error(err))
 	}
 
-	if cfg.Seed {
-		logger.Debug("Seeding database")
-		// Seed the database with sample data
-		if err := store.Seed(); err != nil {
-			logger.Error("Warning: Failed to seed database", zap.Error(err))
-		}
-		logger.Debug("Seeding finished successfully")
+	// Always ensure demo user exists
+	if err := store.Seed(); err != nil {
+		logger.Error("Warning: Failed to seed database", zap.Error(err))
 	}
 
 	// Create server

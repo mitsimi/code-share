@@ -30,6 +30,60 @@
           <Button type="submit" class="w-full" :disabled="isLoading">
             {{ isLoading ? 'Logging in...' : 'Login' }}
           </Button>
+
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t" />
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-background text-muted-foreground px-2">Or</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            class="relative w-full"
+            :disabled="isLoading"
+            @click="handleDemoLogin"
+          >
+            <span class="flex items-center justify-center gap-2">
+              Try Demo Version
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon class="text-muted-foreground h-4 w-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p class="max-w-xs">
+                      The demo version gives you access to a pre-configured account with sample
+                      data. All changes are temporary and will be reset periodically.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </span>
+            <span
+              v-if="isLoading"
+              class="bg-background/80 absolute inset-0 flex items-center justify-center"
+            >
+              <span class="animate-spin">⌛</span>
+            </span>
+          </Button>
+          <p class="text-muted-foreground text-center text-sm">
+            Demo credentials:<br />
+            Email: demo@example.com<br />
+            Password: password123
+          </p>
+          <div class="bg-muted rounded-lg p-3 text-sm">
+            <p class="text-muted-foreground font-medium">Demo Account Information:</p>
+            <ul class="text-muted-foreground mt-2 list-inside list-disc space-y-1">
+              <li>Access to sample data and features</li>
+              <li>Changes are temporary and will reset</li>
+              <li>Limited functionality compared to full accounts</li>
+              <li>Perfect for exploring the platform</li>
+            </ul>
+          </div>
         </form>
       </CardContent>
       <CardFooter class="flex justify-center">
@@ -100,4 +154,27 @@ const onSubmit = handleSubmit(async (values) => {
     isLoading.value = false
   }
 })
+
+const handleDemoLogin = async () => {
+  try {
+    isLoading.value = true
+    const response = await authService.login({
+      email: 'demo@example.com',
+      password: 'password123',
+    })
+    authStore.setAuth({
+      user: response.user,
+      token: response.token,
+      refreshToken: response.refreshToken,
+      expiresAt: response.expiresAt,
+    })
+    const redirectPath = route.query.redirect as string
+    router.push(redirectPath || '/snippets')
+  } catch (error) {
+    console.log(error)
+    toast.error(error instanceof Error ? error.message : 'Failed to login to demo account')
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
