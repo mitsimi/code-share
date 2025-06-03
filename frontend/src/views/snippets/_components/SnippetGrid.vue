@@ -129,6 +129,6 @@ defineEmits<{
 const router = useRouter()
 
 const handleCardClick = (card: Snippet) => {
-  router.push({ name: 'snippet', params: { id: card.id } })
+  router.push({ name: 'snippet-details', params: { snippetId: card.id } })
 }
 </script>
