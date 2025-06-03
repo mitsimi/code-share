@@ -20,6 +20,7 @@ func (s *SQLiteStorage) Seed() error {
 
 	// Create sample users if they don't exist
 	users := map[string]string{
+		"Demo User":                "demo@example.com",
 		"John Doe":                 "john@example.com",
 		"Alice Johnson":            "alice@example.com",
 		"Paula Cyan":               "paula@example.com",
