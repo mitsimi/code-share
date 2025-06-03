@@ -28,7 +28,7 @@
           </p>
 
           <div class="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Button size="lg" class="text-base" @click="handleGetStarted">
+            <Button variant="reverse" size="lg" class="text-base" @click="handleGetStarted">
               <FileCodeIcon class="mr-2 h-4 w-4" />
               Start Sharing Code
             </Button>
