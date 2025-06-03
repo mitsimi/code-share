@@ -40,6 +40,7 @@ func New(storage storage.Storage, secretKey string) *Server {
 	}
 	s.setupMiddleware()
 	s.setupRoutes()
+	s.startSessionCleanup()
 	return s
 }
 
@@ -155,6 +156,22 @@ func (s *Server) setupRoutes() {
 			http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
 		})
 	}
+}
+
+// startSessionCleanup starts a background goroutine to periodically clean up expired sessions
+func (s *Server) startSessionCleanup() {
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour) // Run cleanup every hour
+		defer ticker.Stop()
+
+		for range ticker.C {
+			if err := s.storage.DeleteExpiredSessions(); err != nil {
+				s.logger.Error("Failed to delete expired sessions", zap.Error(err))
+			} else {
+				s.logger.Debug("Successfully cleaned up expired sessions")
+			}
+		}
+	}()
 }
 
 // Start starts the server
