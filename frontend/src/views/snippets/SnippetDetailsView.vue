@@ -2,7 +2,7 @@
   <main class="mx-auto my-12 max-w-7xl px-4 lg:w-fit lg:min-w-4xl">
     <!-- Back button -->
     <Button variant="outline" @click="router.back()">
-      <ArrowLeft class="size-5" />
+      <ArrowLeftIcon class="size-5" />
       Back
     </Button>
 
@@ -62,6 +62,7 @@ import { useFetch } from '@/composables/useCustomFetch'
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LikeButton from './_components/LikeButton.vue'
+import { ArrowLeftIcon } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
