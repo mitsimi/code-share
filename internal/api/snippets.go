@@ -31,9 +31,8 @@ func NewSnippetHandler(storage storage.Storage) *SnippetHandler {
 // GetSnippets returns all snippets
 func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
-	log := h.logger.With(zap.String("request_id", requestID))
-
 	userID := GetUserID(r)
+	log := h.logger.With(zap.String("request_id", requestID), zap.String("user_id", userID))
 
 	snippets, err := h.storage.GetSnippets(userID)
 	if err != nil {
@@ -78,12 +77,14 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
+	userID := GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", id),
+		zap.String("user_id", userID),
 	)
 
-	snippet, err := h.storage.GetSnippet(id)
+	snippet, err := h.storage.GetSnippet(userID, id)
 	if err != nil {
 		log.Error("failed to get snippet",
 			zap.Error(err),
@@ -112,7 +113,8 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 // CreateSnippet creates a new snippet
 func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
-	log := h.logger.With(zap.String("request_id", requestID))
+	userID := GetUserID(r)
+	log := h.logger.With(zap.String("request_id", requestID), zap.String("user_id", userID))
 
 	var req models.SnippetCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -123,8 +125,6 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user ID from context
-	userID := GetUserID(r)
 	if userID == "" {
 		log.Error("no user ID in context")
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
@@ -157,7 +157,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	s, _ := h.storage.GetSnippet(id)
+	s, _ := h.storage.GetSnippet(userID, id)
 	log.Info("created new snippet",
 		zap.String("id", id),
 		zap.String("title", s.Title),
@@ -171,9 +171,11 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
+	userID := GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", id),
+		zap.String("user_id", userID),
 	)
 
 	var req models.SnippetCreateRequest
@@ -185,12 +187,21 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snippet, err := h.storage.GetSnippet(id)
+	snippet, err := h.storage.GetSnippet(userID, id)
 	if err != nil {
 		log.Error("failed to get snippet for update",
 			zap.Error(err),
 		)
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if snippet.Author != userID {
+		log.Error("unauthorized update attempt",
+			zap.String("snippet_author", snippet.Author),
+			zap.String("user_id", userID),
+		)
+		http.Error(w, "Only the author can update this snippet", http.StatusForbidden)
 		return
 	}
 
@@ -225,14 +236,33 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 
 // DeleteSnippet deletes a snippet
 func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	snippetID := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
+	userID := GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
-		zap.String("snippet_id", id),
+		zap.String("snippet_id", snippetID),
+		zap.String("user_id", userID),
 	)
 
-	if err := h.storage.DeleteSnippet(id); err != nil {
+	snippet, err := h.storage.GetSnippet(userID, snippetID)
+	if err != nil {
+		log.Error("failed to get snippet",
+			zap.Error(err),
+		)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if snippet.Author != userID {
+		log.Error("unauthorized deletion attempt",
+			zap.String("snippet_author", snippet.Author),
+			zap.String("user_id", userID),
+		)
+		http.Error(w, "Only the author can delete this snippet", http.StatusForbidden)
+		return
+	}
+
+	if err := h.storage.DeleteSnippet(snippetID); err != nil {
 		log.Error("failed to delete snippet",
 			zap.Error(err),
 		)
@@ -248,9 +278,11 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
+	userID := GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", id),
+		zap.String("user_id", userID),
 	)
 
 	// Parse the action from query parameters
@@ -263,7 +295,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := h.storage.ToggleLikeSnippet(id, action == "like"); err != nil {
+	if err := h.storage.ToggleLikeSnippet(userID, id, action == "like"); err != nil {
 		log.Error("failed to toggle like",
 			zap.Error(err),
 			zap.String("action", action),
@@ -273,7 +305,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Get the updated snippet
-	snippet, err := h.storage.GetSnippet(id)
+	snippet, err := h.storage.GetSnippet(userID, id)
 	if err != nil {
 		log.Error("failed to get updated snippet",
 			zap.Error(err),
