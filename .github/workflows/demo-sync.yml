@@ -5,12 +5,13 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
   sync-demo:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,6 +24,7 @@ jobs:
           git config user.email "actions@github.com"
 
       - name: Sync demo branch
+        id: sync
         run: |
           # Create or update demo branch
           git checkout demo || git checkout -b demo
@@ -37,3 +39,7 @@ jobs:
           git push origin demo --force-with-lease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-demo-docker:
+    needs: sync-demo # Wait for sync to complete
+    uses: ./.github/workflows/demo-docker.yml # Call the demo-docker workflow
