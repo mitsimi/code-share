@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"mitsimi.dev/codeShare/frontend"
@@ -137,7 +138,7 @@ func (s *Server) setupRoutes() {
 	})
 
 	// Only serve static files if SERVE_STATIC is set to "true"
-	if os.Getenv("SERVE_STATIC") == "true" {
+	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {
 		// Handle all other routes by serving index.html
 		s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 			indexFile, err := frontend.DistDirFS.Open("index.html")
