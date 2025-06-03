@@ -52,7 +52,7 @@
                   v-model="password"
                 />
               </FormControl>
-              <template v-show="showRequirements">
+              <template v-if="showRequirements">
                 <div class="mt-2 text-sm">
                   <p class="text-muted-foreground font-medium">Password must contain:</p>
                   <ul class="mt-1 space-y-1">
