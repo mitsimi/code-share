@@ -1,4 +1,4 @@
-name: Sync Demo Branch
+name: Sync Demo Branch and Build
 
 on:
   push:
@@ -6,8 +6,39 @@ on:
       - main
 
 jobs:
+  check-changes:
+      name: Check for relevant file changes
+      runs-on: ubuntu-latest
+      outputs:
+        changes_detected: ${{ steps.changed_files_specific.outputs.any_changed }}
+      steps:
+        - name: Checkout repository (main branch)
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+  
+        - name: Get changed Go and JavaScript files
+          id: changed_files_specific
+          uses: tj-actions/changed-files@v44 
+          with:
+            files: |
+              **.go
+              **.js
+              **.ts
+              **.jsx
+              **.tsx
+              **.vue
+              **.sql
+  
+        - name: Echo decision
+          if: always()
+          run: |
+            echo "files changed: ${{ steps.changed_files_specific.outputs.any_changed }}"
+
   sync-demo:
     name: Sync main to demo
+    needs: check-changes
+    if: needs.check-changes.outputs.changes_detected == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
