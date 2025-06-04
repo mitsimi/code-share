@@ -1,9 +1,9 @@
 <template>
   <div class="bg-primary/95 supports-[backdrop-filter]:bg-primary/60 border-b backdrop-blur">
     <div class="container mx-auto flex h-10 items-center justify-between px-4">
-      <div class="flex items-center space-x-2">
+      <div class="text-primary-foreground/80 flex items-center space-x-2">
         <CircleAlertIcon class="size-4" />
-        <span class="text-primary-foreground/80 text-sm font-semibold"> Demo Version</span>
+        <span class="text-sm font-semibold"> Demo Version</span>
         <span class="text-primary-foreground/60 text-sm"
           >This is a demonstration of the application</span
         >
