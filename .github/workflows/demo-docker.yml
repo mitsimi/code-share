@@ -42,6 +42,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/code-share:demo
-            ghcr.io/${{ github.repository_owner }}/code-share:demo-${{ github.sha }}
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/code-share:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/code-share:buildcache,mode=max
