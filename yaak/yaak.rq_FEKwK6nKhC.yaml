@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_FEKwK6nKhC
+createdAt: 2025-05-19T15:07:18.830570
+updatedAt: 2025-05-26T16:14:05.088139
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_kb6ND2zGAX
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "title": "some title",
+      "content": "cat file1 file2 file3",
+      "author": "mitsimi"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: fFEP7rKuPj
+method: PUT
+name: UpdateSnippet
+sortPriority: 1000.0
+url: ${[ BASE_URL ]}/snippets/9477232c-2fc5-4ea6-9b21-15dd30131064
+urlParameters: []
