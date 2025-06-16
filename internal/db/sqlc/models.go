@@ -44,3 +44,9 @@ type UserLike struct {
 	UserID    string    `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type UserSafe struct {
+	SnippetID string    `json:"snippet_id"`
+	UserID    string    `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}

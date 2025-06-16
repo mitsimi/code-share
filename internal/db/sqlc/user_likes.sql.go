@@ -9,6 +9,25 @@ import (
 	"context"
 )
 
+const checkLikeExists = `-- name: CheckLikeExists :one
+SELECT 1 as exists_flag
+FROM user_likes 
+WHERE snippet_id = ? AND user_id = ?
+LIMIT 1
+`
+
+type CheckLikeExistsParams struct {
+	SnippetID string `json:"snippet_id"`
+	UserID    string `json:"user_id"`
+}
+
+func (q *Queries) CheckLikeExists(ctx context.Context, arg CheckLikeExistsParams) (int64, error) {
+	row := q.queryRow(ctx, q.checkLikeExistsStmt, checkLikeExists, arg.SnippetID, arg.UserID)
+	var exists_flag int64
+	err := row.Scan(&exists_flag)
+	return exists_flag, err
+}
+
 const decrementLikesCount = `-- name: DecrementLikesCount :exec
 UPDATE snippets 
 SET likes = likes - 1 
@@ -17,6 +36,21 @@ WHERE id = ?
 
 func (q *Queries) DecrementLikesCount(ctx context.Context, id string) error {
 	_, err := q.exec(ctx, q.decrementLikesCountStmt, decrementLikesCount, id)
+	return err
+}
+
+const deleteLike = `-- name: DeleteLike :exec
+DELETE FROM user_likes
+WHERE snippet_id = ? AND user_id = ?
+`
+
+type DeleteLikeParams struct {
+	SnippetID string `json:"snippet_id"`
+	UserID    string `json:"user_id"`
+}
+
+func (q *Queries) DeleteLike(ctx context.Context, arg DeleteLikeParams) error {
+	_, err := q.exec(ctx, q.deleteLikeStmt, deleteLike, arg.SnippetID, arg.UserID)
 	return err
 }
 
@@ -43,21 +77,6 @@ type LikeSnippetParams struct {
 
 func (q *Queries) LikeSnippet(ctx context.Context, arg LikeSnippetParams) error {
 	_, err := q.exec(ctx, q.likeSnippetStmt, likeSnippet, arg.SnippetID, arg.UserID)
-	return err
-}
-
-const unlikeSnippet = `-- name: UnlikeSnippet :exec
-DELETE FROM user_likes
-WHERE snippet_id = ? AND user_id = ?
-`
-
-type UnlikeSnippetParams struct {
-	SnippetID string `json:"snippet_id"`
-	UserID    string `json:"user_id"`
-}
-
-func (q *Queries) UnlikeSnippet(ctx context.Context, arg UnlikeSnippetParams) error {
-	_, err := q.exec(ctx, q.unlikeSnippetStmt, unlikeSnippet, arg.SnippetID, arg.UserID)
 	return err
 }
 

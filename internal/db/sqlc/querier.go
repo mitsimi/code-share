@@ -9,11 +9,13 @@ import (
 )
 
 type Querier interface {
+	CheckLikeExists(ctx context.Context, arg CheckLikeExistsParams) (int64, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateSnippet(ctx context.Context, arg CreateSnippetParams) (Snippet, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DecrementLikesCount(ctx context.Context, id string) error
 	DeleteExpiredSessions(ctx context.Context) error
+	DeleteLike(ctx context.Context, arg DeleteLikeParams) error
 	DeleteSession(ctx context.Context, token string) error
 	DeleteSnippet(ctx context.Context, id string) error
 	GetSession(ctx context.Context, token string) (Session, error)
@@ -24,7 +26,6 @@ type Querier interface {
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	IncrementLikesCount(ctx context.Context, id string) error
 	LikeSnippet(ctx context.Context, arg LikeSnippetParams) error
-	UnlikeSnippet(ctx context.Context, arg UnlikeSnippetParams) error
 	UpdateLikesCount(ctx context.Context, arg UpdateLikesCountParams) error
 	UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) error
 	UpdateSnippet(ctx context.Context, arg UpdateSnippetParams) (Snippet, error)

@@ -24,3 +24,8 @@ SET likes = (
     WHERE snippet_id = ?
 )
 WHERE id = ?;
+-- name: CheckLikeExists :one
+SELECT 1 as exists_flag
+FROM user_likes 
+WHERE snippet_id = ? AND user_id = ?
+LIMIT 1;
