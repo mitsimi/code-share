@@ -7,7 +7,7 @@ import (
 )
 
 // In-memory storage for snippets (to be replaced with a database later)
-var sampleSnippets = []models.Snippet{
+var SampleSnippets = []models.Snippet{
 	{
 		ID:        "1",
 		Title:     "Vue 3 Composition API Example",
