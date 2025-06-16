@@ -14,6 +14,7 @@ export interface Snippet {
 export interface User {
   id: string
   username: string
+  avatar: string
   email: string
   createdAt: string
   updatedAt: string

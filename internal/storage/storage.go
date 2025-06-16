@@ -16,9 +16,12 @@ type (
 type Storage interface {
 	// User management
 	CreateUser(username, email, password string) (db.User, error)
-	GetUser(id UserID) (db.User, error)
+	GetUserByID(id UserID) (db.User, error)
 	GetUserByUsername(username string) (db.User, error)
 	GetUserByEmail(email string) (db.User, error)
+	UpdateUser(userID UserID, username, email string) (db.User, error)
+	UpdateUserAvatar(userID UserID, avatarURL string) (db.User, error)
+	UpdateUserPassword(userID UserID, password string) error
 
 	// Session management
 	Login(email, password string) (UserID, error)

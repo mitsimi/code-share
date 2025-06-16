@@ -172,58 +172,6 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// GetCurrentUser returns the current user's information
-func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
-	requestID := middleware.GetReqID(r.Context())
-	log := h.logger.With(zap.String("request_id", requestID))
-
-	// Get session cookie
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		log.Error("failed to get session cookie",
-			zap.Error(err),
-		)
-		http.Error(w, "Not authenticated", http.StatusUnauthorized)
-		return
-	}
-
-	// Get session
-	session, err := h.storage.GetSession(cookie.Value)
-	if err != nil {
-		log.Error("failed to get session",
-			zap.Error(err),
-		)
-		http.Error(w, "Not authenticated", http.StatusUnauthorized)
-		return
-	}
-
-	// Check if session is expired
-	if session.ExpiresAt < time.Now().Unix() {
-		log.Error("session expired",
-			zap.Int64("expires_at", session.ExpiresAt),
-		)
-		http.Error(w, "Session expired", http.StatusUnauthorized)
-		return
-	}
-
-	// Get user
-	user, err := h.storage.GetUser(session.UserID)
-	if err != nil {
-		log.Error("failed to get user",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	log.Info("retrieved current user",
-		zap.String("username", user.Username),
-		zap.String("email", user.Email),
-	)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(models.FromDBUser(user))
-}
-
 // RefreshToken handles token refresh requests
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
@@ -301,4 +249,21 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+// UpdateProfileRequest represents the request body for updating a user's profile
+type UpdateProfileRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+// UpdatePasswordRequest represents the request body for updating a user's password
+type UpdatePasswordRequest struct {
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword     string `json:"newPassword"`
+}
+
+// UpdateAvatarRequest represents the request body for updating a user's avatar
+type UpdateAvatarRequest struct {
+	AvatarURL string `json:"avatarUrl"`
 }

@@ -32,10 +32,9 @@
             <Button variant="reverse" size="sm" @click="handleSignup"> Sign Up </Button>
           </template>
           <template v-else>
-            <Button variant="ghost" size="sm" @click="handleLogout">
-              <LogOut class="mr-2 h-4 w-4" />
-              Logout
-            </Button>
+            <div class="flex items-center space-x-2">
+              <ProfileMenu @logout="handleLogout" />
+            </div>
           </template>
         </div>
 
@@ -107,6 +106,7 @@ import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 import ThemeSwitch from './ThemeSwitch.vue'
 import Separator from '../ui/separator/Separator.vue'
+import ProfileMenu from '../ProfileMenu.vue'
 
 const authStore = useAuthStore()
 

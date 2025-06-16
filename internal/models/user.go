@@ -24,6 +24,7 @@ func FromDBUser(user db.User) User {
 	return User{
 		ID:           user.ID,
 		Username:     user.Username,
+		Avatar:       user.Avatar.String,
 		Email:        user.Email,
 		PasswordHash: user.PasswordHash,
 		CreatedAt:    user.CreatedAt,

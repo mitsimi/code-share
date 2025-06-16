@@ -33,8 +33,8 @@ func (s *SQLiteStorage) CreateUser(username, email, password string) (db.User, e
 	return user, nil
 }
 
-// GetUser gets a user by ID
-func (s *SQLiteStorage) GetUser(id storage.UserID) (db.User, error) {
+// GetUserByID gets a user by ID
+func (s *SQLiteStorage) GetUserByID(id storage.UserID) (db.User, error) {
 	user, err := s.q.GetUser(s.ctx, string(id))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -67,4 +67,48 @@ func (s *SQLiteStorage) GetUserByEmail(email string) (db.User, error) {
 		return db.User{}, err
 	}
 	return user, nil
+}
+
+// UpdateUser updates a user info
+func (s *SQLiteStorage) UpdateUser(userID storage.UserID, username, email string) (db.User, error) {
+	user, err := s.q.UpdateUserInfo(s.ctx, db.UpdateUserInfoParams{
+		ID:       userID,
+		Username: username,
+		Email:    email,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return db.User{}, errors.New("user not found")
+		}
+		return db.User{}, err
+	}
+	return user, nil
+}
+
+// UpdateUserAvatar updates a user's avatar URL
+func (s *SQLiteStorage) UpdateUserAvatar(userID storage.UserID, avatarURL string) (db.User, error) {
+	user, err := s.q.UpdateUserAvatar(s.ctx, db.UpdateUserAvatarParams{
+		ID:     userID,
+		Avatar: sql.NullString{String: avatarURL, Valid: avatarURL != ""},
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return db.User{}, errors.New("user not found")
+		}
+		return db.User{}, err
+	}
+	return user, nil
+}
+
+// UpdateUserPassword updates a user's password
+func (s *SQLiteStorage) UpdateUserPassword(userID storage.UserID, password string) error {
+	passwordHash, err := auth.HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	return s.q.UpdateUserPassword(s.ctx, db.UpdateUserPasswordParams{
+		ID:           userID,
+		PasswordHash: passwordHash,
+	})
 }

@@ -38,109 +38,12 @@
           </FormField>
 
           <FormField v-slot="{ componentField, errorMessage }" name="password">
-            <FormItem>
-              <FormLabel> Password </FormLabel>
-              <FormControl>
-                <Input
-                  v-bind="componentField"
-                  type="password"
-                  placeholder="Create a password"
-                  class="pr-8"
-                  :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
-                  @focus="showRequirements = true"
-                  @blur="showRequirements = false"
-                  v-model="password"
-                />
-              </FormControl>
-              <template v-if="showRequirements">
-                <div class="mt-2 text-sm">
-                  <p class="text-muted-foreground font-medium">Password must contain:</p>
-                  <ul class="mt-1 space-y-1">
-                    <li class="flex items-center gap-2">
-                      <template v-if="password.length >= 8">
-                        <CheckCircle2Icon class="size-4 text-green-500" />
-                      </template>
-                      <template v-else>
-                        <CircleIcon class="text-muted-foreground size-4" />
-                      </template>
-                      <span
-                        :class="{
-                          'text-green-500': password.length >= 8,
-                          'text-muted-foreground': password.length < 8,
-                        }"
-                      >
-                        At least 8 characters
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <template v-if="hasUpperCase(password)">
-                        <CheckCircle2Icon class="size-4 text-green-500" />
-                      </template>
-                      <template v-else>
-                        <CircleIcon class="text-muted-foreground size-4" />
-                      </template>
-                      <span
-                        :class="{
-                          'text-green-500': hasUpperCase(password),
-                          'text-muted-foreground': !hasUpperCase(password),
-                        }"
-                      >
-                        At least one uppercase letter
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <template v-if="hasLowerCase(password)">
-                        <CheckCircle2Icon class="size-4 text-green-500" />
-                      </template>
-                      <template v-else>
-                        <CircleIcon class="text-muted-foreground size-4" />
-                      </template>
-                      <span
-                        :class="{
-                          'text-green-500': hasLowerCase(password),
-                          'text-muted-foreground': !hasLowerCase(password),
-                        }"
-                      >
-                        At least one lowercase letter
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <template v-if="hasNumber(password)">
-                        <CheckCircle2Icon class="size-4 text-green-500" />
-                      </template>
-                      <template v-else>
-                        <CircleIcon class="text-muted-foreground size-4" />
-                      </template>
-                      <span
-                        :class="{
-                          'text-green-500': hasNumber(password),
-                          'text-muted-foreground': !hasNumber(password),
-                        }"
-                      >
-                        At least one number
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <template v-if="specialCharRegex.test(password)">
-                        <CheckCircle2Icon class="size-4 text-green-500" />
-                      </template>
-                      <template v-else>
-                        <CircleIcon class="text-muted-foreground size-4" />
-                      </template>
-                      <span
-                        :class="{
-                          'text-green-500': specialCharRegex.test(password),
-                          'text-muted-foreground': !specialCharRegex.test(password),
-                        }"
-                      >
-                        At least one special character
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </template>
-              <!--FormMessage /-->
-            </FormItem>
+            <PasswordInput
+              label="Password"
+              placeholder="Create a password"
+              :component-field="componentField"
+              :error-message="errorMessage"
+            />
           </FormField>
 
           <FormField v-slot="{ componentField, errorMessage }" name="confirmPassword">
@@ -194,34 +97,20 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth'
-import { CheckCircle2Icon, CircleIcon } from 'lucide-vue-next'
+import { passwordSchema } from '@/utils/password'
+import PasswordInput from '@/components/ui/password-input.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const isLoading = ref(false)
-const password = ref('')
 const showRequirements = ref(false)
-
-const specialCharRegex = /[\p{P}\p{S}]/u
-const uppercaseRegex = /\p{Lu}/u
-const lowercaseRegex = /\p{Ll}/u
-const numberRegex = /\p{N}/u
-const hasUpperCase = (str: string) => uppercaseRegex.test(str)
-const hasLowerCase = (str: string) => lowercaseRegex.test(str)
-const hasNumber = (str: string) => numberRegex.test(str)
 
 const formSchema = toTypedSchema(
   z
     .object({
       username: z.string().min(2, 'Username must be at least 2 characters'),
       email: z.string().email('Please enter a valid email address'),
-      password: z
-        .string()
-        .min(8, 'Password must be at least 8 characters')
-        .regex(uppercaseRegex, 'Password must contain at least one uppercase letter')
-        .regex(lowercaseRegex, 'Password must contain at least one lowercase letter')
-        .regex(numberRegex, 'Password must contain at least one number')
-        .regex(specialCharRegex, 'Password must contain at least one special character'),
+      password: passwordSchema,
       confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
