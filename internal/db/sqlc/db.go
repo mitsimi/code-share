@@ -24,6 +24,9 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.checkLikeExistsStmt, err = db.PrepareContext(ctx, checkLikeExists); err != nil {
+		return nil, fmt.Errorf("error preparing query CheckLikeExists: %w", err)
+	}
 	if q.createSessionStmt, err = db.PrepareContext(ctx, createSession); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateSession: %w", err)
 	}
@@ -38,6 +41,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.deleteExpiredSessionsStmt, err = db.PrepareContext(ctx, deleteExpiredSessions); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteExpiredSessions: %w", err)
+	}
+	if q.deleteLikeStmt, err = db.PrepareContext(ctx, deleteLike); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteLike: %w", err)
 	}
 	if q.deleteSessionStmt, err = db.PrepareContext(ctx, deleteSession); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteSession: %w", err)
@@ -69,9 +75,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.likeSnippetStmt, err = db.PrepareContext(ctx, likeSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query LikeSnippet: %w", err)
 	}
-	if q.unlikeSnippetStmt, err = db.PrepareContext(ctx, unlikeSnippet); err != nil {
-		return nil, fmt.Errorf("error preparing query UnlikeSnippet: %w", err)
-	}
 	if q.updateLikesCountStmt, err = db.PrepareContext(ctx, updateLikesCount); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateLikesCount: %w", err)
 	}
@@ -95,6 +98,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.checkLikeExistsStmt != nil {
+		if cerr := q.checkLikeExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing checkLikeExistsStmt: %w", cerr)
+		}
+	}
 	if q.createSessionStmt != nil {
 		if cerr := q.createSessionStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createSessionStmt: %w", cerr)
@@ -118,6 +126,11 @@ func (q *Queries) Close() error {
 	if q.deleteExpiredSessionsStmt != nil {
 		if cerr := q.deleteExpiredSessionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteExpiredSessionsStmt: %w", cerr)
+		}
+	}
+	if q.deleteLikeStmt != nil {
+		if cerr := q.deleteLikeStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteLikeStmt: %w", cerr)
 		}
 	}
 	if q.deleteSessionStmt != nil {
@@ -168,11 +181,6 @@ func (q *Queries) Close() error {
 	if q.likeSnippetStmt != nil {
 		if cerr := q.likeSnippetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing likeSnippetStmt: %w", cerr)
-		}
-	}
-	if q.unlikeSnippetStmt != nil {
-		if cerr := q.unlikeSnippetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing unlikeSnippetStmt: %w", cerr)
 		}
 	}
 	if q.updateLikesCountStmt != nil {
@@ -244,11 +252,13 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                        DBTX
 	tx                        *sql.Tx
+	checkLikeExistsStmt       *sql.Stmt
 	createSessionStmt         *sql.Stmt
 	createSnippetStmt         *sql.Stmt
 	createUserStmt            *sql.Stmt
 	decrementLikesCountStmt   *sql.Stmt
 	deleteExpiredSessionsStmt *sql.Stmt
+	deleteLikeStmt            *sql.Stmt
 	deleteSessionStmt         *sql.Stmt
 	deleteSnippetStmt         *sql.Stmt
 	getSessionStmt            *sql.Stmt
@@ -259,7 +269,6 @@ type Queries struct {
 	getUserByUsernameStmt     *sql.Stmt
 	incrementLikesCountStmt   *sql.Stmt
 	likeSnippetStmt           *sql.Stmt
-	unlikeSnippetStmt         *sql.Stmt
 	updateLikesCountStmt      *sql.Stmt
 	updateSessionExpiryStmt   *sql.Stmt
 	updateSnippetStmt         *sql.Stmt
@@ -272,11 +281,13 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                        tx,
 		tx:                        tx,
+		checkLikeExistsStmt:       q.checkLikeExistsStmt,
 		createSessionStmt:         q.createSessionStmt,
 		createSnippetStmt:         q.createSnippetStmt,
 		createUserStmt:            q.createUserStmt,
 		decrementLikesCountStmt:   q.decrementLikesCountStmt,
 		deleteExpiredSessionsStmt: q.deleteExpiredSessionsStmt,
+		deleteLikeStmt:            q.deleteLikeStmt,
 		deleteSessionStmt:         q.deleteSessionStmt,
 		deleteSnippetStmt:         q.deleteSnippetStmt,
 		getSessionStmt:            q.getSessionStmt,
@@ -287,7 +298,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserByUsernameStmt:     q.getUserByUsernameStmt,
 		incrementLikesCountStmt:   q.incrementLikesCountStmt,
 		likeSnippetStmt:           q.likeSnippetStmt,
-		unlikeSnippetStmt:         q.unlikeSnippetStmt,
 		updateLikesCountStmt:      q.updateLikesCountStmt,
 		updateSessionExpiryStmt:   q.updateSessionExpiryStmt,
 		updateSnippetStmt:         q.updateSnippetStmt,
