@@ -10,6 +10,7 @@ import (
 type User struct {
 	ID           string    `json:"id"`
 	Username     string    `json:"username"`
+	Avatar       string    `json:"avatar"`
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"-"` // Not exposed in JSON
 	CreatedAt    time.Time `json:"createdAt"`

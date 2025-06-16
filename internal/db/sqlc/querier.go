@@ -28,6 +28,7 @@ type Querier interface {
 	UpdateLikesCount(ctx context.Context, arg UpdateLikesCountParams) error
 	UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) error
 	UpdateSnippet(ctx context.Context, arg UpdateSnippetParams) (Snippet, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 }
 
 var _ Querier = (*Queries)(nil)

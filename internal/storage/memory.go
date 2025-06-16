@@ -24,7 +24,7 @@ type MemoryStorage struct {
 // NewMemoryStorage creates a new in-memory storage
 func NewMemoryStorage() *MemoryStorage {
 	snippets := make(map[string]models.Snippet)
-	for _, snippet := range sampleSnippets {
+	for _, snippet := range SampleSnippets {
 		snippets[snippet.ID] = snippet
 	}
 	return &MemoryStorage{

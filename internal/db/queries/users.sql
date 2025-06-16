@@ -20,3 +20,13 @@ WHERE username = ?;
 -- name: GetUserByEmail :one
 SELECT * FROM users
 WHERE email = ?;
+
+-- name: UpdateUser :exec
+UPDATE users
+SET 
+    username = ?,
+    email = ?,
+    password_hash = ?,
+    avatar = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;

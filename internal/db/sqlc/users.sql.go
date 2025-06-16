@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -18,7 +19,7 @@ INSERT INTO users (
 ) VALUES (
     ?, ?, ?, ?
 ) 
-RETURNING id, username, email, password_hash, created_at, updated_at
+RETURNING id, username, avatar, email, password_hash, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -39,6 +40,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Avatar,
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
@@ -48,7 +50,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, email, password_hash, created_at, updated_at FROM users
+SELECT id, username, avatar, email, password_hash, created_at, updated_at FROM users
 WHERE id = ?
 `
 
@@ -58,6 +60,7 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Avatar,
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
@@ -67,7 +70,7 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, email, password_hash, created_at, updated_at FROM users
+SELECT id, username, avatar, email, password_hash, created_at, updated_at FROM users
 WHERE email = ?
 `
 
@@ -77,6 +80,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Avatar,
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
@@ -86,7 +90,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, email, password_hash, created_at, updated_at FROM users
+SELECT id, username, avatar, email, password_hash, created_at, updated_at FROM users
 WHERE username = ?
 `
 
@@ -96,10 +100,41 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Avatar,
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET 
+    username = ?,
+    email = ?,
+    password_hash = ?,
+    avatar = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserParams struct {
+	Username     string         `json:"username"`
+	Email        string         `json:"email"`
+	PasswordHash string         `json:"password_hash"`
+	Avatar       sql.NullString `json:"avatar"`
+	ID           string         `json:"id"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.exec(ctx, q.updateUserStmt, updateUser,
+		arg.Username,
+		arg.Email,
+		arg.PasswordHash,
+		arg.Avatar,
+		arg.ID,
+	)
+	return err
 }

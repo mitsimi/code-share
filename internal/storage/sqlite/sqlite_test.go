@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"mitsimi.dev/codeShare/internal/models"
+	"mitsimi.dev/codeShare/internal/storage"
 )
 
 // setupTestDB creates a temporary database for testing
@@ -42,7 +43,7 @@ func TestSQLiteCreateAndGetUser(t *testing.T) {
 	}
 
 	// Test getting user by ID
-	user, err := store.GetUser(UserID(userID.ID))
+	user, err := store.GetUser(storage.UserID(userID.ID))
 	if err != nil {
 		t.Fatalf("Failed to get user: %v", err)
 	}

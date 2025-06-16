@@ -19,9 +19,9 @@ type Storage interface {
 	GetUser(id UserID) (db.User, error)
 	GetUserByUsername(username string) (db.User, error)
 	GetUserByEmail(email string) (db.User, error)
-	Login(email, password string) (UserID, error)
 
 	// Session management
+	Login(email, password string) (UserID, error)
 	CreateSession(id UserID, token string, refreshToken string, expiresAt UnixTime) error
 	GetSession(token string) (models.Session, error)
 	DeleteSession(token string) error
