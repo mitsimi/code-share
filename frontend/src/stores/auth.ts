@@ -122,7 +122,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const isAuthenticated = () => {
-    return !!token.value && !!user.value
+    return !!token.value && !!user.value && !!expiresAt.value && expiresAt.value > Date.now() / 1000
   }
 
   const refreshAccessToken = async () => {
