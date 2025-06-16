@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_UzpDkeugoT
 createdAt: 2025-05-19T15:03:28.508613
-updatedAt: 2025-05-26T16:12:12.520121
+updatedAt: 2025-06-16T22:37:25.396935
 workspaceId: wk_gJPTxkB9Tw
 folderId: fl_7XEdkhgA43
 authentication: {}
@@ -14,5 +14,5 @@ headers: []
 method: GET
 name: GetSnippetById
 sortPriority: 1000.0
-url: ${[ BASE_URL ]}/snippets/2
+url: ${[ BASE_URL ]}/snippets/1
 urlParameters: []
