@@ -140,15 +140,22 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.storage.UpdateUser(userID, req.Username, req.Email)
+	if req.Username == "" || req.Email == "" {
+		http.Error(w, "Username and email cannot be empty", http.StatusBadRequest)
+		return
+	}
+	h.logger.Info("updating user profile",
+		zap.String("user_id", userID),
+		zap.String("username", req.Username),
+		zap.String("email", req.Email),
+	)
+
+	user, err := h.storage.UpdateUser(userID, req.Username, req.Email)
 	if err != nil {
 		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
 		return
 	}
 
 	// For now, return the request data as the response
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"username": req.Username,
-		"email":    req.Email,
-	})
+	json.NewEncoder(w).Encode(models.FromDBUser(user))
 }
