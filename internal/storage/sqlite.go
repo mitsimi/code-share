@@ -179,6 +179,7 @@ func (s *SQLiteStorage) GetSnippets(userID UserID) ([]models.Snippet, error) {
 			ID:        snippet.ID,
 			Title:     snippet.Title,
 			Content:   snippet.Content,
+			Language:  snippet.Language,
 			Author:    snippet.AuthorUsername.String, // Handle sql.NullString
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,
@@ -206,6 +207,7 @@ func (s *SQLiteStorage) GetSnippet(userID UserID, id string) (models.Snippet, er
 		ID:        snippet.ID,
 		Title:     snippet.Title,
 		Content:   snippet.Content,
+		Language:  snippet.Language,
 		Author:    snippet.AuthorUsername.String, // Handle sql.NullString
 		CreatedAt: snippet.CreatedAt,
 		UpdatedAt: snippet.UpdatedAt,
@@ -222,10 +224,11 @@ func (s *SQLiteStorage) CreateSnippet(snippet models.Snippet) (SnippetID, error)
 	}
 
 	result, err := s.q.CreateSnippet(s.ctx, db.CreateSnippetParams{
-		ID:      uuid.NewString(),
-		Title:   snippet.Title,
-		Content: snippet.Content,
-		Author:  snippet.Author, // Use the user ID directly
+		ID:       uuid.NewString(),
+		Title:    snippet.Title,
+		Content:  snippet.Content,
+		Language: snippet.Language,
+		Author:   snippet.Author, // Use the user ID directly
 	})
 	if err != nil {
 		return "", err
@@ -236,9 +239,10 @@ func (s *SQLiteStorage) CreateSnippet(snippet models.Snippet) (SnippetID, error)
 
 func (s *SQLiteStorage) UpdateSnippet(snippet models.Snippet) error {
 	_, err := s.q.UpdateSnippet(s.ctx, db.UpdateSnippetParams{
-		Title:   snippet.Title,
-		Content: snippet.Content,
-		ID:      snippet.ID,
+		Title:    snippet.Title,
+		Content:  snippet.Content,
+		Language: snippet.Language,
+		ID:       snippet.ID,
 	})
 	return err
 }
@@ -358,10 +362,11 @@ func (s *SQLiteStorage) Seed() error {
 
 		// Create new snippet
 		_, err = qtx.CreateSnippet(s.ctx, db.CreateSnippetParams{
-			ID:      sampleSnippet.ID,
-			Title:   sampleSnippet.Title,
-			Content: sampleSnippet.Content,
-			Author:  userIDs[sampleSnippet.Author],
+			ID:       sampleSnippet.ID,
+			Title:    sampleSnippet.Title,
+			Content:  sampleSnippet.Content,
+			Language: sampleSnippet.Language,
+			Author:   userIDs[sampleSnippet.Author],
 		})
 		if err != nil {
 			return err
