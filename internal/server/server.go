@@ -103,7 +103,15 @@ func (s *Server) setupRoutes() {
 		r.Post("/login", handler.Login)
 		r.Post("/logout", handler.Logout)
 		r.Post("/refresh", handler.RefreshToken)
-		r.Get("/me", handler.GetCurrentUser)
+
+		// Protected profile routes
+		r.Route("/me", func(r chi.Router) {
+			r.Use(authMiddleware.RequireAuth)
+			r.Get("/", handler.GetCurrentUser)
+			r.Patch("/", handler.UpdateProfile)
+			r.Patch("/password", handler.UpdatePassword)
+			r.Patch("/avatar", handler.UpdateAvatar)
+		})
 	})
 
 	// API routes
@@ -132,9 +140,21 @@ func (s *Server) setupRoutes() {
 		r.Group(func(r chi.Router) {
 			r.Use(authMiddleware.RequireAuth)
 			r.Post("/", handler.CreateSnippet)
+
 			r.Put("/{id}", handler.UpdateSnippet)
 			r.Delete("/{id}", handler.DeleteSnippet)
 			r.Patch("/{id}/like", handler.ToggleLikeSnippet)
+
+			r.Get("/liked", func(w http.ResponseWriter, r *http.Request) {
+				s.logger.Info("API called: Get liked snippets",
+					zap.String("request_id", middleware.GetReqID(r.Context())),
+				)
+			})
+			r.Get("/saved", func(w http.ResponseWriter, r *http.Request) {
+				s.logger.Info("API called: Get liked snippets",
+					zap.String("request_id", middleware.GetReqID(r.Context())),
+				)
+			})
 		})
 	})
 

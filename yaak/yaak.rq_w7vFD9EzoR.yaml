@@ -2,9 +2,9 @@ type: http_request
 model: http_request
 id: rq_w7vFD9EzoR
 createdAt: 2025-05-26T16:10:31.137544
-updatedAt: 2025-05-26T16:17:57.013780
+updatedAt: 2025-06-16T21:46:26.689270
 workspaceId: wk_gJPTxkB9Tw
-folderId: fl_dMgTuuDT2c
+folderId: fl_s5LRy7VcJj
 authentication: {}
 authenticationType: null
 body: {}
@@ -13,6 +13,6 @@ description: ''
 headers: []
 method: GET
 name: Me
-sortPriority: 3000.0
+sortPriority: 0.0
 url: ${[ BASE_URL ]}/auth/me
 urlParameters: []

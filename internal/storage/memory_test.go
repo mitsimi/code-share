@@ -26,7 +26,7 @@ func TestMemoryCreateAndGetUser(t *testing.T) {
 	}
 
 	// Test getting user by ID
-	user, err := store.GetUser(UserID(userID.ID))
+	user, err := store.GetUserByID(UserID(userID.ID))
 	if err != nil {
 		t.Fatalf("Failed to get user: %v", err)
 	}

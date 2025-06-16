@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_cmfaCzncUA
+createdAt: 2025-06-16T21:50:06.794891
+updatedAt: 2025-06-16T21:50:53.423432
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_s5LRy7VcJj
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "username": "Josh Doe",
+      "email": "john@example.com"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: cSgaXR69Pw
+method: PATCH
+name: Update Profile Info (Username)
+sortPriority: 1000.001
+url: ${[ BASE_URL ]}/auth/me
+urlParameters: []

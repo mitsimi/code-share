@@ -109,32 +109,80 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	return i, err
 }
 
-const updateUser = `-- name: UpdateUser :exec
+const updateUserAvatar = `-- name: UpdateUserAvatar :one
+UPDATE users
+SET 
+    avatar = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING id, username, avatar, email, password_hash, created_at, updated_at
+`
+
+type UpdateUserAvatarParams struct {
+	Avatar sql.NullString `json:"avatar"`
+	ID     string         `json:"id"`
+}
+
+func (q *Queries) UpdateUserAvatar(ctx context.Context, arg UpdateUserAvatarParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserAvatarStmt, updateUserAvatar, arg.Avatar, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Avatar,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUserInfo = `-- name: UpdateUserInfo :one
 UPDATE users
 SET 
     username = ?,
     email = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING id, username, avatar, email, password_hash, created_at, updated_at
+`
+
+type UpdateUserInfoParams struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	ID       string `json:"id"`
+}
+
+func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserInfoStmt, updateUserInfo, arg.Username, arg.Email, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Avatar,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users
+SET 
     password_hash = ?,
-    avatar = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 
-type UpdateUserParams struct {
-	Username     string         `json:"username"`
-	Email        string         `json:"email"`
-	PasswordHash string         `json:"password_hash"`
-	Avatar       sql.NullString `json:"avatar"`
-	ID           string         `json:"id"`
+type UpdateUserPasswordParams struct {
+	PasswordHash string `json:"password_hash"`
+	ID           string `json:"id"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.exec(ctx, q.updateUserStmt, updateUser,
-		arg.Username,
-		arg.Email,
-		arg.PasswordHash,
-		arg.Avatar,
-		arg.ID,
-	)
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.exec(ctx, q.updateUserPasswordStmt, updateUserPassword, arg.PasswordHash, arg.ID)
 	return err
 }

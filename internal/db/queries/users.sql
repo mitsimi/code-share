@@ -21,12 +21,26 @@ WHERE username = ?;
 SELECT * FROM users
 WHERE email = ?;
 
--- name: UpdateUser :exec
+-- name: UpdateUserAvatar :one
+UPDATE users
+SET 
+    avatar = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING *;
+
+-- name: UpdateUserInfo :one
 UPDATE users
 SET 
     username = ?,
     email = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+RETURNING *;
+
+-- name: UpdateUserPassword :exec
+UPDATE users
+SET 
     password_hash = ?,
-    avatar = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?;

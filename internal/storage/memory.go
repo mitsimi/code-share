@@ -65,8 +65,8 @@ func (s *MemoryStorage) CreateUser(username, email, password string) (db.User, e
 	return user, nil
 }
 
-// GetUser gets a user by ID
-func (s *MemoryStorage) GetUser(id UserID) (db.User, error) {
+// GetUserByID gets a user by ID
+func (s *MemoryStorage) GetUserByID(id UserID) (db.User, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -296,5 +296,69 @@ func (s *MemoryStorage) Close() error {
 
 // Seed populates the storage with sample data
 func (s *MemoryStorage) Seed() error {
+	return nil
+}
+
+// UpdateUser updates a user info
+func (s *MemoryStorage) UpdateUser(userID UserID, username, email string) (db.User, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	user, exists := s.users[string(userID)]
+	if !exists {
+		return db.User{}, errors.New("user not found")
+	}
+
+	user.Username = username
+	user.Email = email
+	user.UpdatedAt = time.Now()
+	s.users[string(userID)] = user
+
+	return db.User{
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+	}, nil
+}
+
+// UpdateUserAvatar updates a user's avatar URL
+func (s *MemoryStorage) UpdateUserAvatar(userID UserID, avatarURL string) (db.User, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	user, exists := s.users[string(userID)]
+	if !exists {
+		return db.User{}, errors.New("user not found")
+	}
+
+	user.Avatar = avatarURL
+	user.UpdatedAt = time.Now()
+	s.users[string(userID)] = user
+	return db.User{
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+	}, nil
+}
+
+// UpdateUserPassword updates a user's password
+func (s *MemoryStorage) UpdateUserPassword(userID UserID, password string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	user, exists := s.users[string(userID)]
+	if !exists {
+		return errors.New("user not found")
+	}
+
+	user.PasswordHash = password // In a real app, this would be hashed
+	user.UpdatedAt = time.Now()
+	s.users[string(userID)] = user
 	return nil
 }

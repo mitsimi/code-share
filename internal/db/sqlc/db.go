@@ -81,8 +81,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateSnippetStmt, err = db.PrepareContext(ctx, updateSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateSnippet: %w", err)
 	}
-	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
+	if q.updateUserAvatarStmt, err = db.PrepareContext(ctx, updateUserAvatar); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserAvatar: %w", err)
+	}
+	if q.updateUserInfoStmt, err = db.PrepareContext(ctx, updateUserInfo); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserInfo: %w", err)
+	}
+	if q.updateUserPasswordStmt, err = db.PrepareContext(ctx, updateUserPassword); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserPassword: %w", err)
 	}
 	return &q, nil
 }
@@ -184,9 +190,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateSnippetStmt: %w", cerr)
 		}
 	}
-	if q.updateUserStmt != nil {
-		if cerr := q.updateUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
+	if q.updateUserAvatarStmt != nil {
+		if cerr := q.updateUserAvatarStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserAvatarStmt: %w", cerr)
+		}
+	}
+	if q.updateUserInfoStmt != nil {
+		if cerr := q.updateUserInfoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserInfoStmt: %w", cerr)
+		}
+	}
+	if q.updateUserPasswordStmt != nil {
+		if cerr := q.updateUserPasswordStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserPasswordStmt: %w", cerr)
 		}
 	}
 	return err
@@ -247,7 +263,9 @@ type Queries struct {
 	updateLikesCountStmt      *sql.Stmt
 	updateSessionExpiryStmt   *sql.Stmt
 	updateSnippetStmt         *sql.Stmt
-	updateUserStmt            *sql.Stmt
+	updateUserAvatarStmt      *sql.Stmt
+	updateUserInfoStmt        *sql.Stmt
+	updateUserPasswordStmt    *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -273,6 +291,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updateLikesCountStmt:      q.updateLikesCountStmt,
 		updateSessionExpiryStmt:   q.updateSessionExpiryStmt,
 		updateSnippetStmt:         q.updateSnippetStmt,
-		updateUserStmt:            q.updateUserStmt,
+		updateUserAvatarStmt:      q.updateUserAvatarStmt,
+		updateUserInfoStmt:        q.updateUserInfoStmt,
+		updateUserPasswordStmt:    q.updateUserPasswordStmt,
 	}
 }

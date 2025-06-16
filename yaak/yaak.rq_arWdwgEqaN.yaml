@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_arWdwgEqaN
+createdAt: 2025-06-16T21:50:57.928045
+updatedAt: 2025-06-16T21:51:57.826411
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_s5LRy7VcJj
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "currentPassword": "password123",
+      "newPassword": "Password123!"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: cSgaXR69Pw
+method: PATCH
+name: Update Password
+sortPriority: 1000.00195
+url: ${[ BASE_URL ]}/auth/me/password
+urlParameters: []
