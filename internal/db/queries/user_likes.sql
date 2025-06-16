@@ -7,7 +7,7 @@ UPDATE snippets
 SET likes = likes + 1 
 WHERE id = ?;
 
--- name: UnlikeSnippet :exec
+-- name: DeleteLike :exec
 DELETE FROM user_likes
 WHERE snippet_id = ? AND user_id = ?;
 

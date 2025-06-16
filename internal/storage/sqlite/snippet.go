@@ -116,7 +116,7 @@ func (s *SQLiteStorage) ToggleLikeSnippet(userID storage.UserID, id storage.Snip
 			return err
 		}
 	} else {
-		if err := qtx.UnlikeSnippet(s.ctx, db.UnlikeSnippetParams{
+		if err := qtx.DeleteLike(s.ctx, db.DeleteLikeParams{
 			SnippetID: id,
 			UserID:    userID,
 		}); err != nil {
