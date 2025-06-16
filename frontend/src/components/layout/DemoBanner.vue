@@ -1,20 +1,22 @@
 <template>
   <div class="bg-primary/95 supports-[backdrop-filter]:bg-primary/60 border-b backdrop-blur">
-    <div class="container mx-auto flex h-10 items-center justify-between px-4">
+    <div
+      class="container mx-auto flex h-auto items-center justify-between px-4 py-2 sm:h-10 sm:py-0"
+    >
       <div class="text-primary-foreground/80 flex items-center space-x-2">
         <CircleAlertIcon class="size-4" />
         <span class="text-sm font-semibold"> Demo Version</span>
-        <span class="text-primary-foreground/60 text-sm"
+        <span class="text-primary-foreground/60 hidden text-sm sm:inline"
           >This is a demonstration of the application</span
         >
       </div>
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center gap-x-4">
         <Button
           variant="link"
           href="https://github.com/mitsimi/code-share"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-primary-foreground/60 hover:text-primary-foreground/80 flex items-center space-x-1 text-sm transition-colors"
+          class="text-primary-foreground/60 hover:text-primary-foreground/80 flex items-center space-x-1 p-0 text-sm transition-colors"
           as="a"
         >
           <span>View Source</span>
@@ -23,7 +25,7 @@
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
-              class="text-primary-foreground/60 hover:text-primary-foreground/80 flex items-center space-x-1 text-sm transition-colors hover:underline hover:underline-offset-4"
+              class="text-primary-foreground/60 hover:text-primary-foreground/80 flex hidden items-center space-x-1 p-0 text-sm transition-colors hover:underline hover:underline-offset-4 sm:inline"
             >
               <span>Demo Info</span>
               <InfoIcon class="size-4" />
