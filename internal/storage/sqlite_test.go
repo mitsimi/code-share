@@ -108,9 +108,10 @@ func TestSQLiteCreateAndGetSnippet(t *testing.T) {
 
 	// Create a snippet
 	snippet := models.Snippet{
-		Title:   "Test Snippet",
-		Content: "Test Content",
-		Author:  username,
+		Title:    "Test Snippet",
+		Content:  "Test Content",
+		Language: "go",
+		Author:   user.ID,
 	}
 
 	snippetID, err := store.CreateSnippet(snippet)
@@ -130,6 +131,9 @@ func TestSQLiteCreateAndGetSnippet(t *testing.T) {
 	}
 	if gotSnippet.Content != snippet.Content {
 		t.Errorf("Expected content %q, got %q", snippet.Content, gotSnippet.Content)
+	}
+	if gotSnippet.Language != snippet.Language {
+		t.Errorf("Expected language %q, got %q", snippet.Language, gotSnippet.Language)
 	}
 	if gotSnippet.Author != username {
 		t.Errorf("Expected author %q, got %q", username, gotSnippet.Author)
@@ -160,9 +164,10 @@ func TestSQLiteUpdateSnippet(t *testing.T) {
 
 	// Create a snippet
 	snippet := models.Snippet{
-		Title:   "Original Title",
-		Content: "Original Content",
-		Author:  username,
+		Title:    "Original Title",
+		Content:  "Original Content",
+		Language: "go",
+		Author:   user.ID,
 	}
 
 	snippetID, err := store.CreateSnippet(snippet)
@@ -172,10 +177,11 @@ func TestSQLiteUpdateSnippet(t *testing.T) {
 
 	// Update the snippet
 	updatedSnippet := models.Snippet{
-		ID:      snippetID,
-		Title:   "Updated Title",
-		Content: "Updated Content",
-		Author:  username,
+		ID:       snippetID,
+		Title:    "Updated Title",
+		Content:  "Updated Content",
+		Language: "python",
+		Author:   user.ID,
 	}
 
 	err = store.UpdateSnippet(updatedSnippet)
@@ -196,28 +202,9 @@ func TestSQLiteUpdateSnippet(t *testing.T) {
 	if gotSnippet.Content != updatedSnippet.Content {
 		t.Errorf("Expected content %q, got %q", updatedSnippet.Content, gotSnippet.Content)
 	}
-}
-
-// retryWithBackoff retries the given operation with exponential backoff
-func retryWithBackoff(operation func() error) error {
-	var err error
-	for i := 0; i < 5; i++ { // Try up to 5 times
-		err = operation()
-		if err == nil {
-			return nil
-		}
-
-		// Check if it's a busy error or transaction error
-		if err.Error() == "database is locked (5) (SQLITE_BUSY)" ||
-			err.Error() == "SQL logic error: cannot start a transaction within a transaction (1)" {
-			// Wait with exponential backoff
-			time.Sleep(time.Duration(1<<uint(i)) * 10 * time.Millisecond)
-			continue
-		}
-		// If it's not a busy error, return immediately
-		return err
+	if gotSnippet.Language != updatedSnippet.Language {
+		t.Errorf("Expected language %q, got %q", updatedSnippet.Language, gotSnippet.Language)
 	}
-	return err
 }
 
 func TestSQLiteDeleteSnippet(t *testing.T) {
@@ -237,7 +224,7 @@ func TestSQLiteDeleteSnippet(t *testing.T) {
 	snippet := models.Snippet{
 		Title:   "Test Snippet",
 		Content: "Test Content",
-		Author:  username,
+		Author:  user.ID,
 	}
 
 	snippetID, err := store.CreateSnippet(snippet)

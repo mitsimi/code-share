@@ -8,9 +8,9 @@
         >
           {{ snippet.title }}
         </CardTitle>
-        <Badge variant="secondary" class="shrink-0 text-xs">
+        <Badge v-if="snippet.language" variant="secondary" class="shrink-0 text-xs">
           <!-- TODO: Add language property to snippet type -->
-          {{ hardcodedLanguage }}
+          {{ getLanguageName(snippet.language) || 'Text' }}
         </Badge>
       </div>
     </CardHeader>
@@ -22,8 +22,7 @@
         <div class="bg-muted/50 flex items-center justify-between border-b px-3 py-2">
           <div class="flex items-center gap-2">
             <span class="text-muted-foreground font-mono text-xs">
-              <!-- TODO: Add file extension property to snippet type -->
-              snippet.{{ hardcodedFileExtension }}
+              snippet.{{ getLanguageExtension(snippet.language || '') || 'txt' }}
             </span>
           </div>
           <Button
@@ -117,6 +116,7 @@ import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
+import { getLanguageExtension, getLanguageName } from '@/utils/languages'
 
 const authStore = useAuthStore()
 
@@ -127,8 +127,6 @@ defineEmits<{
 }>()
 
 // TODO: Replace these hardcoded values with actual props when available
-const hardcodedLanguage = 'JavaScript' // Add to snippet type: language: string
-const hardcodedFileExtension = 'js' // Add to snippet type: filename?: string
 const hardcodedIsSaved = false // Add to snippet type or user state: isSaved: boolean
 
 const props = defineProps<{

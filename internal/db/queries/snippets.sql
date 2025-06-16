@@ -23,9 +23,10 @@ INSERT INTO snippets (
     id,
     title,
     content,
+    language,
     author
 ) VALUES (
-    ?, ?, ?, ?
+    ?, ?, ?, ?, ?
 )
 RETURNING *;
 
@@ -34,6 +35,7 @@ UPDATE snippets
 SET 
     title = ?,
     content = ?,
+    language = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 RETURNING *;

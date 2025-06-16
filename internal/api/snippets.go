@@ -43,26 +43,7 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Add isLiked field to each snippet
-	response := make([]struct {
-		models.Snippet
-		IsLiked bool `json:"is_liked"`
-	}, len(snippets))
-
-	for i, snippet := range snippets {
-		response[i] = struct {
-			models.Snippet
-			IsLiked bool `json:"is_liked"`
-		}{
-			Snippet: snippet,
-			IsLiked: snippet.IsLiked,
-		}
-	}
-
-	slices.SortFunc(response, func(a, b struct {
-		models.Snippet
-		IsLiked bool `json:"is_liked"`
-	}) int {
+	slices.SortFunc(snippets, func(a, b models.Snippet) int {
 		return b.CreatedAt.Compare(a.CreatedAt)
 	})
 
@@ -70,7 +51,7 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		zap.Int("count", len(snippets)),
 	)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(snippets)
 }
 
 // GetSnippet returns a specific snippet
@@ -93,21 +74,13 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Add isLiked field to the response
-	response := struct {
-		models.Snippet
-		IsLiked bool `json:"is_liked"`
-	}{
-		Snippet: snippet,
-		IsLiked: snippet.IsLiked,
-	}
-
 	log.Debug("retrieved snippet",
 		zap.String("title", snippet.Title),
 		zap.String("author", snippet.Author),
+		zap.String("language", snippet.Language),
 	)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(snippet)
 }
 
 // CreateSnippet creates a new snippet
@@ -132,11 +105,12 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	snippet := models.Snippet{
-		Title:   req.Title,
-		Content: req.Content,
-		Author:  userID,
-		Likes:   0,
-		IsLiked: false,
+		Title:    req.Title,
+		Content:  req.Content,
+		Language: req.Language,
+		Author:   userID,
+		Likes:    0,
+		IsLiked:  false,
 	}
 
 	log.Debug("creating new snippet",
@@ -207,6 +181,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 
 	snippet.Title = req.Title
 	snippet.Content = req.Content
+	snippet.Language = req.Language
 
 	if err := h.storage.UpdateSnippet(snippet); err != nil {
 		log.Error("failed to update snippet",
@@ -218,20 +193,12 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := struct {
-		models.Snippet
-		IsLiked bool `json:"is_liked"`
-	}{
-		Snippet: snippet,
-		IsLiked: snippet.IsLiked,
-	}
-
 	log.Info("updated snippet",
 		zap.String("title", snippet.Title),
 		zap.String("author", snippet.Author),
 	)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(snippet)
 }
 
 // DeleteSnippet deletes a snippet

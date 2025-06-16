@@ -20,6 +20,7 @@ type Session struct {
 type Snippet struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
+	Language  string    `json:"language"`
 	Content   string    `json:"content"`
 	Author    string    `json:"author"`
 	CreatedAt time.Time `json:"created_at"`
