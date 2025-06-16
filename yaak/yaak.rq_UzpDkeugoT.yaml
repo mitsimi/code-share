@@ -1,0 +1,18 @@
+type: http_request
+model: http_request
+id: rq_UzpDkeugoT
+createdAt: 2025-05-19T15:03:28.508613
+updatedAt: 2025-05-26T16:12:12.520121
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_7XEdkhgA43
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: GetSnippetById
+sortPriority: 1000.0
+url: ${[ BASE_URL ]}/snippets/2
+urlParameters: []
