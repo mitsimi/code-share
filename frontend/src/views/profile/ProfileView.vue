@@ -61,6 +61,7 @@
                       type="text"
                       placeholder="Enter your username"
                       :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
+                      :model-value="values.username"
                     />
                   </FormControl>
                   <FormMessage />
@@ -77,6 +78,7 @@
                       type="email"
                       placeholder="Enter your email"
                       :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
+                      :model-value="values.email"
                     />
                   </FormControl>
                   <FormMessage />
@@ -193,13 +195,10 @@ import { passwordSchema } from '@/utils/password'
 import PasswordInput from '@/components/ui/password-input.vue'
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue'
 import type { Snippet } from '@/types'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useMutation } from '@tanstack/vue-query'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const queryClient = useQueryClient()
-const isLoading = ref(false)
-const isLoadingAvatar = ref(false)
 const activeTab = ref('settings')
 const avatarUrl = ref(authStore.user?.avatar || '')
 
@@ -239,11 +238,11 @@ const formSchema = toTypedSchema(
     ),
 )
 
-const { handleSubmit } = useForm({
+const { handleSubmit, values } = useForm({
   validationSchema: formSchema,
   initialValues: {
-    username: authStore.user?.username,
-    email: authStore.user?.email,
+    username: authStore.user?.username || '',
+    email: authStore.user?.email || '',
   },
 })
 
