@@ -66,7 +66,7 @@ func (q *Queries) IncrementLikesCount(ctx context.Context, id string) error {
 }
 
 const likeSnippet = `-- name: LikeSnippet :exec
-INSERT OR IGNORE INTO user_likes (snippet_id, user_id)
+INSERT INTO user_likes (snippet_id, user_id)
 VALUES (?, ?)
 `
 
