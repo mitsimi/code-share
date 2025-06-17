@@ -44,8 +44,8 @@ func setupTestSnippetHandler(
 
 // createTestToken creates a valid JWT token for testing
 func createTestToken(userID string, secretKey string) string {
-	token, _ := auth.CreateToken(userID, secretKey)
-	return token
+	tokenResp, _ := auth.GenerateToken(userID, secretKey, false)
+	return tokenResp.Token
 }
 
 func runToggleLikeSnippetTests(t *testing.T, store storage.Storage) {
