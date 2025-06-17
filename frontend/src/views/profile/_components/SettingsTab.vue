@@ -2,17 +2,17 @@
   <div class="bg-card rounded-lg border-2 p-6 shadow">
     <form @submit.prevent="updateProfile" class="space-y-6">
       <!-- Avatar Upload -->
-      <div class="flex items-center gap-6">
+      <div class="flex flex-col items-center gap-6 sm:flex-row">
         <Avatar class="size-24">
           <AvatarImage :src="avatarUrl" />
           <AvatarFallback class="text-4xl">{{
             authStore.user?.username[0].toUpperCase()
           }}</AvatarFallback>
         </Avatar>
-        <div class="flex flex-col gap-2">
+        <div class="flex w-full flex-col gap-2">
           <form @submit.prevent="updateAvatar" class="flex gap-2">
             <FormField v-slot="{ componentField, errorMessage }" name="avatarUrl">
-              <FormItem>
+              <FormItem class="w-full">
                 <FormLabel>Avatar URL</FormLabel>
                 <div class="flex gap-2">
                   <FormControl>
