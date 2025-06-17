@@ -10,6 +10,7 @@ import (
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/storage"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 )
@@ -79,6 +80,27 @@ func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 			http.Error(w, "Not authenticated", http.StatusUnauthorized)
 			return
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (m *AuthMiddleware) RequireSelfOrAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userID := GetUserID(r)
+		if userID == "" {
+			requestID := middleware.GetReqID(r.Context())
+			log := m.logger.With(zap.String("request_id", requestID))
+			log.Error("authentication required but not provided")
+			http.Error(w, "Not authenticated", http.StatusUnauthorized)
+			return
+		}
+
+		// Check if the user is an admin or the same user
+		if !auth.IsAdmin(userID) && chi.URLParam(r, "id") != string(userID) {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }
