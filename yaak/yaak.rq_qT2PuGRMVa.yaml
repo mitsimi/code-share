@@ -1,8 +1,8 @@
 type: http_request
 model: http_request
-id: rq_AEvXm9Veq6
-createdAt: 2025-05-19T15:03:29.863559
-updatedAt: 2025-06-17T12:18:04.175952
+id: rq_qT2PuGRMVa
+createdAt: 2025-06-17T12:18:17.786215
+updatedAt: 2025-06-17T12:23:31.033688
 workspaceId: wk_gJPTxkB9Tw
 folderId: fl_kb6ND2zGAX
 authentication: {}
@@ -12,15 +12,15 @@ bodyType: null
 description: ''
 headers: []
 method: PATCH
-name: ToggleLikeSnippet
-sortPriority: 3000.0
-url: ${[ BASE_URL ]}/snippets/2/like
+name: ToggleSaveSnippet
+sortPriority: 3000.001
+url: ${[ BASE_URL ]}/snippets/5/save
 urlParameters:
 - enabled: false
   name: action
-  value: unlike
+  value: unsave
   id: jdfxI7CSbm
 - enabled: true
   name: ''
   value: ''
-  id: S5rYRB4HT8
+  id: VJsVfpYgvq
