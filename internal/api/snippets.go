@@ -78,6 +78,8 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("title", snippet.Title),
 		zap.String("author", snippet.Author),
 		zap.String("language", snippet.Language),
+		zap.Int("likes", int(snippet.Likes)),
+		zap.Bool("is_liked", snippet.IsLiked),
 	)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(snippet)
@@ -254,12 +256,8 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 
 	// Parse the action from query parameters
 	action := r.URL.Query().Get("action")
-	if action != "like" && action != "unlike" {
-		log.Error("invalid action",
-			zap.String("action", action),
-		)
-		http.Error(w, "Invalid action. Must be 'like' or 'unlike'", http.StatusBadRequest)
-		return
+	if action == "" {
+		action = "like"
 	}
 
 	if err := h.storage.ToggleLikeSnippet(userID, id, action == "like"); err != nil {
