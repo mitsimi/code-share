@@ -3,6 +3,7 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"mitsimi.dev/codeShare/internal/domain"
 )
 
@@ -52,6 +53,7 @@ func ToSnippetResponse(snippet *domain.Snippet) SnippetResponse {
 func ToDomainSnippet(req CreateSnippetRequest, authorID string) *domain.Snippet {
 	now := time.Now()
 	return &domain.Snippet{
+		ID:        uuid.New().String(),
 		Title:     req.Title,
 		Content:   req.Content,
 		Language:  req.Language,
@@ -65,7 +67,6 @@ func UpdateDomainSnippet(snippet *domain.Snippet, req UpdateSnippetRequest) {
 	snippet.Title = req.Title
 	snippet.Content = req.Content
 	snippet.Language = req.Language
-	snippet.UpdatedAt = time.Now()
 }
 
 type ToggleActionRequest struct {

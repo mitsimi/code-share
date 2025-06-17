@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_FEKwK6nKhC
 createdAt: 2025-05-19T15:07:18.830570
-updatedAt: 2025-05-26T16:14:05.088139
+updatedAt: 2025-06-17T22:18:50.435686
 workspaceId: wk_gJPTxkB9Tw
 folderId: fl_kb6ND2zGAX
 authentication: {}
@@ -10,7 +10,7 @@ authenticationType: null
 body:
   text: |-
     {
-      "title": "some title",
+      "title": "some other title",
       "content": "cat file1 file2 file3",
       "author": "mitsimi"
     }
@@ -24,5 +24,5 @@ headers:
 method: PUT
 name: UpdateSnippet
 sortPriority: 1000.0
-url: ${[ BASE_URL ]}/snippets/9477232c-2fc5-4ea6-9b21-15dd30131064
+url: ${[ BASE_URL ]}/snippets/9826d3a6-353b-43ad-8633-dcf4c1191e68
 urlParameters: []

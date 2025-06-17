@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_qT2PuGRMVa
 createdAt: 2025-06-17T12:18:17.786215
-updatedAt: 2025-06-17T12:23:31.033688
+updatedAt: 2025-06-17T22:20:41.053426
 workspaceId: wk_gJPTxkB9Tw
 folderId: fl_kb6ND2zGAX
 authentication: {}
@@ -14,7 +14,7 @@ headers: []
 method: PATCH
 name: ToggleSaveSnippet
 sortPriority: 3000.001
-url: ${[ BASE_URL ]}/snippets/5/save
+url: ${[ BASE_URL ]}/snippets/1/save
 urlParameters:
 - enabled: false
   name: action
@@ -23,4 +23,4 @@ urlParameters:
 - enabled: true
   name: ''
   value: ''
-  id: VJsVfpYgvq
+  id: aaA68wXbkG

@@ -64,9 +64,9 @@ SELECT s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_a
     u.id AS author_id, 
     u.avatar AS author_avatar
 FROM snippets s
-JOIN user_likes ul ON s.id = ul.snippet_id
-JOIN users u ON s.author = u.id
+LEFT JOIN user_likes ul ON s.id = ul.snippet_id
 LEFT JOIN user_saves us ON s.id = us.snippet_id AND us.user_id = ?1
+LEFT JOIN users u ON s.author = u.id
 WHERE ul.user_id = ?1
 ORDER BY s.created_at DESC
 `
@@ -82,8 +82,8 @@ type GetLikedSnippetsRow struct {
 	Likes          int64          `json:"likes"`
 	IsSaved        int64          `json:"is_saved"`
 	IsLiked        int64          `json:"is_liked"`
-	AuthorUsername string         `json:"author_username"`
-	AuthorID       string         `json:"author_id"`
+	AuthorUsername sql.NullString `json:"author_username"`
+	AuthorID       sql.NullString `json:"author_id"`
 	AuthorAvatar   sql.NullString `json:"author_avatar"`
 }
 

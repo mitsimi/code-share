@@ -13,7 +13,7 @@ import (
 // setupAPIRoutes configures all API routes
 func (s *Server) setupAPIRoutes(r chi.Router) {
 	// Create auth middleware
-	authMiddleware := api.NewAuthMiddleware(s.storage, s.secretKey)
+	authMiddleware := api.NewAuthMiddleware(s.users, s.sessions, s.secretKey)
 
 	r.Use(authMiddleware.TryAttachUserID)       // Attach user ID to context
 	r.Use(middleware.Timeout(15 * time.Second)) // Set a timeout for all API routes
@@ -34,8 +34,8 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 
 	// Auth routes
 	r.Route("/auth", func(r chi.Router) {
-		handler := api.NewAuthHandler(s.storage, s.secretKey)
-		r.Post("/signup", handler.Signup)
+		handler := api.NewAuthHandler(s.users, s.sessions, s.secretKey)
+		r.Post("/register", handler.Register)
 		r.Post("/login", handler.Login)
 		r.Post("/logout", handler.Logout)
 		r.Post("/refresh", handler.RefreshToken)
@@ -43,7 +43,7 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 
 	// User routes
 	r.Route("/users", func(r chi.Router) {
-		handler := api.NewUserHandler(s.storage)
+		handler := api.NewUserHandler(s.users, s.snippets, s.likes, s.bookmarks)
 		r.Use(authMiddleware.RequireAuth)                // Protect user routes
 		r.Get("/{id}", handler.GetUser)                  // Get user by ID
 		r.Get("/{id}/snippets", handler.GetUserSnippets) // Get user's snippets
@@ -60,7 +60,7 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 
 	// Snippet routes
 	r.Route("/snippets", func(r chi.Router) {
-		handler := api.NewSnippetHandler(s.storage)
+		handler := api.NewSnippetHandler(s.snippets, s.likes, s.bookmarks)
 
 		// Public routes
 		r.Group(func(r chi.Router) {

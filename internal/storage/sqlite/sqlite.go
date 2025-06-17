@@ -1,4 +1,4 @@
-package storage
+package sqlite
 
 import (
 	"context"
@@ -7,22 +7,18 @@ import (
 
 	ddl "mitsimi.dev/codeShare/internal/db"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
-	"mitsimi.dev/codeShare/internal/storage"
 )
 
-var _ storage.StorageOLD = (*SQLiteStorage)(nil)
-
-// SQLiteStorage implements Storage interface with SQLite
-type SQLiteStorage struct {
-	db  *sql.DB
-	q   *db.Queries
-	ctx context.Context
+// Storage implements the storage interface using SQLite
+type Storage struct {
+	db *sql.DB
+	q  *db.Queries
 }
 
-// NewSQLiteStorage creates a new SQLite storage
-func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
+// New creates a new SQLite storage instance
+func New(dbPath string) (*Storage, error) {
 	// Add SQLite configuration options
-	dbConn, err := sql.Open("sqlite", dbPath+"?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=temp_store(MEMORY)&_pragma=mmap_size(30000000000)&_pragma=page_size(4096)&_pragma=busy_timeout(5000)")
+	dbConn, err := sql.Open("sqlite3", dbPath+"?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=temp_store(MEMORY)&_pragma=mmap_size(30000000000)&_pragma=page_size(4096)&_pragma=busy_timeout(5000)")
 	if err != nil {
 		return nil, err
 	}
@@ -37,13 +33,13 @@ func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
 		return nil, err
 	}
 
-	return &SQLiteStorage{
-		db:  dbConn,
-		q:   db.New(dbConn),
-		ctx: context.Background(),
+	return &Storage{
+		db: dbConn,
+		q:  db.New(dbConn),
 	}, nil
 }
 
+// createTables creates all necessary tables in the database
 func createTables(dbConn *sql.DB) error {
 	ctx := context.Background()
 	_, err := dbConn.ExecContext(ctx, ddl.SchemaDDL)
@@ -51,6 +47,11 @@ func createTables(dbConn *sql.DB) error {
 }
 
 // Close closes the database connection
-func (s *SQLiteStorage) Close() error {
+func (s *Storage) Close() error {
 	return s.db.Close()
+}
+
+// DB returns the underlying database connection
+func (s *Storage) DB() *sql.DB {
+	return s.db
 }

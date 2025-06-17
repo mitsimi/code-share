@@ -3,79 +3,36 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
+	"mitsimi.dev/codeShare/internal/api/dto"
+	"mitsimi.dev/codeShare/internal/domain"
 	"mitsimi.dev/codeShare/internal/logger"
-	"mitsimi.dev/codeShare/internal/models"
-	"mitsimi.dev/codeShare/internal/storage"
+	"mitsimi.dev/codeShare/internal/repository"
 )
 
 type UserHandler struct {
-	storage storage.StorageOLD
-	logger  *zap.Logger
+	users     repository.UserRepository
+	snippets  repository.SnippetRepository
+	likes     repository.LikeRepository
+	bookmarks repository.BookmarkRepository
+	logger    *zap.Logger
 }
 
-func NewUserHandler(storage storage.StorageOLD) *UserHandler {
+func NewUserHandler(users repository.UserRepository,
+	snippets repository.SnippetRepository,
+	likes repository.LikeRepository,
+	bookmarks repository.BookmarkRepository) *UserHandler {
 	return &UserHandler{
-		storage: storage,
-		logger:  logger.Log,
+		users:     users,
+		snippets:  snippets,
+		likes:     likes,
+		bookmarks: bookmarks,
+		logger:    logger.Log,
 	}
-}
-
-// GetCurrentUser returns the current user's information
-func (h *UserHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
-	requestID := middleware.GetReqID(r.Context())
-	log := h.logger.With(zap.String("request_id", requestID))
-
-	// Get session cookie
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		log.Error("failed to get session cookie",
-			zap.Error(err),
-		)
-		http.Error(w, "Not authenticated", http.StatusUnauthorized)
-		return
-	}
-
-	// Get session
-	session, err := h.storage.GetSession(cookie.Value)
-	if err != nil {
-		log.Error("failed to get session",
-			zap.Error(err),
-		)
-		http.Error(w, "Not authenticated", http.StatusUnauthorized)
-		return
-	}
-
-	// Check if session is expired
-	if session.ExpiresAt < time.Now().Unix() {
-		log.Error("session expired",
-			zap.Int64("expires_at", session.ExpiresAt),
-		)
-		http.Error(w, "Session expired", http.StatusUnauthorized)
-		return
-	}
-
-	// Get user
-	user, err := h.storage.GetUserByID(session.UserID)
-	if err != nil {
-		log.Error("failed to get user",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	log.Info("retrieved current user",
-		zap.String("username", user.Username),
-		zap.String("email", user.Email),
-	)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(models.FromDBUser(user))
 }
 
 // GetUser returns a user by ID
@@ -87,7 +44,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		zap.String("queried user_id", userID),
 	)
 
-	user, err := h.storage.GetUserByID(userID)
+	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil {
 		log.Error("failed to get user",
 			zap.Error(err),
@@ -96,33 +53,35 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
-	log.Info("retrieved user",
+	log.Debug("retrieved user",
 		zap.String("username", user.Username),
 		zap.String("email", user.Email),
 	)
+
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(models.FromDBUser(user))
+	json.NewEncoder(w).Encode(dto.ToUserResponse(user))
 }
 
 // UpdatePassword handles updating a user's password
 func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
-	var req UpdatePasswordRequest
+	var req dto.UpdatePasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// Verify current password
-	user, err := h.storage.GetUserByID(userID)
+	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		http.Error(w, "Failed to get user", http.StatusInternalServerError)
 		return
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.CurrentPassword)); err != nil {
-		http.Error(w, "Current password is incorrect", http.StatusUnauthorized)
+		http.Error(w, "Current password is incorrect", http.StatusBadRequest)
 		return
 	}
 
@@ -132,19 +91,20 @@ func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
-	if err := h.storage.UpdateUserPassword(userID, string(hashedPassword)); err != nil {
+	if err := h.users.UpdatePassword(r.Context(), userID, string(hashedPassword)); err != nil {
 		http.Error(w, "Failed to update password", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 }
 
 // UpdateAvatar handles updating a user's avatar URL
 func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
-	var req UpdateAvatarRequest
+	var req dto.UpdateAvatarRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -155,19 +115,21 @@ func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Info("updating user avatar",
+	h.logger.Debug("updating user avatar",
 		zap.String("user_id", userID),
 		zap.String("avatar_url", req.AvatarURL),
 	)
-	user, err := h.storage.UpdateUserAvatar(userID, req.AvatarURL)
+	err := h.users.UpdateAvatar(r.Context(), userID, req.AvatarURL)
 	if err != nil {
 		http.Error(w, "Failed to update avatar", http.StatusInternalServerError)
 		return
 	}
 
-	// For now, return the request data as the response
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"avatar": user.Avatar,
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Avatar updated successfully",
+		"avatar":  req.AvatarURL,
 	})
 }
 
@@ -175,7 +137,7 @@ func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
-	var req UpdateProfileRequest
+	var req dto.UpdateUserInfoRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -185,20 +147,26 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Username and email cannot be empty", http.StatusBadRequest)
 		return
 	}
-	h.logger.Info("updating user profile",
+	h.logger.Debug("updating user profile",
 		zap.String("user_id", userID),
 		zap.String("username", req.Username),
 		zap.String("email", req.Email),
 	)
 
-	user, err := h.storage.UpdateUser(userID, req.Username, req.Email)
+	user := &domain.User{
+		ID:       userID,
+		Username: req.Username,
+		Email:    req.Email,
+	}
+	updatedUser, err := h.users.Update(r.Context(), user)
 	if err != nil {
-		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
+		http.Error(w, "Failed to update user info", http.StatusInternalServerError)
 		return
 	}
 
-	// For now, return the request data as the response
-	json.NewEncoder(w).Encode(models.FromDBUser(user))
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedUser)
 }
 
 // GetUserSnippets returns all snippets created by a user
@@ -213,7 +181,7 @@ func (h *UserHandler) GetUserSnippets(w http.ResponseWriter, r *http.Request) {
 		zap.String("user_id", userID),
 	)
 
-	snippets, err := h.storage.GetSnippetsByAuthor(userID, authorID)
+	snippets, err := h.snippets.GetAllByAuthor(r.Context(), authorID, userID)
 	if err != nil {
 		log.Error("failed to get user snippets",
 			zap.Error(err),
@@ -224,10 +192,11 @@ func (h *UserHandler) GetUserSnippets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info("retrieved user snippets",
+	log.Debug("retrieved user snippets",
 		zap.Int("count", len(snippets)),
 	)
 
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(snippets)
 }
@@ -241,7 +210,7 @@ func (h *UserHandler) GetUserLikedSnippets(w http.ResponseWriter, r *http.Reques
 		zap.String("user_id", userID),
 	)
 
-	snippets, err := h.storage.GetLikedSnippets(userID)
+	snippets, err := h.likes.GetLikedSnippets(r.Context(), userID)
 	if err != nil {
 		log.Error("failed to get user liked snippets",
 			zap.Error(err),
@@ -251,12 +220,18 @@ func (h *UserHandler) GetUserLikedSnippets(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	log.Info("retrieved user liked snippets",
+	responses := make([]dto.SnippetResponse, len(snippets))
+	for i, snippet := range snippets {
+		responses[i] = dto.ToSnippetResponse(snippet)
+	}
+
+	log.Debug("retrieved user liked snippets",
 		zap.Int("count", len(snippets)),
 	)
 
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(snippets)
+	json.NewEncoder(w).Encode(responses)
 }
 
 // GetUserSavedSnippets returns all snippets saved by a user
@@ -268,7 +243,7 @@ func (h *UserHandler) GetUserSavedSnippets(w http.ResponseWriter, r *http.Reques
 		zap.String("user_id", userID),
 	)
 
-	snippets, err := h.storage.GetSavedSnippets(userID)
+	snippets, err := h.bookmarks.GetSavedSnippets(r.Context(), userID)
 	if err != nil {
 		log.Error("failed to get user saved snippets",
 			zap.Error(err),
@@ -278,10 +253,16 @@ func (h *UserHandler) GetUserSavedSnippets(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	log.Info("retrieved user saved snippets",
+	responses := make([]dto.SnippetResponse, len(snippets))
+	for i, snippet := range snippets {
+		responses[i] = dto.ToSnippetResponse(snippet)
+	}
+
+	log.Debug("retrieved user saved snippets",
 		zap.Int("count", len(snippets)),
 	)
 
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(snippets)
+	json.NewEncoder(w).Encode(responses)
 }

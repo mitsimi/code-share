@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/uuid"
+	"go.uber.org/zap"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
 	"mitsimi.dev/codeShare/internal/domain"
+	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/repository"
 )
 
@@ -24,17 +25,18 @@ func NewUserRepository(dbConn *sql.DB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, user *domain.UserCreation) error {
-	_, err := r.q.CreateUser(ctx, db.CreateUserParams{
-		ID:           uuid.NewString(),
+func (r *UserRepository) Create(ctx context.Context, user *domain.UserCreation) (*domain.User, error) {
+	logger.Log.Debug("Creating new user", zap.String("username", user.Username), zap.String("email", user.Email), zap.String("password_hash", user.PasswordHash))
+	newUser, err := r.q.CreateUser(ctx, db.CreateUserParams{
+		ID:           user.ID,
 		Username:     user.Username,
 		Email:        user.Email,
 		PasswordHash: user.PasswordHash,
 	})
 	if err != nil {
-		return repository.WrapError(err, "failed to create user")
+		return nil, repository.WrapError(err, "failed to create user")
 	}
-	return nil
+	return domain.ToDomainUser(newUser), nil
 }
 
 func (r *UserRepository) GetByID(ctx context.Context, userID string) (*domain.User, error) {
@@ -45,14 +47,7 @@ func (r *UserRepository) GetByID(ctx context.Context, userID string) (*domain.Us
 		}
 		return nil, repository.WrapError(err, "failed to get user by ID")
 	}
-	return &domain.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		Avatar:    user.Avatar.String,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}, nil
+	return domain.ToDomainUser(user), nil
 
 }
 
@@ -64,14 +59,7 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*d
 		}
 		return nil, repository.WrapError(err, "failed to get user by username")
 	}
-	return &domain.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		Avatar:    user.Avatar.String,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}, nil
+	return domain.ToDomainUser(user), nil
 }
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	user, err := r.q.GetUserByEmail(ctx, email)
@@ -81,25 +69,18 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 		}
 		return nil, repository.WrapError(err, "failed to get user by email")
 	}
-	return &domain.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		Avatar:    user.Avatar.String,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}, nil
+	return domain.ToDomainUser(user), nil
 }
-func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
-	_, err := r.q.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
+func (r *UserRepository) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
+	updatedUser, err := r.q.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
 		ID:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,
 	})
 	if err != nil {
-		return repository.WrapError(err, "failed to update user")
+		return nil, repository.WrapError(err, "failed to update user")
 	}
-	return nil
+	return domain.ToDomainUser(updatedUser), nil
 }
 
 func (r *UserRepository) UpdateAvatar(ctx context.Context, userID, avatarURL string) error {

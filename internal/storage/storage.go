@@ -78,7 +78,7 @@ func (s *Storage) ToggleSaveSnippet(ctx context.Context, userID, snippetID strin
 }
 
 // User operations
-func (s *Storage) CreateUser(ctx context.Context, user *domain.UserCreation) error {
+func (s *Storage) CreateUser(ctx context.Context, user *domain.UserCreation) (*domain.User, error) {
 	return s.users.Create(ctx, user)
 }
 
@@ -94,7 +94,7 @@ func (s *Storage) GetUserByEmail(ctx context.Context, email string) (*domain.Use
 	return s.users.GetByEmail(ctx, email)
 }
 
-func (s *Storage) UpdateUser(ctx context.Context, user *domain.User) error {
+func (s *Storage) UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 	return s.users.Update(ctx, user)
 }
 
