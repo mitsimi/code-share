@@ -14,9 +14,9 @@ SELECT
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
     u.username as author_username
 FROM snippets s
-LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?
+LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = @user_id
 LEFT JOIN users u ON s.author = u.id
-WHERE s.id = ?;
+WHERE s.id = @snippet_id;
 
 -- name: CreateSnippet :one
 INSERT INTO snippets (
