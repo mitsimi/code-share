@@ -45,11 +45,20 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteLikeStmt, err = db.PrepareContext(ctx, deleteLike); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteLike: %w", err)
 	}
+	if q.deleteSavedSnippetStmt, err = db.PrepareContext(ctx, deleteSavedSnippet); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteSavedSnippet: %w", err)
+	}
 	if q.deleteSessionStmt, err = db.PrepareContext(ctx, deleteSession); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteSession: %w", err)
 	}
 	if q.deleteSnippetStmt, err = db.PrepareContext(ctx, deleteSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteSnippet: %w", err)
+	}
+	if q.getLikedSnippetsStmt, err = db.PrepareContext(ctx, getLikedSnippets); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLikedSnippets: %w", err)
+	}
+	if q.getSavedSnippetsStmt, err = db.PrepareContext(ctx, getSavedSnippets); err != nil {
+		return nil, fmt.Errorf("error preparing query GetSavedSnippets: %w", err)
 	}
 	if q.getSessionStmt, err = db.PrepareContext(ctx, getSession); err != nil {
 		return nil, fmt.Errorf("error preparing query GetSession: %w", err)
@@ -59,6 +68,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getSnippetsStmt, err = db.PrepareContext(ctx, getSnippets); err != nil {
 		return nil, fmt.Errorf("error preparing query GetSnippets: %w", err)
+	}
+	if q.getSnippetsByAuthorStmt, err = db.PrepareContext(ctx, getSnippetsByAuthor); err != nil {
+		return nil, fmt.Errorf("error preparing query GetSnippetsByAuthor: %w", err)
 	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
@@ -74,6 +86,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.likeSnippetStmt, err = db.PrepareContext(ctx, likeSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query LikeSnippet: %w", err)
+	}
+	if q.saveSnippetStmt, err = db.PrepareContext(ctx, saveSnippet); err != nil {
+		return nil, fmt.Errorf("error preparing query SaveSnippet: %w", err)
 	}
 	if q.updateLikesCountStmt, err = db.PrepareContext(ctx, updateLikesCount); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateLikesCount: %w", err)
@@ -133,6 +148,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteLikeStmt: %w", cerr)
 		}
 	}
+	if q.deleteSavedSnippetStmt != nil {
+		if cerr := q.deleteSavedSnippetStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteSavedSnippetStmt: %w", cerr)
+		}
+	}
 	if q.deleteSessionStmt != nil {
 		if cerr := q.deleteSessionStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteSessionStmt: %w", cerr)
@@ -141,6 +161,16 @@ func (q *Queries) Close() error {
 	if q.deleteSnippetStmt != nil {
 		if cerr := q.deleteSnippetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteSnippetStmt: %w", cerr)
+		}
+	}
+	if q.getLikedSnippetsStmt != nil {
+		if cerr := q.getLikedSnippetsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLikedSnippetsStmt: %w", cerr)
+		}
+	}
+	if q.getSavedSnippetsStmt != nil {
+		if cerr := q.getSavedSnippetsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getSavedSnippetsStmt: %w", cerr)
 		}
 	}
 	if q.getSessionStmt != nil {
@@ -156,6 +186,11 @@ func (q *Queries) Close() error {
 	if q.getSnippetsStmt != nil {
 		if cerr := q.getSnippetsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getSnippetsStmt: %w", cerr)
+		}
+	}
+	if q.getSnippetsByAuthorStmt != nil {
+		if cerr := q.getSnippetsByAuthorStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getSnippetsByAuthorStmt: %w", cerr)
 		}
 	}
 	if q.getUserStmt != nil {
@@ -181,6 +216,11 @@ func (q *Queries) Close() error {
 	if q.likeSnippetStmt != nil {
 		if cerr := q.likeSnippetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing likeSnippetStmt: %w", cerr)
+		}
+	}
+	if q.saveSnippetStmt != nil {
+		if cerr := q.saveSnippetStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing saveSnippetStmt: %w", cerr)
 		}
 	}
 	if q.updateLikesCountStmt != nil {
@@ -259,16 +299,21 @@ type Queries struct {
 	decrementLikesCountStmt   *sql.Stmt
 	deleteExpiredSessionsStmt *sql.Stmt
 	deleteLikeStmt            *sql.Stmt
+	deleteSavedSnippetStmt    *sql.Stmt
 	deleteSessionStmt         *sql.Stmt
 	deleteSnippetStmt         *sql.Stmt
+	getLikedSnippetsStmt      *sql.Stmt
+	getSavedSnippetsStmt      *sql.Stmt
 	getSessionStmt            *sql.Stmt
 	getSnippetStmt            *sql.Stmt
 	getSnippetsStmt           *sql.Stmt
+	getSnippetsByAuthorStmt   *sql.Stmt
 	getUserStmt               *sql.Stmt
 	getUserByEmailStmt        *sql.Stmt
 	getUserByUsernameStmt     *sql.Stmt
 	incrementLikesCountStmt   *sql.Stmt
 	likeSnippetStmt           *sql.Stmt
+	saveSnippetStmt           *sql.Stmt
 	updateLikesCountStmt      *sql.Stmt
 	updateSessionExpiryStmt   *sql.Stmt
 	updateSnippetStmt         *sql.Stmt
@@ -288,16 +333,21 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		decrementLikesCountStmt:   q.decrementLikesCountStmt,
 		deleteExpiredSessionsStmt: q.deleteExpiredSessionsStmt,
 		deleteLikeStmt:            q.deleteLikeStmt,
+		deleteSavedSnippetStmt:    q.deleteSavedSnippetStmt,
 		deleteSessionStmt:         q.deleteSessionStmt,
 		deleteSnippetStmt:         q.deleteSnippetStmt,
+		getLikedSnippetsStmt:      q.getLikedSnippetsStmt,
+		getSavedSnippetsStmt:      q.getSavedSnippetsStmt,
 		getSessionStmt:            q.getSessionStmt,
 		getSnippetStmt:            q.getSnippetStmt,
 		getSnippetsStmt:           q.getSnippetsStmt,
+		getSnippetsByAuthorStmt:   q.getSnippetsByAuthorStmt,
 		getUserStmt:               q.getUserStmt,
 		getUserByEmailStmt:        q.getUserByEmailStmt,
 		getUserByUsernameStmt:     q.getUserByUsernameStmt,
 		incrementLikesCountStmt:   q.incrementLikesCountStmt,
 		likeSnippetStmt:           q.likeSnippetStmt,
+		saveSnippetStmt:           q.saveSnippetStmt,
 		updateLikesCountStmt:      q.updateLikesCountStmt,
 		updateSessionExpiryStmt:   q.updateSessionExpiryStmt,
 		updateSnippetStmt:         q.updateSnippetStmt,

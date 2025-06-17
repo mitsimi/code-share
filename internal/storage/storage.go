@@ -32,12 +32,21 @@ type Storage interface {
 	UpdateSessionExpiry(sessionID string, expiresAt UnixTime, refreshToken string) error
 
 	// Snippet management
-	GetSnippets(userID UserID) ([]models.Snippet, error)
 	GetSnippet(userID UserID, id SnippetID) (models.Snippet, error)
+	GetSnippets(userID UserID) ([]models.Snippet, error)
+	GetSnippetsByAuthor(userID, authorID UserID) ([]models.Snippet, error)
+
 	CreateSnippet(snippet models.Snippet) (SnippetID, error)
 	UpdateSnippet(snippet models.Snippet) error
 	DeleteSnippet(id SnippetID) error
+
+	// Like management
 	ToggleLikeSnippet(userID UserID, id SnippetID, isLike bool) error
+	GetLikedSnippets(userID UserID) ([]models.Snippet, error)
+
+	// Bookmark management
+	ToggleSaveSnippet(userID UserID, id SnippetID, isSave bool) error
+	GetSavedSnippets(userID UserID) ([]models.Snippet, error)
 
 	// Database management
 	Seed() error
