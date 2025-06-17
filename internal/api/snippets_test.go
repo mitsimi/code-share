@@ -18,7 +18,7 @@ import (
 
 func setupTestSnippetHandler(
 	t *testing.T,
-	store storage.Storage,
+	store storage.StorageOLD,
 ) (*chi.Mux, func()) {
 	// Create a test logger
 	testLogger := zap.NewNop()
@@ -48,7 +48,7 @@ func createTestToken(userID string, secretKey string) string {
 	return tokenResp.Token
 }
 
-func runToggleLikeSnippetTests(t *testing.T, store storage.Storage) {
+func runToggleLikeSnippetTests(t *testing.T, store storage.StorageOLD) {
 	router, cleanup := setupTestSnippetHandler(t, store)
 	defer cleanup()
 
@@ -239,7 +239,7 @@ func TestToggleLikeSnippet(t *testing.T) {
 	})
 }
 
-func runLikeStateConsistencyTests(t *testing.T, store storage.Storage) {
+func runLikeStateConsistencyTests(t *testing.T, store storage.StorageOLD) {
 	router, cleanup := setupTestSnippetHandler(t, store)
 	defer cleanup()
 

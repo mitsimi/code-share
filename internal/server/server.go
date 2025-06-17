@@ -23,13 +23,13 @@ import (
 type Server struct {
 	router     *chi.Mux
 	httpServer *http.Server
-	storage    storage.Storage
+	storage    storage.StorageOLD
 	logger     *zap.Logger
 	secretKey  string
 }
 
 // New creates a new server instance
-func New(storage storage.Storage, secretKey string) *Server {
+func New(storage storage.StorageOLD, secretKey string) *Server {
 	s := &Server{
 		router:    chi.NewRouter(),
 		storage:   storage,

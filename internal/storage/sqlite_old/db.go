@@ -10,7 +10,7 @@ import (
 	"mitsimi.dev/codeShare/internal/storage"
 )
 
-var _ storage.Storage = (*SQLiteStorage)(nil)
+var _ storage.StorageOLD = (*SQLiteStorage)(nil)
 
 // SQLiteStorage implements Storage interface with SQLite
 type SQLiteStorage struct {

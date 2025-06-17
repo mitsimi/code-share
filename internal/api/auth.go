@@ -16,13 +16,13 @@ import (
 
 // AuthHandler handles authentication-related HTTP requests
 type AuthHandler struct {
-	storage   storage.Storage
+	storage   storage.StorageOLD
 	logger    *zap.Logger
 	secretKey string
 }
 
 // NewAuthHandler creates a new auth handler
-func NewAuthHandler(storage storage.Storage, secretKey string) *AuthHandler {
+func NewAuthHandler(storage storage.StorageOLD, secretKey string) *AuthHandler {
 	return &AuthHandler{
 		storage:   storage,
 		logger:    logger.Log,

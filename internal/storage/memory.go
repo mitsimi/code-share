@@ -22,7 +22,7 @@ var (
 	ErrDuplicateUsername = errors.New("username already exists")
 )
 
-var _ Storage = (*MemoryStorage)(nil)
+var _ StorageOLD = (*MemoryStorage)(nil)
 
 // MemoryStorage implements Storage interface with in-memory storage
 type MemoryStorage struct {

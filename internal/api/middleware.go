@@ -21,13 +21,13 @@ const userIDKey contextKey = "user_id"
 
 // AuthMiddleware is a middleware that checks for valid authentication
 type AuthMiddleware struct {
-	storage   storage.Storage
+	storage   storage.StorageOLD
 	logger    *zap.Logger
 	secretKey string
 }
 
 // NewAuthMiddleware creates a new auth middleware
-func NewAuthMiddleware(storage storage.Storage, secretKey string) *AuthMiddleware {
+func NewAuthMiddleware(storage storage.StorageOLD, secretKey string) *AuthMiddleware {
 	return &AuthMiddleware{
 		storage:   storage,
 		logger:    logger.Log,

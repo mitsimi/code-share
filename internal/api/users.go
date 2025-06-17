@@ -15,11 +15,11 @@ import (
 )
 
 type UserHandler struct {
-	storage storage.Storage
+	storage storage.StorageOLD
 	logger  *zap.Logger
 }
 
-func NewUserHandler(storage storage.Storage) *UserHandler {
+func NewUserHandler(storage storage.StorageOLD) *UserHandler {
 	return &UserHandler{
 		storage: storage,
 		logger:  logger.Log,

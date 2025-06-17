@@ -1,53 +1,52 @@
-package storage
+package sqlite
 
 import (
+	"context"
 	"database/sql"
-	"errors"
 
-	"github.com/google/uuid"
-	"mitsimi.dev/codeShare/internal/auth"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
-	"mitsimi.dev/codeShare/internal/models"
-	"mitsimi.dev/codeShare/internal/storage"
+	"mitsimi.dev/codeShare/internal/domain"
+	"mitsimi.dev/codeShare/internal/repository"
 )
 
-// Login authenticates a user and returns their ID
-func (s *SQLiteStorage) Login(email, password string) (storage.UserID, error) {
-	user, err := s.GetUserByEmail(email)
-	if err != nil {
-		return "", auth.ErrInvalidCredentials
-	}
+var _ repository.SessionRepository = (*SessionRepository)(nil)
 
-	if !auth.CheckPasswordHash(password, user.PasswordHash) {
-		return "", auth.ErrInvalidCredentials
-	}
-
-	return user.ID, nil
+type SessionRepository struct {
+	db *sql.DB
+	q  *db.Queries
 }
 
-// CreateSession creates a new session for a user
-func (s *SQLiteStorage) CreateSession(userID string, token string, refreshToken string, expiresAt storage.UnixTime) error {
-	_, err := s.q.CreateSession(s.ctx, db.CreateSessionParams{
-		ID:           uuid.NewString(),
-		UserID:       userID,
-		Token:        token,
-		RefreshToken: refreshToken,
-		ExpiresAt:    expiresAt,
+func NewSessionRepository(dbConn *sql.DB) *SessionRepository {
+	return &SessionRepository{
+		db: dbConn,
+		q:  db.New(dbConn),
+	}
+}
+
+func (r *SessionRepository) Create(ctx context.Context, session *domain.Session) error {
+	_, err := r.q.CreateSession(ctx, db.CreateSessionParams{
+		ID:           session.ID,
+		UserID:       session.UserID,
+		Token:        session.Token,
+		RefreshToken: session.RefreshToken,
+		ExpiresAt:    session.ExpiresAt,
 	})
-	return err
+	if err != nil {
+		return repository.WrapError(err, "failed to create session")
+	}
+	return nil
 }
 
-// GetSession gets a session by token
-func (s *SQLiteStorage) GetSession(token string) (models.Session, error) {
-	session, err := s.q.GetSession(s.ctx, token)
+func (r *SessionRepository) GetByToken(ctx context.Context, token string) (*domain.Session, error) {
+	session, err := r.q.GetSession(ctx, token)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return models.Session{}, errors.New("session not found")
+		if err == sql.ErrNoRows {
+			return nil, repository.ErrNotFound
 		}
-		return models.Session{}, err
+		return nil, repository.WrapError(err, "failed to get session")
 	}
 
-	return models.Session{
+	return &domain.Session{
 		ID:           session.ID,
 		UserID:       session.UserID,
 		Token:        session.Token,
@@ -57,28 +56,39 @@ func (s *SQLiteStorage) GetSession(token string) (models.Session, error) {
 	}, nil
 }
 
-// DeleteSession deletes a session by token
-func (s *SQLiteStorage) DeleteSession(token string) error {
-	return s.q.DeleteSession(s.ctx, token)
+func (r *SessionRepository) Delete(ctx context.Context, token string) error {
+	err := r.q.DeleteSession(ctx, token)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return repository.ErrNotFound
+		}
+		return repository.WrapError(err, "failed to delete session")
+	}
+	return nil
 }
 
-// DeleteExpiredSessions deletes all expired sessions
-func (s *SQLiteStorage) DeleteExpiredSessions() error {
-	return s.q.DeleteExpiredSessions(s.ctx)
+func (r *SessionRepository) DeleteExpired(ctx context.Context) error {
+	err := r.q.DeleteExpiredSessions(ctx)
+	if err != nil {
+		return repository.WrapError(err, "failed to delete expired sessions")
+	}
+	return nil
 }
 
-// UpdateSessionExpiry updates the expiry time and refresh token of a session
-func (s *SQLiteStorage) UpdateSessionExpiry(token string, expiresAt storage.UnixTime, refreshToken string) error {
+func (r *SessionRepository) UpdateExpiry(ctx context.Context, token string, expiresAt domain.UnixTime, refreshToken string) error {
 	// First get the session to verify it exists
-	session, err := s.GetSession(token)
+	session, err := r.GetByToken(ctx, token)
 	if err != nil {
 		return err
 	}
 
-	err = s.q.UpdateSessionExpiry(s.ctx, db.UpdateSessionExpiryParams{
+	err = r.q.UpdateSessionExpiry(ctx, db.UpdateSessionExpiryParams{
 		Token:        session.Token,
 		ExpiresAt:    expiresAt,
 		RefreshToken: refreshToken,
 	})
-	return err
+	if err != nil {
+		return repository.WrapError(err, "failed to update session expiry")
+	}
+	return nil
 }

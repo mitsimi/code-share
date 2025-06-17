@@ -84,10 +84,10 @@ func (s *SQLiteStorage) CreateSnippet(snippet models.Snippet) (storage.SnippetID
 
 func (s *SQLiteStorage) UpdateSnippet(snippet models.Snippet) error {
 	_, err := s.q.UpdateSnippet(s.ctx, db.UpdateSnippetParams{
-		Title:    snippet.Title,
-		Content:  snippet.Content,
-		Language: snippet.Language,
-		ID:       snippet.ID,
+		Title:     snippet.Title,
+		Content:   snippet.Content,
+		Language:  snippet.Language,
+		SnippetID: snippet.ID,
 	})
 	return err
 }

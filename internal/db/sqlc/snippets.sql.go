@@ -266,19 +266,19 @@ func (q *Queries) GetSnippetsByAuthor(ctx context.Context, arg GetSnippetsByAuth
 const updateSnippet = `-- name: UpdateSnippet :one
 UPDATE snippets
 SET 
-    title = ?,
-    content = ?,
-    language = ?,
+    title = ?1,
+    content = ?2,
+    language = ?3,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE id = ?4
 RETURNING id, title, language, content, author, created_at, updated_at, likes
 `
 
 type UpdateSnippetParams struct {
-	Title    string `json:"title"`
-	Content  string `json:"content"`
-	Language string `json:"language"`
-	ID       string `json:"id"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	Language  string `json:"language"`
+	SnippetID string `json:"snippet_id"`
 }
 
 func (q *Queries) UpdateSnippet(ctx context.Context, arg UpdateSnippetParams) (Snippet, error) {
@@ -286,7 +286,7 @@ func (q *Queries) UpdateSnippet(ctx context.Context, arg UpdateSnippetParams) (S
 		arg.Title,
 		arg.Content,
 		arg.Language,
-		arg.ID,
+		arg.SnippetID,
 	)
 	var i Snippet
 	err := row.Scan(

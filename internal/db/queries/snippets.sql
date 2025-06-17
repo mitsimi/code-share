@@ -56,11 +56,11 @@ RETURNING *;
 -- name: UpdateSnippet :one
 UPDATE snippets
 SET 
-    title = ?,
-    content = ?,
-    language = ?,
+    title = @title,
+    content = @content,
+    language = @language,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE id = @snippet_id
 RETURNING *;
 
 -- name: DeleteSnippet :exec
