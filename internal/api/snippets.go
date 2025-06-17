@@ -260,6 +260,14 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		action = "like"
 	}
 
+	if action != "like" && action != "unlike" {
+		log.Error("invalid action",
+			zap.String("action", action),
+		)
+		http.Error(w, "Invalid action", http.StatusBadRequest)
+		return
+	}
+
 	if err := h.storage.ToggleLikeSnippet(userID, id, action == "like"); err != nil {
 		log.Error("failed to toggle like",
 			zap.Error(err),
