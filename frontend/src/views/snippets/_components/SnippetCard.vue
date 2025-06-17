@@ -8,9 +8,9 @@
         >
           {{ snippet.title }}
         </CardTitle>
-        <Badge variant="secondary" class="shrink-0 text-xs">
+        <Badge v-if="snippet.language" variant="secondary" class="shrink-0 text-xs">
           <!-- TODO: Add language property to snippet type -->
-          {{ hardcodedLanguage }}
+          {{ getLanguageName(snippet.language) || 'Text' }}
         </Badge>
       </div>
     </CardHeader>
@@ -22,8 +22,7 @@
         <div class="bg-muted/50 flex items-center justify-between border-b px-3 py-2">
           <div class="flex items-center gap-2">
             <span class="text-muted-foreground font-mono text-xs">
-              <!-- TODO: Add file extension property to snippet type -->
-              snippet.{{ hardcodedFileExtension }}
+              snippet.{{ getLanguageExtension(snippet.language || '') || 'txt' }}
             </span>
           </div>
           <Button
@@ -60,13 +59,11 @@
             <div
               class="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium"
             >
-              <!-- TODO: Add author avatar or generate from author name -->
               {{ getAuthorInitials(snippet.author) }}
             </div>
             <div class="flex flex-col">
               <span class="text-foreground text-sm font-medium">{{ snippet.author }}</span>
               <span class="text-muted-foreground text-xs">
-                <!-- TODO: Add createdAt property to snippet type -->
                 {{ dayjs(snippet.createdAt).fromNow() }}
               </span>
             </div>
@@ -76,24 +73,11 @@
         <!-- Right side - Action buttons -->
         <div class="flex items-center gap-2">
           <!-- Save/Bookmark button -->
-          <Button
-            v-if="authStore.isAuthenticated()"
-            variant="ghost"
-            size="sm"
-            class="h-8 w-8 p-0"
-            @click.stop="toggleSave"
-          >
-            <BookmarkIcon
-              :class="[
-                'h-4 w-4 transition-colors',
-                hardcodedIsSaved
-                  ? 'text-primary fill-current'
-                  : 'text-muted-foreground hover:text-foreground',
-              ]"
-            />
-          </Button>
+          <div @click.stop>
+            <SaveButton :isSaved="snippet.isSaved" :snippetId="snippet.id" />
+          </div>
 
-          <!-- Like button - your existing component -->
+          <!-- Like button -->
           <div @click.stop>
             <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
           </div>
@@ -115,8 +99,10 @@ import type { Snippet } from '@/types'
 import { CopyIcon, BookmarkIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
+import SaveButton from './SaveButton.vue'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
+import { getLanguageExtension, getLanguageName } from '@/utils/languages'
 
 const authStore = useAuthStore()
 
@@ -127,8 +113,6 @@ defineEmits<{
 }>()
 
 // TODO: Replace these hardcoded values with actual props when available
-const hardcodedLanguage = 'JavaScript' // Add to snippet type: language: string
-const hardcodedFileExtension = 'js' // Add to snippet type: filename?: string
 const hardcodedIsSaved = false // Add to snippet type or user state: isSaved: boolean
 
 const props = defineProps<{

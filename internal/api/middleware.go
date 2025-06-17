@@ -10,6 +10,7 @@ import (
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/storage"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 )
@@ -34,60 +35,73 @@ func NewAuthMiddleware(storage storage.Storage, secretKey string) *AuthMiddlewar
 	}
 }
 
-// RequireAuth is a middleware that requires valid authentication
-func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
+func (m *AuthMiddleware) TryAttachUserID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID := middleware.GetReqID(r.Context())
 		log := m.logger.With(zap.String("request_id", requestID))
 
-		// Try to get session from cookie
-		cookie, err := r.Cookie("session")
-		if err == nil {
-			// Validate session
-			session, err := m.storage.GetSession(cookie.Value)
-			if err == nil {
+		var userID storage.UserID
+
+		// Try to get session from cookie first
+		if cookie, err := r.Cookie("session"); err == nil {
+			if session, err := m.storage.GetSession(cookie.Value); err == nil {
 				if session.ExpiresAt > time.Now().Unix() {
-					// Add user ID to context
-					ctx := context.WithValue(r.Context(), userIDKey, session.UserID)
-					next.ServeHTTP(w, r.WithContext(ctx))
-					return
+					userID = session.UserID
 				}
-				// Session expired
-				log.Error("session expired", zap.Int64("expires_at", session.ExpiresAt))
-				http.Error(w, "Not authenticated", http.StatusUnauthorized)
-				return
 			}
 		}
 
-		// Try to get JWT token from Authorization header
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			log.Error("no authorization header")
+		// If no valid session, try JWT token
+		if userID == "" {
+			authHeader := r.Header.Get("Authorization")
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				token := strings.TrimPrefix(authHeader, "Bearer ")
+				if user, err := auth.ValidateToken(token, m.secretKey); err == nil {
+					userID = user.UserID
+				}
+			}
+		}
+
+		// Add user ID to context (even if empty)
+		ctx := context.WithValue(r.Context(), userIDKey, userID)
+		log.Debug("TryAuth completed", zap.String("user_id", userID))
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// RequireAuth is a middleware that requires valid authentication
+func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userID := GetUserID(r)
+		if userID == "" {
+			requestID := middleware.GetReqID(r.Context())
+			log := m.logger.With(zap.String("request_id", requestID))
+			log.Error("authentication required but not provided")
+			http.Error(w, "Not authenticated", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (m *AuthMiddleware) RequireSelfOrAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userID := GetUserID(r)
+		if userID == "" {
+			requestID := middleware.GetReqID(r.Context())
+			log := m.logger.With(zap.String("request_id", requestID))
+			log.Error("authentication required but not provided")
 			http.Error(w, "Not authenticated", http.StatusUnauthorized)
 			return
 		}
 
-		// Check if header has Bearer prefix
-		if !strings.HasPrefix(authHeader, "Bearer ") {
-			log.Error("invalid authorization header format")
-			http.Error(w, "Invalid authorization header", http.StatusUnauthorized)
+		// Check if the user is an admin or the same user
+		if !auth.IsAdmin(userID) && chi.URLParam(r, "id") != string(userID) {
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 
-		// Extract token
-		token := strings.TrimPrefix(authHeader, "Bearer ")
-
-		// Validate token
-		userID, err := auth.ValidateToken(token, m.secretKey)
-		if err != nil {
-			log.Error("invalid token", zap.Error(err))
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
-			return
-		}
-
-		// Add user ID to context
-		ctx := context.WithValue(r.Context(), userIDKey, userID)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, r)
 	})
 }
 

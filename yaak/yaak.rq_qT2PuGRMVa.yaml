@@ -1,0 +1,26 @@
+type: http_request
+model: http_request
+id: rq_qT2PuGRMVa
+createdAt: 2025-06-17T12:18:17.786215
+updatedAt: 2025-06-17T12:23:31.033688
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_kb6ND2zGAX
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: PATCH
+name: ToggleSaveSnippet
+sortPriority: 3000.001
+url: ${[ BASE_URL ]}/snippets/5/save
+urlParameters:
+- enabled: false
+  name: action
+  value: unsave
+  id: jdfxI7CSbm
+- enabled: true
+  name: ''
+  value: ''
+  id: VJsVfpYgvq

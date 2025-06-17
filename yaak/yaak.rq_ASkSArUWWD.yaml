@@ -1,0 +1,26 @@
+type: http_request
+model: http_request
+id: rq_ASkSArUWWD
+createdAt: 2025-06-16T21:39:28.760998
+updatedAt: 2025-06-16T21:46:26.689489
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_s5LRy7VcJj
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "avatarUrl": "https://www.shutterstock.com/image-photo/awesome-pic-natureza-600nw-2408133899.jpg"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: cSgaXR69Pw
+method: PATCH
+name: Update Avatar
+sortPriority: 1000.0
+url: ${[ BASE_URL ]}/auth/me/avatar
+urlParameters: []

@@ -1,0 +1,82 @@
+package server
+
+import (
+	"time"
+
+	"mitsimi.dev/codeShare/internal/api"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+)
+
+// setupAPIRoutes configures all API routes
+func (s *Server) setupAPIRoutes(r chi.Router) {
+	// Create auth middleware
+	authMiddleware := api.NewAuthMiddleware(s.storage, s.secretKey)
+
+	r.Use(authMiddleware.TryAttachUserID)       // Attach user ID to context
+	r.Use(middleware.Timeout(15 * time.Second)) // Set a timeout for all API routes
+	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))
+	r.Use(middleware.AllowContentType("application/json"))
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:3000",         // Development
+			"https://codeshare.mitsimi.dev", // Production
+		},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
+	// Auth routes
+	r.Route("/auth", func(r chi.Router) {
+		handler := api.NewAuthHandler(s.storage, s.secretKey)
+		r.Post("/signup", handler.Signup)
+		r.Post("/login", handler.Login)
+		r.Post("/logout", handler.Logout)
+		r.Post("/refresh", handler.RefreshToken)
+	})
+
+	// User routes
+	r.Route("/users", func(r chi.Router) {
+		handler := api.NewUserHandler(s.storage)
+		r.Use(authMiddleware.RequireAuth)                // Protect user routes
+		r.Get("/{id}", handler.GetUser)                  // Get user by ID
+		r.Get("/{id}/snippets", handler.GetUserSnippets) // Get user's snippets
+
+		r.Group(func(r chi.Router) {
+			r.Use(authMiddleware.RequireSelfOrAdmin)           // Require self or admin access
+			r.Get("/{id}/liked", handler.GetUserLikedSnippets) // Get user's liked snippets
+			r.Get("/{id}/saved", handler.GetUserSavedSnippets) // Get user's saved snippets
+			r.Patch("/{id}/", handler.UpdateProfile)
+			r.Patch("/{id}/password", handler.UpdatePassword)
+			r.Patch("/{id}/avatar", handler.UpdateAvatar)
+		})
+	})
+
+	// Snippet routes
+	r.Route("/snippets", func(r chi.Router) {
+		handler := api.NewSnippetHandler(s.storage)
+
+		// Public routes
+		r.Group(func(r chi.Router) {
+			r.Get("/", handler.GetSnippets)
+			r.Get("/{id}", handler.GetSnippet)
+		})
+
+		// Protected routes
+		r.Group(func(r chi.Router) {
+			r.Use(authMiddleware.RequireAuth)
+			r.Post("/", handler.CreateSnippet)
+
+			r.Put("/{id}", handler.UpdateSnippet)
+			r.Delete("/{id}", handler.DeleteSnippet)
+			r.Patch("/{id}/like", handler.ToggleLikeSnippet)
+			r.Patch("/{id}/save", handler.ToggleSaveSnippet)
+		})
+	})
+}

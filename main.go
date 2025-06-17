@@ -11,7 +11,7 @@ import (
 	"mitsimi.dev/codeShare/internal/config"
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/server"
-	"mitsimi.dev/codeShare/internal/storage"
+	storage "mitsimi.dev/codeShare/internal/storage/sqlite"
 
 	"go.uber.org/zap"
 )

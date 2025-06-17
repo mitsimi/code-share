@@ -5,6 +5,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type Session struct {
 type Snippet struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
+	Language  string    `json:"language"`
 	Content   string    `json:"content"`
 	Author    string    `json:"author"`
 	CreatedAt time.Time `json:"created_at"`
@@ -28,15 +30,22 @@ type Snippet struct {
 }
 
 type User struct {
-	ID           string    `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           string         `json:"id"`
+	Username     string         `json:"username"`
+	Avatar       sql.NullString `json:"avatar"`
+	Email        string         `json:"email"`
+	PasswordHash string         `json:"password_hash"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
 }
 
 type UserLike struct {
+	SnippetID string    `json:"snippet_id"`
+	UserID    string    `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserSafe struct {
 	SnippetID string    `json:"snippet_id"`
 	UserID    string    `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`

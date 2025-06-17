@@ -26,7 +26,7 @@ func TestMemoryCreateAndGetUser(t *testing.T) {
 	}
 
 	// Test getting user by ID
-	user, err := store.GetUser(UserID(userID.ID))
+	user, err := store.GetUserByID(UserID(userID.ID))
 	if err != nil {
 		t.Fatalf("Failed to get user: %v", err)
 	}
@@ -90,9 +90,10 @@ func TestMemoryCreateAndGetSnippet(t *testing.T) {
 
 	// Create a snippet
 	snippet := models.Snippet{
-		Title:   "Test Snippet",
-		Content: "Test Content",
-		Author:  username,
+		Title:    "Test Snippet",
+		Content:  "Test Content",
+		Language: "go",
+		Author:   username,
 	}
 
 	snippetID, err := store.CreateSnippet(snippet)
@@ -112,6 +113,9 @@ func TestMemoryCreateAndGetSnippet(t *testing.T) {
 	}
 	if gotSnippet.Content != snippet.Content {
 		t.Errorf("Expected content %q, got %q", snippet.Content, gotSnippet.Content)
+	}
+	if gotSnippet.Language != snippet.Language {
+		t.Errorf("Expected language %q, got %q", snippet.Language, gotSnippet.Language)
 	}
 	if gotSnippet.Author != username {
 		t.Errorf("Expected author %q, got %q", username, gotSnippet.Author)
@@ -141,9 +145,10 @@ func TestMemoryUpdateSnippet(t *testing.T) {
 
 	// Create a snippet
 	snippet := models.Snippet{
-		Title:   "Original Title",
-		Content: "Original Content",
-		Author:  username,
+		Title:    "Original Title",
+		Content:  "Original Content",
+		Language: "go",
+		Author:   username,
 	}
 
 	snippetID, err := store.CreateSnippet(snippet)
@@ -153,10 +158,11 @@ func TestMemoryUpdateSnippet(t *testing.T) {
 
 	// Update the snippet
 	updatedSnippet := models.Snippet{
-		ID:      snippetID,
-		Title:   "Updated Title",
-		Content: "Updated Content",
-		Author:  username,
+		ID:       snippetID,
+		Title:    "Updated Title",
+		Content:  "Updated Content",
+		Language: "python",
+		Author:   username,
 	}
 
 	err = store.UpdateSnippet(updatedSnippet)
@@ -176,6 +182,9 @@ func TestMemoryUpdateSnippet(t *testing.T) {
 	}
 	if gotSnippet.Content != updatedSnippet.Content {
 		t.Errorf("Expected content %q, got %q", updatedSnippet.Content, gotSnippet.Content)
+	}
+	if gotSnippet.Language != updatedSnippet.Language {
+		t.Errorf("Expected language %q, got %q", updatedSnippet.Language, gotSnippet.Language)
 	}
 }
 

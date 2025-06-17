@@ -10,6 +10,7 @@ import (
 type User struct {
 	ID           string    `json:"id"`
 	Username     string    `json:"username"`
+	Avatar       string    `json:"avatar"`
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"-"` // Not exposed in JSON
 	CreatedAt    time.Time `json:"createdAt"`
@@ -23,6 +24,7 @@ func FromDBUser(user db.User) User {
 	return User{
 		ID:           user.ID,
 		Username:     user.Username,
+		Avatar:       user.Avatar.String,
 		Email:        user.Email,
 		PasswordHash: user.PasswordHash,
 		CreatedAt:    user.CreatedAt,
