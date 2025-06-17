@@ -90,11 +90,7 @@ const { mutate: updateLike } = useMutation<
     // Update the snippet in the list view
     queryClient.setQueryData(['snippets'], (oldData: Snippet[] | undefined) => {
       if (!oldData) return [updatedSnippet]
-      return oldData.map((snippet) =>
-        snippet.id === updatedSnippet.id
-          ? { ...updatedSnippet, isLiked: !snippet.isLiked }
-          : snippet,
-      )
+      return oldData.map((snippet) => (snippet.id === updatedSnippet.id ? updatedSnippet : snippet))
     })
   },
   onError: (error) => {
