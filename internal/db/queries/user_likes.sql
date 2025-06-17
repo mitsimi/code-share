@@ -1,5 +1,5 @@
 -- name: LikeSnippet :exec
-INSERT OR IGNORE INTO user_likes (snippet_id, user_id)
+INSERT INTO user_likes (snippet_id, user_id)
 VALUES (?, ?);
 
 -- name: IncrementLikesCount :exec
@@ -24,6 +24,7 @@ SET likes = (
     WHERE snippet_id = ?
 )
 WHERE id = ?;
+
 -- name: CheckLikeExists :one
 SELECT 1 as exists_flag
 FROM user_likes 
