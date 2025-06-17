@@ -149,19 +149,15 @@ export const useAuthStore = defineStore('auth', () => {
     const hasStoredAuth = loadAuthFromStorage()
     if (hasStoredAuth && isAuthenticated()) {
       try {
-        // Verify and update user data
-        const currentUser = await authService.getCurrentUser()
+        // If we have stored auth and it's not expired, we can use it directly
+        // No need to verify with the server since we have the token
         if (!token.value || !refreshToken.value || !expiresAt.value) {
           throw new Error('Missing auth data')
         }
-        setAuth({
-          token: token.value,
-          refreshToken: refreshToken.value,
-          expiresAt: expiresAt.value,
-          user: currentUser,
-        })
+        // Schedule token refresh
+        scheduleTokenRefresh(expiresAt.value)
       } catch (error) {
-        // If getCurrentUser fails, try to refresh the token
+        // If there's an issue with the stored auth, try to refresh the token
         try {
           await refreshAccessToken()
         } catch (refreshError) {
