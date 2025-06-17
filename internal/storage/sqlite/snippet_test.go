@@ -186,84 +186,96 @@ func TestSQLiteToggleLikeSnippet(t *testing.T) {
 	}
 
 	// Test liking a non-existent snippet
-	err = store.ToggleLikeSnippet(user1.ID, "non-existent-id", true)
-	if err == nil {
-		t.Error("Expected error when liking non-existent snippet")
-	}
+	t.Run("LikeNonExistentSnippet", func(t *testing.T) {
+		err = store.ToggleLikeSnippet(user1.ID, "non-existent-id", true)
+		if err == nil {
+			t.Error("Expected error when liking non-existent snippet")
+		}
+	})
 
 	// Test liking the snippet
-	err = store.ToggleLikeSnippet(user1.ID, snippetID, true)
-	if err != nil {
-		t.Fatalf("Failed to like snippet: %v", err)
-	}
+	t.Run("LikeSnippet", func(t *testing.T) {
+		err = store.ToggleLikeSnippet(user1.ID, snippetID, true)
+		if err != nil {
+			t.Fatalf("Failed to like snippet: %v", err)
+		}
 
-	// Verify like count and IsLiked flag
-	gotSnippet, err := store.GetSnippet(user1.ID, snippetID)
-	if err != nil {
-		t.Fatalf("Failed to get snippet after liking: %v", err)
-	}
-	if gotSnippet.Likes != 1 {
-		t.Errorf("Expected 1 like, got %d", gotSnippet.Likes)
-	}
-	if !gotSnippet.IsLiked {
-		t.Error("Expected IsLiked to be true after liking")
-	}
+		// Verify like count and IsLiked flag
+		gotSnippet, err := store.GetSnippet(user1.ID, snippetID)
+		if err != nil {
+			t.Fatalf("Failed to get snippet after liking: %v", err)
+		}
+		if gotSnippet.Likes != 1 {
+			t.Errorf("Expected 1 like, got %d", gotSnippet.Likes)
+		}
+		if !gotSnippet.IsLiked {
+			t.Error("Expected IsLiked to be true after liking")
+		}
+	})
 
 	// Test liking the same snippet again (should be ignored due to UNIQUE constraint)
-	err = store.ToggleLikeSnippet(user1.ID, snippetID, true)
-	if err != nil {
-		t.Fatalf("Failed to like snippet again: %v", err)
-	}
-	gotSnippet, err = store.GetSnippet(user1.ID, snippetID)
-	if err != nil {
-		t.Fatalf("Failed to get snippet after second like: %v", err)
-	}
-	if gotSnippet.Likes != 1 {
-		t.Errorf("Expected 1 like after second like attempt, got %d", gotSnippet.Likes)
-	}
+	t.Run("LikeSnippetAgain", func(t *testing.T) {
+		err = store.ToggleLikeSnippet(user1.ID, snippetID, true)
+		if err != nil {
+			t.Fatalf("Failed to like snippet again: %v", err)
+		}
+		gotSnippet, err := store.GetSnippet(user1.ID, snippetID)
+		if err != nil {
+			t.Fatalf("Failed to get snippet after second like: %v", err)
+		}
+		if gotSnippet.Likes != 1 {
+			t.Errorf("Expected 1 like after second like attempt, got %d", gotSnippet.Likes)
+		}
+	})
 
 	// Test another user liking the same snippet
-	err = store.ToggleLikeSnippet(user2.ID, snippetID, true)
-	if err != nil {
-		t.Fatalf("Failed to like snippet as second user: %v", err)
-	}
-	gotSnippet, err = store.GetSnippet(user2.ID, snippetID)
-	if err != nil {
-		t.Fatalf("Failed to get snippet after second user liked: %v", err)
-	}
-	if gotSnippet.Likes != 2 {
-		t.Errorf("Expected 2 likes after second user liked, got %d", gotSnippet.Likes)
-	}
-	if !gotSnippet.IsLiked {
-		t.Error("Expected IsLiked to be true for second user")
-	}
+	t.Run("LikeSnippetByAnotherUser", func(t *testing.T) {
+		err = store.ToggleLikeSnippet(user2.ID, snippetID, true)
+		if err != nil {
+			t.Fatalf("Failed to like snippet as second user: %v", err)
+		}
+		gotSnippet, err := store.GetSnippet(user2.ID, snippetID)
+		if err != nil {
+			t.Fatalf("Failed to get snippet after second user liked: %v", err)
+		}
+		if gotSnippet.Likes != 2 {
+			t.Errorf("Expected 2 likes after second user liked, got %d", gotSnippet.Likes)
+		}
+		if !gotSnippet.IsLiked {
+			t.Error("Expected IsLiked to be true for second user")
+		}
+	})
 
 	// Test unliking the snippet
-	err = store.ToggleLikeSnippet(user1.ID, snippetID, false)
-	if err != nil {
-		t.Fatalf("Failed to unlike snippet: %v", err)
-	}
-	gotSnippet, err = store.GetSnippet(user1.ID, snippetID)
-	if err != nil {
-		t.Fatalf("Failed to get snippet after unliking: %v", err)
-	}
-	if gotSnippet.Likes != 1 {
-		t.Errorf("Expected 1 like after unliking, got %d", gotSnippet.Likes)
-	}
-	if gotSnippet.IsLiked {
-		t.Error("Expected IsLiked to be false after unliking")
-	}
+	t.Run("UnlikeSnippet", func(t *testing.T) {
+		err = store.ToggleLikeSnippet(user1.ID, snippetID, false)
+		if err != nil {
+			t.Fatalf("Failed to unlike snippet: %v", err)
+		}
+		gotSnippet, err := store.GetSnippet(user1.ID, snippetID)
+		if err != nil {
+			t.Fatalf("Failed to get snippet after unliking: %v", err)
+		}
+		if gotSnippet.Likes != 1 {
+			t.Errorf("Expected 1 like after unliking, got %d", gotSnippet.Likes)
+		}
+		if gotSnippet.IsLiked {
+			t.Error("Expected IsLiked to be false after unliking")
+		}
+	})
 
 	// Test unliking a snippet that wasn't liked (should be a no-op)
-	err = store.ToggleLikeSnippet(user1.ID, snippetID, false)
-	if err != nil {
-		t.Fatalf("Failed to unlike already unliked snippet: %v", err)
-	}
-	gotSnippet, err = store.GetSnippet(user1.ID, snippetID)
-	if err != nil {
-		t.Fatalf("Failed to get snippet after second unlike: %v", err)
-	}
-	if gotSnippet.Likes != 1 {
-		t.Errorf("Expected 1 like after second unlike attempt, got %d", gotSnippet.Likes)
-	}
+	t.Run("UnlikeSnippetNotLiked", func(t *testing.T) {
+		err = store.ToggleLikeSnippet(user1.ID, snippetID, false)
+		if err != nil {
+			t.Fatalf("Failed to unlike already unliked snippet: %v", err)
+		}
+		gotSnippet, err := store.GetSnippet(user1.ID, snippetID)
+		if err != nil {
+			t.Fatalf("Failed to get snippet after second unlike: %v", err)
+		}
+		if gotSnippet.Likes != 1 {
+			t.Errorf("Expected 1 like after second unlike attempt, got %d", gotSnippet.Likes)
+		}
+	})
 }
