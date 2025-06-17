@@ -32,10 +32,9 @@
             <Button variant="reverse" size="sm" @click="handleSignup"> Sign Up </Button>
           </template>
           <template v-else>
-            <Button variant="ghost" size="sm" @click="handleLogout">
-              <LogOut class="mr-2 h-4 w-4" />
-              Logout
-            </Button>
+            <div class="flex items-center space-x-2">
+              <UserMenu @logout="handleLogout" @close="closeMobileMenu" />
+            </div>
           </template>
         </div>
 
@@ -44,8 +43,8 @@
 
         <!-- Mobile Menu Button -->
         <Button variant="ghost" size="sm" class="h-9 w-9 px-0 md:hidden" @click="toggleMobileMenu">
-          <Menu v-if="!isMobileMenuOpen" class="h-4 w-4" />
-          <X v-else class="h-4 w-4" />
+          <MenuIcon v-if="!isMobileMenuOpen" class="h-4 w-4" />
+          <XIcon v-else class="h-4 w-4" />
           <span class="sr-only">Toggle menu</span>
         </Button>
       </div>
@@ -87,10 +86,8 @@
               </Button>
             </template>
             <template v-else>
-              <Button variant="ghost" class="justify-start" @click="handleLogout">
-                <LogOut class="mr-2 h-4 w-4" />
-                Logout
-              </Button>
+              <UserInfo class="px-2 py-2" />
+              <MenuItems isMobile @logout="handleLogout" @close="closeMobileMenu" />
             </template>
           </div>
         </div>
@@ -102,11 +99,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import { Menu, X, LogOut } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 import ThemeSwitch from './ThemeSwitch.vue'
 import Separator from '../ui/separator/Separator.vue'
+import UserInfo from '@/components/UserMenu/UserInfo.vue'
+import MenuItems from '@/components/UserMenu/MenuItems.vue'
+import { MenuIcon, XIcon } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 

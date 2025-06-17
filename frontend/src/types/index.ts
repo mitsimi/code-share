@@ -2,18 +2,19 @@ export interface Snippet {
   id: string
   title: string
   content: string
+  language: string
   author: string
   likes: number
   isLiked: boolean
+  isSaved: boolean
   createdAt: string
   updatedAt: string
-  language?: string
-  isSaved?: boolean
 }
 
 export interface User {
   id: string
   username: string
+  avatar: string
   email: string
   createdAt: string
   updatedAt: string

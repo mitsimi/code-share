@@ -7,7 +7,28 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
+
+const checkLikeExists = `-- name: CheckLikeExists :one
+SELECT 1 as exists_flag
+FROM user_likes 
+WHERE snippet_id = ? AND user_id = ?
+LIMIT 1
+`
+
+type CheckLikeExistsParams struct {
+	SnippetID string `json:"snippet_id"`
+	UserID    string `json:"user_id"`
+}
+
+func (q *Queries) CheckLikeExists(ctx context.Context, arg CheckLikeExistsParams) (int64, error) {
+	row := q.queryRow(ctx, q.checkLikeExistsStmt, checkLikeExists, arg.SnippetID, arg.UserID)
+	var exists_flag int64
+	err := row.Scan(&exists_flag)
+	return exists_flag, err
+}
 
 const decrementLikesCount = `-- name: DecrementLikesCount :exec
 UPDATE snippets 
@@ -18,6 +39,89 @@ WHERE id = ?
 func (q *Queries) DecrementLikesCount(ctx context.Context, id string) error {
 	_, err := q.exec(ctx, q.decrementLikesCountStmt, decrementLikesCount, id)
 	return err
+}
+
+const deleteLike = `-- name: DeleteLike :exec
+DELETE FROM user_likes
+WHERE snippet_id = ? AND user_id = ?
+`
+
+type DeleteLikeParams struct {
+	SnippetID string `json:"snippet_id"`
+	UserID    string `json:"user_id"`
+}
+
+func (q *Queries) DeleteLike(ctx context.Context, arg DeleteLikeParams) error {
+	_, err := q.exec(ctx, q.deleteLikeStmt, deleteLike, arg.SnippetID, arg.UserID)
+	return err
+}
+
+const getLikedSnippets = `-- name: GetLikedSnippets :many
+SELECT s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes, 
+    CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
+    CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
+    u.username AS author_username, 
+    u.id AS author_id, 
+    u.avatar AS author_avatar
+FROM snippets s
+JOIN user_likes ul ON s.id = ul.snippet_id
+JOIN users u ON s.author = u.id
+LEFT JOIN user_saves us ON s.id = us.snippet_id AND us.user_id = ?1
+WHERE ul.user_id = ?1
+ORDER BY s.created_at DESC
+`
+
+type GetLikedSnippetsRow struct {
+	ID             string         `json:"id"`
+	Title          string         `json:"title"`
+	Language       string         `json:"language"`
+	Content        string         `json:"content"`
+	Author         string         `json:"author"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	Likes          int64          `json:"likes"`
+	IsSaved        int64          `json:"is_saved"`
+	IsLiked        int64          `json:"is_liked"`
+	AuthorUsername string         `json:"author_username"`
+	AuthorID       string         `json:"author_id"`
+	AuthorAvatar   sql.NullString `json:"author_avatar"`
+}
+
+func (q *Queries) GetLikedSnippets(ctx context.Context, userID string) ([]GetLikedSnippetsRow, error) {
+	rows, err := q.query(ctx, q.getLikedSnippetsStmt, getLikedSnippets, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetLikedSnippetsRow{}
+	for rows.Next() {
+		var i GetLikedSnippetsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Language,
+			&i.Content,
+			&i.Author,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Likes,
+			&i.IsSaved,
+			&i.IsLiked,
+			&i.AuthorUsername,
+			&i.AuthorID,
+			&i.AuthorAvatar,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const incrementLikesCount = `-- name: IncrementLikesCount :exec
@@ -32,7 +136,7 @@ func (q *Queries) IncrementLikesCount(ctx context.Context, id string) error {
 }
 
 const likeSnippet = `-- name: LikeSnippet :exec
-INSERT OR IGNORE INTO user_likes (snippet_id, user_id)
+INSERT INTO user_likes (snippet_id, user_id)
 VALUES (?, ?)
 `
 
@@ -43,21 +147,6 @@ type LikeSnippetParams struct {
 
 func (q *Queries) LikeSnippet(ctx context.Context, arg LikeSnippetParams) error {
 	_, err := q.exec(ctx, q.likeSnippetStmt, likeSnippet, arg.SnippetID, arg.UserID)
-	return err
-}
-
-const unlikeSnippet = `-- name: UnlikeSnippet :exec
-DELETE FROM user_likes
-WHERE snippet_id = ? AND user_id = ?
-`
-
-type UnlikeSnippetParams struct {
-	SnippetID string `json:"snippet_id"`
-	UserID    string `json:"user_id"`
-}
-
-func (q *Queries) UnlikeSnippet(ctx context.Context, arg UnlikeSnippetParams) error {
-	_, err := q.exec(ctx, q.unlikeSnippetStmt, unlikeSnippet, arg.SnippetID, arg.UserID)
 	return err
 }
 

@@ -38,7 +38,7 @@ func (h *AuthHandler) createTokensAndSession(userID string) (*models.AuthRespons
 	}
 
 	// Get user details
-	user, err := h.storage.GetUser(userID)
+	user, err := h.storage.GetUserByID(userID)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to get user: %w", err)
 	}

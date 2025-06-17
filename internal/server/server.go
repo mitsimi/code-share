@@ -11,13 +11,11 @@ import (
 	"time"
 
 	"mitsimi.dev/codeShare/frontend"
-	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 	"go.uber.org/zap"
 )
 
@@ -81,62 +79,8 @@ func (s *Server) setupRoutes() {
 		fs.ServeHTTP(w, r)
 	})
 
-	// Create auth middleware
-	authMiddleware := api.NewAuthMiddleware(s.storage, s.secretKey)
-
-	// Auth routes
-	s.router.Route("/api/auth", func(r chi.Router) {
-		r.Use(cors.Handler(cors.Options{
-			AllowedOrigins: []string{
-				"http://localhost:3000",         // Development
-				"https://codeshare.mitsimi.dev", // Production
-			},
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-			ExposedHeaders:   []string{"Link"},
-			AllowCredentials: true,
-			MaxAge:           300,
-		}))
-
-		handler := api.NewAuthHandler(s.storage, s.secretKey)
-		r.Post("/signup", handler.Signup)
-		r.Post("/login", handler.Login)
-		r.Post("/logout", handler.Logout)
-		r.Post("/refresh", handler.RefreshToken)
-		r.Get("/me", handler.GetCurrentUser)
-	})
-
-	// API routes
-	s.router.Route("/api/snippets", func(r chi.Router) {
-		r.Use(cors.Handler(cors.Options{
-			AllowedOrigins: []string{
-				"http://localhost:3000",         // Development
-				"https://codeshare.mitsimi.dev", // Production
-			},
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-			ExposedHeaders:   []string{"Link"},
-			AllowCredentials: true,
-			MaxAge:           300,
-		}))
-
-		handler := api.NewSnippetHandler(s.storage)
-
-		// Public routes
-		r.Group(func(r chi.Router) {
-			r.Get("/", handler.GetSnippets)
-			r.Get("/{id}", handler.GetSnippet)
-		})
-
-		// Protected routes
-		r.Group(func(r chi.Router) {
-			r.Use(authMiddleware.RequireAuth)
-			r.Post("/", handler.CreateSnippet)
-			r.Put("/{id}", handler.UpdateSnippet)
-			r.Delete("/{id}", handler.DeleteSnippet)
-			r.Patch("/{id}/like", handler.ToggleLikeSnippet)
-		})
-	})
+	// Setup API routes
+	s.router.Route("/api", s.setupAPIRoutes)
 
 	// Only serve static files if SERVE_STATIC is set to "true"
 	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {

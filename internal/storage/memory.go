@@ -1,36 +1,51 @@
 package storage
 
 import (
+	"database/sql"
 	"errors"
 	"sync"
 	"time"
 
+	"mitsimi.dev/codeShare/internal/auth"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
 	"mitsimi.dev/codeShare/internal/models"
 
 	"github.com/google/uuid"
 )
 
+var (
+	ErrUserNotFound      = errors.New("user not found")
+	ErrSnippetNotFound   = errors.New("snippet not found")
+	ErrSessionNotFound   = errors.New("session not found")
+	ErrInvalidPassword   = errors.New("invalid password")
+	ErrDuplicateEmail    = errors.New("email already exists")
+	ErrDuplicateUsername = errors.New("username already exists")
+)
+
 var _ Storage = (*MemoryStorage)(nil)
 
 // MemoryStorage implements Storage interface with in-memory storage
 type MemoryStorage struct {
-	snippets map[string]models.Snippet
-	users    map[string]models.User
+	users    map[UserID]db.User
+	snippets map[SnippetID]models.Snippet
 	sessions map[string]models.Session
 	mu       sync.RWMutex
+	likes    map[UserID]map[SnippetID]struct{}
+	saves    map[UserID]map[SnippetID]struct{}
 }
 
 // NewMemoryStorage creates a new in-memory storage
 func NewMemoryStorage() *MemoryStorage {
 	snippets := make(map[string]models.Snippet)
-	for _, snippet := range sampleSnippets {
+	for _, snippet := range SampleSnippets {
 		snippets[snippet.ID] = snippet
 	}
 	return &MemoryStorage{
 		snippets: snippets,
-		users:    make(map[string]models.User),
+		users:    make(map[UserID]db.User),
 		sessions: make(map[string]models.Session),
+		likes:    make(map[UserID]map[SnippetID]struct{}),
+		saves:    make(map[UserID]map[SnippetID]struct{}),
 	}
 }
 
@@ -41,47 +56,42 @@ func (s *MemoryStorage) CreateUser(username, email, password string) (db.User, e
 
 	// Check if username or email already exists
 	for _, user := range s.users {
-		if user.Username == username || user.Email == email {
-			return db.User{}, errors.New("username or email already exists")
+		if user.Username == username {
+			return db.User{}, ErrDuplicateUsername
 		}
+		if user.Email == email {
+			return db.User{}, ErrDuplicateEmail
+		}
+	}
+
+	// Hash the password
+	passwordHash, err := auth.HashPassword(password)
+	if err != nil {
+		return db.User{}, err
 	}
 
 	user := db.User{
 		ID:           uuid.NewString(),
 		Username:     username,
 		Email:        email,
-		PasswordHash: password,
+		PasswordHash: passwordHash,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
-	s.users[user.ID] = models.User{
-		ID:           user.ID,
-		Username:     user.Username,
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
-		CreatedAt:    user.CreatedAt,
-		UpdatedAt:    user.UpdatedAt,
-	}
+	s.users[user.ID] = user
 	return user, nil
 }
 
-// GetUser gets a user by ID
-func (s *MemoryStorage) GetUser(id UserID) (db.User, error) {
+// GetUserByID gets a user by ID
+func (s *MemoryStorage) GetUserByID(id UserID) (db.User, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	user, exists := s.users[string(id)]
+	user, exists := s.users[id]
 	if !exists {
-		return db.User{}, errors.New("user not found")
+		return db.User{}, ErrUserNotFound
 	}
-	return db.User{
-		ID:           user.ID,
-		Username:     user.Username,
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
-		CreatedAt:    user.CreatedAt,
-		UpdatedAt:    user.UpdatedAt,
-	}, nil
+	return user, nil
 }
 
 // GetUserByUsername gets a user by username
@@ -91,17 +101,10 @@ func (s *MemoryStorage) GetUserByUsername(username string) (db.User, error) {
 
 	for _, user := range s.users {
 		if user.Username == username {
-			return db.User{
-				ID:           user.ID,
-				Username:     user.Username,
-				Email:        user.Email,
-				PasswordHash: user.PasswordHash,
-				CreatedAt:    user.CreatedAt,
-				UpdatedAt:    user.UpdatedAt,
-			}, nil
+			return user, nil
 		}
 	}
-	return db.User{}, errors.New("user not found")
+	return db.User{}, ErrUserNotFound
 }
 
 // GetUserByEmail gets a user by email
@@ -111,17 +114,10 @@ func (s *MemoryStorage) GetUserByEmail(email string) (db.User, error) {
 
 	for _, user := range s.users {
 		if user.Email == email {
-			return db.User{
-				ID:           user.ID,
-				Username:     user.Username,
-				Email:        user.Email,
-				PasswordHash: user.PasswordHash,
-				CreatedAt:    user.CreatedAt,
-				UpdatedAt:    user.UpdatedAt,
-			}, nil
+			return user, nil
 		}
 	}
-	return db.User{}, errors.New("user not found")
+	return db.User{}, ErrUserNotFound
 }
 
 // Login authenticates a user
@@ -130,7 +126,7 @@ func (s *MemoryStorage) Login(email, password string) (string, error) {
 	defer s.mu.RUnlock()
 
 	for _, user := range s.users {
-		if user.Email == email && user.PasswordHash == password { // In a real app, use proper password comparison
+		if user.Email == email && auth.CheckPasswordHash(password, user.PasswordHash) {
 			return user.ID, nil
 		}
 	}
@@ -297,4 +293,143 @@ func (s *MemoryStorage) Close() error {
 // Seed populates the storage with sample data
 func (s *MemoryStorage) Seed() error {
 	return nil
+}
+
+// UpdateUser updates a user info
+func (s *MemoryStorage) UpdateUser(userID UserID, username, email string) (db.User, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	user, exists := s.users[userID]
+	if !exists {
+		return db.User{}, ErrUserNotFound
+	}
+
+	user.Username = username
+	user.Email = email
+	user.UpdatedAt = time.Now()
+	s.users[userID] = user
+
+	return user, nil
+}
+
+// UpdateUserAvatar updates a user's avatar URL
+func (s *MemoryStorage) UpdateUserAvatar(userID UserID, avatarURL string) (db.User, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	user, exists := s.users[userID]
+	if !exists {
+		return db.User{}, ErrUserNotFound
+	}
+
+	user.Avatar = sql.NullString{
+		String: avatarURL,
+		Valid:  true,
+	}
+	user.UpdatedAt = time.Now()
+	s.users[userID] = user
+
+	return user, nil
+}
+
+// UpdateUserPassword updates a user's password
+func (s *MemoryStorage) UpdateUserPassword(userID UserID, password string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	user, exists := s.users[userID]
+	if !exists {
+		return ErrUserNotFound
+	}
+
+	user.PasswordHash = password
+	user.UpdatedAt = time.Now()
+	s.users[userID] = user
+
+	return nil
+}
+
+func (s *MemoryStorage) GetLikedSnippets(userID UserID) ([]models.Snippet, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var snippets []models.Snippet
+	for _, snippet := range s.snippets {
+		if _, exists := s.likes[userID][snippet.ID]; exists {
+			snippets = append(snippets, snippet)
+		}
+	}
+
+	return snippets, nil
+}
+
+func (s *MemoryStorage) GetSavedSnippets(userID UserID) ([]models.Snippet, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var snippets []models.Snippet
+	for _, snippet := range s.snippets {
+		if _, exists := s.saves[userID][snippet.ID]; exists {
+			snippets = append(snippets, snippet)
+		}
+	}
+
+	return snippets, nil
+}
+
+func (s *MemoryStorage) ToggleSaveSnippet(userID UserID, id SnippetID, isSave bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, exists := s.snippets[id]; !exists {
+		return ErrSnippetNotFound
+	}
+
+	if s.saves == nil {
+		s.saves = make(map[UserID]map[SnippetID]struct{})
+	}
+	if s.saves[userID] == nil {
+		s.saves[userID] = make(map[SnippetID]struct{})
+	}
+
+	if isSave {
+		s.saves[userID][id] = struct{}{}
+	} else {
+		delete(s.saves[userID], id)
+	}
+
+	return nil
+}
+
+func (s *MemoryStorage) IsLikedByUser(userID UserID, snippetID SnippetID) (bool, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	if _, exists := s.snippets[snippetID]; !exists {
+		return false, ErrSnippetNotFound
+	}
+
+	if s.likes == nil {
+		return false, nil
+	}
+	if s.likes[userID] == nil {
+		return false, nil
+	}
+
+	_, exists := s.likes[userID][snippetID]
+	return exists, nil
+}
+
+func (s *MemoryStorage) GetSnippetsByAuthor(userID, authorID UserID) ([]models.Snippet, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var snippets []models.Snippet
+	for _, snippet := range s.snippets {
+		if snippet.Author == authorID {
+			snippets = append(snippets, snippet)
+		}
+	}
+	return snippets, nil
 }

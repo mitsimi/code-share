@@ -16,18 +16,20 @@ INSERT INTO snippets (
     id,
     title,
     content,
+    language,
     author
 ) VALUES (
-    ?, ?, ?, ?
+    ?, ?, ?, ?, ?
 )
-RETURNING id, title, content, author, created_at, updated_at, likes
+RETURNING id, title, language, content, author, created_at, updated_at, likes
 `
 
 type CreateSnippetParams struct {
-	ID      string `json:"id"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Author  string `json:"author"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Language string `json:"language"`
+	Author   string `json:"author"`
 }
 
 func (q *Queries) CreateSnippet(ctx context.Context, arg CreateSnippetParams) (Snippet, error) {
@@ -35,12 +37,14 @@ func (q *Queries) CreateSnippet(ctx context.Context, arg CreateSnippetParams) (S
 		arg.ID,
 		arg.Title,
 		arg.Content,
+		arg.Language,
 		arg.Author,
 	)
 	var i Snippet
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Language,
 		&i.Content,
 		&i.Author,
 		&i.CreatedAt,
@@ -62,56 +66,72 @@ func (q *Queries) DeleteSnippet(ctx context.Context, id string) error {
 
 const getSnippet = `-- name: GetSnippet :one
 SELECT 
-    s.id, s.title, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
-    u.username as author_username
+    u.username AS author_username, 
+    u.id AS author_id, 
+    u.avatar AS author_avatar
 FROM snippets s
-LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?
+LEFT JOIN user_saves us ON s.id = us.snippet_id AND us.user_id = ?1
+LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?1
 LEFT JOIN users u ON s.author = u.id
-WHERE s.id = ?
+WHERE s.id = ?2
 `
 
 type GetSnippetParams struct {
-	UserID string `json:"user_id"`
-	ID     string `json:"id"`
+	UserID    string `json:"user_id"`
+	SnippetID string `json:"snippet_id"`
 }
 
 type GetSnippetRow struct {
 	ID             string         `json:"id"`
 	Title          string         `json:"title"`
+	Language       string         `json:"language"`
 	Content        string         `json:"content"`
 	Author         string         `json:"author"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Likes          int64          `json:"likes"`
+	IsSaved        int64          `json:"is_saved"`
 	IsLiked        int64          `json:"is_liked"`
 	AuthorUsername sql.NullString `json:"author_username"`
+	AuthorID       sql.NullString `json:"author_id"`
+	AuthorAvatar   sql.NullString `json:"author_avatar"`
 }
 
 func (q *Queries) GetSnippet(ctx context.Context, arg GetSnippetParams) (GetSnippetRow, error) {
-	row := q.queryRow(ctx, q.getSnippetStmt, getSnippet, arg.UserID, arg.ID)
+	row := q.queryRow(ctx, q.getSnippetStmt, getSnippet, arg.UserID, arg.SnippetID)
 	var i GetSnippetRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Language,
 		&i.Content,
 		&i.Author,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Likes,
+		&i.IsSaved,
 		&i.IsLiked,
 		&i.AuthorUsername,
+		&i.AuthorID,
+		&i.AuthorAvatar,
 	)
 	return i, err
 }
 
 const getSnippets = `-- name: GetSnippets :many
 SELECT 
-    s.id, s.title, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
-    u.username as author_username
+    u.username AS author_username, 
+    u.id AS author_id, 
+    u.avatar AS author_avatar
 FROM snippets s
-LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?
+LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?1
+LEFT JOIN user_saves us ON s.id = us.snippet_id AND us.user_id = ?1
 LEFT JOIN users u ON s.author = u.id
 ORDER BY s.created_at DESC
 `
@@ -119,13 +139,17 @@ ORDER BY s.created_at DESC
 type GetSnippetsRow struct {
 	ID             string         `json:"id"`
 	Title          string         `json:"title"`
+	Language       string         `json:"language"`
 	Content        string         `json:"content"`
 	Author         string         `json:"author"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Likes          int64          `json:"likes"`
+	IsSaved        int64          `json:"is_saved"`
 	IsLiked        int64          `json:"is_liked"`
 	AuthorUsername sql.NullString `json:"author_username"`
+	AuthorID       sql.NullString `json:"author_id"`
+	AuthorAvatar   sql.NullString `json:"author_avatar"`
 }
 
 func (q *Queries) GetSnippets(ctx context.Context, userID string) ([]GetSnippetsRow, error) {
@@ -140,13 +164,91 @@ func (q *Queries) GetSnippets(ctx context.Context, userID string) ([]GetSnippets
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Language,
 			&i.Content,
 			&i.Author,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Likes,
+			&i.IsSaved,
 			&i.IsLiked,
 			&i.AuthorUsername,
+			&i.AuthorID,
+			&i.AuthorAvatar,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSnippetsByAuthor = `-- name: GetSnippetsByAuthor :many
+SELECT 
+    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
+    CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
+    u.username AS author_username, 
+    u.id AS author_id, 
+    u.avatar AS author_avatar
+FROM snippets s
+LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?1
+LEFT JOIN user_saves us ON s.id = us.snippet_id AND us.user_id = ?1
+LEFT JOIN users u ON s.author = u.id
+WHERE s.author = ?2
+ORDER BY s.created_at DESC
+`
+
+type GetSnippetsByAuthorParams struct {
+	UserID   string `json:"user_id"`
+	AuthorID string `json:"author_id"`
+}
+
+type GetSnippetsByAuthorRow struct {
+	ID             string         `json:"id"`
+	Title          string         `json:"title"`
+	Language       string         `json:"language"`
+	Content        string         `json:"content"`
+	Author         string         `json:"author"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	Likes          int64          `json:"likes"`
+	IsSaved        int64          `json:"is_saved"`
+	IsLiked        int64          `json:"is_liked"`
+	AuthorUsername sql.NullString `json:"author_username"`
+	AuthorID       sql.NullString `json:"author_id"`
+	AuthorAvatar   sql.NullString `json:"author_avatar"`
+}
+
+func (q *Queries) GetSnippetsByAuthor(ctx context.Context, arg GetSnippetsByAuthorParams) ([]GetSnippetsByAuthorRow, error) {
+	rows, err := q.query(ctx, q.getSnippetsByAuthorStmt, getSnippetsByAuthor, arg.UserID, arg.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetSnippetsByAuthorRow{}
+	for rows.Next() {
+		var i GetSnippetsByAuthorRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Language,
+			&i.Content,
+			&i.Author,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Likes,
+			&i.IsSaved,
+			&i.IsLiked,
+			&i.AuthorUsername,
+			&i.AuthorID,
+			&i.AuthorAvatar,
 		); err != nil {
 			return nil, err
 		}
@@ -166,23 +268,31 @@ UPDATE snippets
 SET 
     title = ?,
     content = ?,
+    language = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
-RETURNING id, title, content, author, created_at, updated_at, likes
+RETURNING id, title, language, content, author, created_at, updated_at, likes
 `
 
 type UpdateSnippetParams struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	ID      string `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Language string `json:"language"`
+	ID       string `json:"id"`
 }
 
 func (q *Queries) UpdateSnippet(ctx context.Context, arg UpdateSnippetParams) (Snippet, error) {
-	row := q.queryRow(ctx, q.updateSnippetStmt, updateSnippet, arg.Title, arg.Content, arg.ID)
+	row := q.queryRow(ctx, q.updateSnippetStmt, updateSnippet,
+		arg.Title,
+		arg.Content,
+		arg.Language,
+		arg.ID,
+	)
 	var i Snippet
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Language,
 		&i.Content,
 		&i.Author,
 		&i.CreatedAt,

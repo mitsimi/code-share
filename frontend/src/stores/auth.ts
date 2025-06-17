@@ -103,6 +103,11 @@ export const useAuthStore = defineStore('auth', () => {
     scheduleTokenRefresh(auth.expiresAt)
   }
 
+  const setUser = (data: User) => {
+    user.value = data
+    localStorage.setItem('user', JSON.stringify(data))
+  }
+
   const clearAuth = () => {
     if (refreshTimer.value) {
       window.clearTimeout(refreshTimer.value)
@@ -117,7 +122,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const isAuthenticated = () => {
-    return !!token.value && !!expiresAt.value && expiresAt.value > Date.now() / 1000
+    return !!token.value && !!user.value && !!expiresAt.value && expiresAt.value > Date.now() / 1000
   }
 
   const refreshAccessToken = async () => {
@@ -195,10 +200,11 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     expiresAt,
     setAuth,
-    clearAuth,
+    setUser,
     isAuthenticated,
     refreshAccessToken,
     initializeAuth,
     logout,
+    clearAuth,
   }
 })
