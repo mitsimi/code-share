@@ -6,11 +6,11 @@
     </div>
 
     <Tabs v-model="activeTab" class="w-full">
-      <TabsList class="grid w-full grid-cols-4">
-        <TabsTrigger value="settings">Settings</TabsTrigger>
-        <TabsTrigger value="mine">My Snippets</TabsTrigger>
-        <TabsTrigger value="liked">Liked Snippets</TabsTrigger>
-        <TabsTrigger value="saved">Saved Snippets</TabsTrigger>
+      <TabsList class="flex w-full justify-start overflow-x-auto sm:grid sm:grid-cols-4">
+        <TabsTrigger value="settings" class="flex-shrink-0">Settings</TabsTrigger>
+        <TabsTrigger value="mine" class="flex-shrink-0">My Snippets</TabsTrigger>
+        <TabsTrigger value="liked" class="flex-shrink-0">Liked Snippets</TabsTrigger>
+        <TabsTrigger value="saved" class="flex-shrink-0">Saved Snippets</TabsTrigger>
       </TabsList>
 
       <!-- Settings Tab -->
