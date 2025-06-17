@@ -134,6 +134,24 @@
             </form>
           </TabsContent>
 
+          <!-- My Snippets Tab -->
+          <TabsContent value="mine" class="mt-6">
+            <div v-if="isLoadingMySnippets" class="flex justify-center py-8">
+              <LoaderCircleIcon class="size-8 animate-spin" />
+            </div>
+            <div v-else-if="mySnippets.length === 0" class="py-8 text-center">
+              <p class="text-muted-foreground">You haven't created any snippets yet.</p>
+            </div>
+            <div v-else class="grid gap-4">
+              <SnippetCard
+                v-for="snippet in mySnippets"
+                :key="snippet.id"
+                :snippet="snippet"
+                @click="router.push(`/snippets/${snippet.id}`)"
+              />
+            </div>
+          </TabsContent>
+
           <!-- Liked Snippets Tab -->
           <TabsContent value="liked" class="mt-6">
             <div v-if="isLoadingLiked" class="flex justify-center py-8">
@@ -176,11 +194,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
 import { useFetch } from '@/composables/useCustomFetch'
@@ -199,8 +217,25 @@ import { useQuery, useMutation } from '@tanstack/vue-query'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const activeTab = ref('settings')
+const route = useRoute()
+const activeTab = ref((route.query.tab as string) || 'settings')
 const avatarUrl = ref(authStore.user?.avatar || '')
+
+// Watch for tab changes to update URL
+watch(activeTab, (newTab) => {
+  router.replace({ query: { ...route.query, tab: newTab } })
+})
+
+// Watch for URL changes to update active tab
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab && typeof newTab === 'string') {
+      activeTab.value = newTab
+    }
+  },
+  { immediate: true },
+)
 
 // Form validation schema
 const formSchema = toTypedSchema(
@@ -250,7 +285,7 @@ const { handleSubmit, values } = useForm({
 const { data: likedSnippets, isLoading: isLoadingLiked } = useQuery({
   queryKey: ['liked-snippets'],
   queryFn: async () => {
-    const { data, error } = await useFetch<Snippet[]>('/snippets/liked').json()
+    const { data, error } = await useFetch<Snippet[]>(`/users/${authStore.user?.id}/liked`).json()
     if (error.value) throw new Error('Failed to fetch liked snippets')
     return data.value || []
   },
@@ -260,8 +295,20 @@ const { data: likedSnippets, isLoading: isLoadingLiked } = useQuery({
 const { data: savedSnippets, isLoading: isLoadingSaved } = useQuery({
   queryKey: ['saved-snippets'],
   queryFn: async () => {
-    const { data, error } = await useFetch<Snippet[]>('/snippets/saved').json()
+    const { data, error } = await useFetch<Snippet[]>(`/users/${authStore.user?.id}/saved`).json()
     if (error.value) throw new Error('Failed to fetch saved snippets')
+    return data.value || []
+  },
+})
+
+// Fetch user's snippets
+const { data: mySnippets, isLoading: isLoadingMySnippets } = useQuery({
+  queryKey: ['my-snippets'],
+  queryFn: async () => {
+    const { data, error } = await useFetch<Snippet[]>(
+      `/users/${authStore.user?.id}/snippets`,
+    ).json()
+    if (error.value) throw new Error('Failed to fetch your snippets')
     return data.value || []
   },
 })
@@ -270,7 +317,7 @@ const { data: savedSnippets, isLoading: isLoadingSaved } = useQuery({
 const { mutate: updateAvatarMutation, isPending: isUpdatingAvatar } = useMutation({
   mutationKey: ['updateAvatar'],
   mutationFn: async (avatarUrl: string) => {
-    const { data, error } = await useFetch('/auth/me/avatar', {
+    const { data, error } = await useFetch(`/users/${authStore.user?.id}/avatar`, {
       method: 'PATCH',
       body: JSON.stringify({ avatarUrl }),
     }).json()
@@ -305,7 +352,7 @@ const { mutate: updateProfileMutation, isPending: isUpdatingProfile } = useMutat
     const { currentPassword, newPassword, ...profileData } = values
 
     // Update profile
-    const { data, error } = await useFetch('/auth/me', {
+    const { data, error } = await useFetch(`/users/${authStore.user?.id}`, {
       method: 'PATCH',
       body: JSON.stringify(profileData),
     }).json()
@@ -315,7 +362,7 @@ const { mutate: updateProfileMutation, isPending: isUpdatingProfile } = useMutat
 
     // Update password if provided
     if (currentPassword && newPassword) {
-      const { error: passwordError } = await useFetch('/auth/me/password', {
+      const { error: passwordError } = await useFetch(`/users/${authStore.user?.id}/password`, {
         method: 'PATCH',
         body: JSON.stringify({
           currentPassword,
