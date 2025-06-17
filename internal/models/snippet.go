@@ -13,6 +13,7 @@ type Snippet struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	Likes     int       `json:"likes"`
 	IsLiked   bool      `json:"isLiked"`
+	IsSaved   bool      `json:"isSaved"`
 }
 
 // SnippetCreateRequest represents the data needed to create/update a snippet

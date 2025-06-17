@@ -1,10 +1,8 @@
 package server
 
 import (
-	"net/http"
 	"time"
 
-	"go.uber.org/zap"
 	"mitsimi.dev/codeShare/internal/api"
 
 	"github.com/go-chi/chi/v5"
@@ -22,50 +20,46 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 	r.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))
 	r.Use(middleware.AllowContentType("application/json"))
 
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:3000",         // Development
+			"https://codeshare.mitsimi.dev", // Production
+		},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
 	// Auth routes
 	r.Route("/auth", func(r chi.Router) {
-		r.Use(cors.Handler(cors.Options{
-			AllowedOrigins: []string{
-				"http://localhost:3000",         // Development
-				"https://codeshare.mitsimi.dev", // Production
-			},
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-			ExposedHeaders:   []string{"Link"},
-			AllowCredentials: true,
-			MaxAge:           300,
-		}))
-
 		handler := api.NewAuthHandler(s.storage, s.secretKey)
 		r.Post("/signup", handler.Signup)
 		r.Post("/login", handler.Login)
 		r.Post("/logout", handler.Logout)
 		r.Post("/refresh", handler.RefreshToken)
+	})
 
-		// Protected profile routes
-		r.Route("/me", func(r chi.Router) {
-			r.Use(authMiddleware.RequireAuth)
-			r.Get("/", handler.GetCurrentUser)
-			r.Patch("/", handler.UpdateProfile)
-			r.Patch("/password", handler.UpdatePassword)
-			r.Patch("/avatar", handler.UpdateAvatar)
+	// User routes
+	r.Route("/users", func(r chi.Router) {
+		handler := api.NewUserHandler(s.storage)
+		r.Use(authMiddleware.RequireAuth)                // Protect user routes
+		r.Get("/{id}", handler.GetUser)                  // Get user by ID
+		r.Get("/{id}/snippets", handler.GetUserSnippets) // Get user's snippets
+
+		r.Group(func(r chi.Router) {
+			r.Use(authMiddleware.RequireSelfOrAdmin)           // Require self or admin access
+			r.Get("/{id}/liked", handler.GetUserLikedSnippets) // Get user's liked snippets
+			r.Get("/{id}/saved", handler.GetUserSavedSnippets) // Get user's saved snippets
+			r.Patch("/{id}/", handler.UpdateProfile)
+			r.Patch("/{id}/password", handler.UpdatePassword)
+			r.Patch("/{id}/avatar", handler.UpdateAvatar)
 		})
 	})
 
 	// Snippet routes
 	r.Route("/snippets", func(r chi.Router) {
-		r.Use(cors.Handler(cors.Options{
-			AllowedOrigins: []string{
-				"http://localhost:3000",         // Development
-				"https://codeshare.mitsimi.dev", // Production
-			},
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-			ExposedHeaders:   []string{"Link"},
-			AllowCredentials: true,
-			MaxAge:           300,
-		}))
-
 		handler := api.NewSnippetHandler(s.storage)
 
 		// Public routes
@@ -82,17 +76,7 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 			r.Put("/{id}", handler.UpdateSnippet)
 			r.Delete("/{id}", handler.DeleteSnippet)
 			r.Patch("/{id}/like", handler.ToggleLikeSnippet)
-
-			r.Get("/liked", func(w http.ResponseWriter, r *http.Request) {
-				s.logger.Info("API called: Get liked snippets",
-					zap.String("request_id", middleware.GetReqID(r.Context())),
-				)
-			})
-			r.Get("/saved", func(w http.ResponseWriter, r *http.Request) {
-				s.logger.Info("API called: Get liked snippets",
-					zap.String("request_id", middleware.GetReqID(r.Context())),
-				)
-			})
+			r.Patch("/{id}/save", handler.ToggleSaveSnippet)
 		})
 	})
 }

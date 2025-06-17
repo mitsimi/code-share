@@ -294,3 +294,55 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(snippet)
 }
+
+// ToggleSaveSnippet toggles the save status of a snippet
+func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	requestID := middleware.GetReqID(r.Context())
+	userID := GetUserID(r)
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("snippet_id", id),
+		zap.String("user_id", userID),
+	)
+
+	// Parse the action from query parameters
+	action := r.URL.Query().Get("action")
+	if action == "" {
+		action = "save"
+	}
+
+	if action != "save" && action != "unsave" {
+		log.Error("invalid action",
+			zap.String("action", action),
+		)
+		http.Error(w, "Invalid action", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.storage.ToggleSaveSnippet(userID, id, action == "save"); err != nil {
+		log.Error("failed to toggle save",
+			zap.Error(err),
+			zap.String("action", action),
+		)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	// Get the updated snippet
+	snippet, err := h.storage.GetSnippet(userID, id)
+	if err != nil {
+		log.Error("failed to get updated snippet",
+			zap.Error(err),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Debug("toggled snippet save",
+		zap.String("action", action),
+		zap.Int("likes", int(snippet.Likes)),
+	)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(snippet)
+}

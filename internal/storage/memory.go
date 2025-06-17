@@ -420,3 +420,16 @@ func (s *MemoryStorage) IsLikedByUser(userID UserID, snippetID SnippetID) (bool,
 	_, exists := s.likes[userID][snippetID]
 	return exists, nil
 }
+
+func (s *MemoryStorage) GetSnippetsByAuthor(userID, authorID UserID) ([]models.Snippet, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var snippets []models.Snippet
+	for _, snippet := range s.snippets {
+		if snippet.Author == authorID {
+			snippets = append(snippets, snippet)
+		}
+	}
+	return snippets, nil
+}
