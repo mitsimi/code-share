@@ -85,6 +85,11 @@ func (s *Server) setupRoutes() {
 	authMiddleware := api.NewAuthMiddleware(s.storage, s.secretKey)
 
 	s.router.Route("/api", func(r chi.Router) {
+		r.Use(authMiddleware.TryAttachUserID)       // Attach user ID to context
+		r.Use(middleware.Timeout(15 * time.Second)) // Set a timeout for all API routes
+		r.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))
+		r.Use(middleware.AllowContentType("application/json"))
+
 		// Auth routes
 		r.Route("/auth", func(r chi.Router) {
 			r.Use(cors.Handler(cors.Options{
