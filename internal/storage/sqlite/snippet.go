@@ -95,6 +95,18 @@ func (s *SQLiteStorage) DeleteSnippet(id storage.SnippetID) error {
 }
 
 func (s *SQLiteStorage) ToggleLikeSnippet(userID storage.UserID, id storage.SnippetID, isLike bool) error {
+	// Check if snippet exists first
+	_, err := s.q.GetSnippet(s.ctx, db.GetSnippetParams{
+		UserID: userID,
+		ID:     id,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("snippet not found")
+		}
+		return err
+	}
+
 	// Start a transaction
 	tx, err := s.db.Begin()
 	if err != nil {
@@ -106,26 +118,53 @@ func (s *SQLiteStorage) ToggleLikeSnippet(userID storage.UserID, id storage.Snip
 
 	// Like or unlike the snippet
 	if isLike {
-		if err := qtx.LikeSnippet(s.ctx, db.LikeSnippetParams{
-			SnippetID: id,
-			UserID:    userID,
-		}); err != nil {
+		exists, err := s.checkLikeExists(qtx, userID, id)
+		if err != nil {
 			return err
 		}
-		if err := qtx.IncrementLikesCount(s.ctx, id); err != nil {
-			return err
+		// If not already liked, add the like
+		if !exists {
+			if err := qtx.LikeSnippet(s.ctx, db.LikeSnippetParams{
+				SnippetID: id,
+				UserID:    userID,
+			}); err != nil {
+				return err
+			}
+			if err := qtx.IncrementLikesCount(s.ctx, id); err != nil {
+				return err
+			}
 		}
 	} else {
-		if err := qtx.DeleteLike(s.ctx, db.DeleteLikeParams{
-			SnippetID: id,
-			UserID:    userID,
-		}); err != nil {
+		// Check if already unliked
+		exists, err := s.checkLikeExists(qtx, userID, id)
+		if err != nil {
 			return err
 		}
-		if err := qtx.DecrementLikesCount(s.ctx, id); err != nil {
-			return err
+		// If liked, remove the like
+		if exists {
+			if err := qtx.DeleteLike(s.ctx, db.DeleteLikeParams{
+				SnippetID: id,
+				UserID:    userID,
+			}); err != nil {
+				return err
+			}
+			if err := qtx.DecrementLikesCount(s.ctx, id); err != nil {
+				return err
+			}
 		}
 	}
 
 	return tx.Commit()
+}
+
+// checkLikeExists checks if a user has liked a snippet
+func (s *SQLiteStorage) checkLikeExists(qtx *db.Queries, userID storage.UserID, snippetID storage.SnippetID) (bool, error) {
+	exists, err := qtx.CheckLikeExists(s.ctx, db.CheckLikeExistsParams{
+		SnippetID: snippetID,
+		UserID:    userID,
+	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return false, err
+	}
+	return exists == 1, nil
 }
