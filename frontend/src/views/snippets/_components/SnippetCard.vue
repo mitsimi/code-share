@@ -40,11 +40,6 @@
           <pre
             class="text-foreground/90 font-mono text-xs leading-relaxed"
           ><code>{{ truncatedContent }}</code></pre>
-          <!-- Fade overlay for long content -->
-          <div
-            v-if="snippet.content.length > 200"
-            class="from-muted/30 absolute right-0 bottom-0 left-0 h-8 bg-gradient-to-t to-transparent"
-          ></div>
         </div>
       </div>
     </CardContent>
