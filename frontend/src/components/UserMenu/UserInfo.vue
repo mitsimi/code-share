@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center space-x-2">
     <Avatar class="size-8">
-      <AvatarImage :src="authStore.user?.avatar" />
+      <AvatarImage :src="authStore.user?.avatar || ''" />
       <AvatarFallback>{{ authStore.user?.username[0].toUpperCase() }}</AvatarFallback>
     </Avatar>
     <div class="flex flex-col">

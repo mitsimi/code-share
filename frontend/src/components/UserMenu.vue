@@ -6,7 +6,7 @@
         <Button variant="ghost" size="sm">
           <span>{{ authStore.user?.username }}</span>
           <Avatar class="size-8">
-            <AvatarImage :src="authStore.user?.avatar" />
+            <AvatarImage :src="authStore.user?.avatar || ''" />
             <AvatarFallback>{{ authStore.user?.username[0].toUpperCase() }}</AvatarFallback>
           </Avatar>
         </Button>
