@@ -5,14 +5,29 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
+	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/models"
+	"mitsimi.dev/codeShare/internal/storage"
 )
 
+type UserHandler struct {
+	storage storage.Storage
+	logger  *zap.Logger
+}
+
+func NewUserHandler(storage storage.Storage) *UserHandler {
+	return &UserHandler{
+		storage: storage,
+		logger:  logger.Log,
+	}
+}
+
 // GetCurrentUser returns the current user's information
-func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(zap.String("request_id", requestID))
 
@@ -63,8 +78,34 @@ func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(models.FromDBUser(user))
 }
 
+// GetUser returns a user by ID
+func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "id")
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("queried user_id", userID),
+	)
+
+	user, err := h.storage.GetUserByID(userID)
+	if err != nil {
+		log.Error("failed to get user",
+			zap.Error(err),
+			zap.String("user_id", userID),
+		)
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+	log.Info("retrieved user",
+		zap.String("username", user.Username),
+		zap.String("email", user.Email),
+	)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.FromDBUser(user))
+}
+
 // UpdatePassword handles updating a user's password
-func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
 	var req UpdatePasswordRequest
@@ -100,7 +141,7 @@ func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateAvatar handles updating a user's avatar URL
-func (h *AuthHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
 	var req UpdateAvatarRequest
@@ -131,7 +172,7 @@ func (h *AuthHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateProfile handles updating a user's profile information
-func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
 	var req UpdateProfileRequest
@@ -158,4 +199,89 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	// For now, return the request data as the response
 	json.NewEncoder(w).Encode(models.FromDBUser(user))
+}
+
+// GetUserSnippets returns all snippets created by a user
+func (h *UserHandler) GetUserSnippets(w http.ResponseWriter, r *http.Request) {
+	authorID := chi.URLParam(r, "id")
+	userID := GetUserID(r)
+
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("author_id", authorID),
+		zap.String("user_id", userID),
+	)
+
+	snippets, err := h.storage.GetSnippetsByAuthor(userID, authorID)
+	if err != nil {
+		log.Error("failed to get user snippets",
+			zap.Error(err),
+			zap.String("author_id", authorID),
+			zap.String("user_id", userID),
+		)
+		http.Error(w, "Failed to retrieve snippets", http.StatusInternalServerError)
+		return
+	}
+
+	log.Info("retrieved user snippets",
+		zap.Int("count", len(snippets)),
+	)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(snippets)
+}
+
+// GetUserLikedSnippets returns all snippets liked by a user
+func (h *UserHandler) GetUserLikedSnippets(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "id")
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("user_id", userID),
+	)
+
+	snippets, err := h.storage.GetLikedSnippets(userID)
+	if err != nil {
+		log.Error("failed to get user liked snippets",
+			zap.Error(err),
+			zap.String("user_id", userID),
+		)
+		http.Error(w, "Failed to retrieve liked snippets", http.StatusInternalServerError)
+		return
+	}
+
+	log.Info("retrieved user liked snippets",
+		zap.Int("count", len(snippets)),
+	)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(snippets)
+}
+
+// GetUserSavedSnippets returns all snippets saved by a user
+func (h *UserHandler) GetUserSavedSnippets(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "id")
+	requestID := middleware.GetReqID(r.Context())
+	log := h.logger.With(
+		zap.String("request_id", requestID),
+		zap.String("user_id", userID),
+	)
+
+	snippets, err := h.storage.GetSavedSnippets(userID)
+	if err != nil {
+		log.Error("failed to get user saved snippets",
+			zap.Error(err),
+			zap.String("user_id", userID),
+		)
+		http.Error(w, "Failed to retrieve saved snippets", http.StatusInternalServerError)
+		return
+	}
+
+	log.Info("retrieved user saved snippets",
+		zap.Int("count", len(snippets)),
+	)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(snippets)
 }
