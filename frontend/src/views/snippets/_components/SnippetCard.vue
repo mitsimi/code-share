@@ -59,13 +59,11 @@
             <div
               class="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium"
             >
-              <!-- TODO: Add author avatar or generate from author name -->
               {{ getAuthorInitials(snippet.author) }}
             </div>
             <div class="flex flex-col">
               <span class="text-foreground text-sm font-medium">{{ snippet.author }}</span>
               <span class="text-muted-foreground text-xs">
-                <!-- TODO: Add createdAt property to snippet type -->
                 {{ dayjs(snippet.createdAt).fromNow() }}
               </span>
             </div>

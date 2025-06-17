@@ -92,6 +92,11 @@ const { mutate: updateLike } = useMutation<
       if (!oldData) return [updatedSnippet]
       return oldData.map((snippet) => (snippet.id === updatedSnippet.id ? updatedSnippet : snippet))
     })
+
+    // Invalidate liked snippets query to trigger a refetch
+    queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
+    queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+    queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
   },
   onError: (error) => {
     console.error('Like mutation failed:', error)
