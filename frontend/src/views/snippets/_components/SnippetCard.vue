@@ -73,24 +73,11 @@
         <!-- Right side - Action buttons -->
         <div class="flex items-center gap-2">
           <!-- Save/Bookmark button -->
-          <Button
-            v-if="authStore.isAuthenticated()"
-            variant="ghost"
-            size="sm"
-            class="h-8 w-8 p-0"
-            @click.stop="toggleSave"
-          >
-            <BookmarkIcon
-              :class="[
-                'h-4 w-4 transition-colors',
-                hardcodedIsSaved
-                  ? 'text-primary fill-current'
-                  : 'text-muted-foreground hover:text-foreground',
-              ]"
-            />
-          </Button>
+          <div @click.stop>
+            <SaveButton :isSaved="snippet.isSaved" :snippetId="snippet.id" />
+          </div>
 
-          <!-- Like button - your existing component -->
+          <!-- Like button -->
           <div @click.stop>
             <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
           </div>
@@ -112,6 +99,7 @@ import type { Snippet } from '@/types'
 import { CopyIcon, BookmarkIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
+import SaveButton from './SaveButton.vue'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
 import { getLanguageExtension, getLanguageName } from '@/utils/languages'
