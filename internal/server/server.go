@@ -11,13 +11,11 @@ import (
 	"time"
 
 	"mitsimi.dev/codeShare/frontend"
-	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 	"go.uber.org/zap"
 )
 
@@ -81,108 +79,27 @@ func (s *Server) setupRoutes() {
 		fs.ServeHTTP(w, r)
 	})
 
-	// Create auth middleware
-	authMiddleware := api.NewAuthMiddleware(s.storage, s.secretKey)
+	// Setup API routes
+	s.router.Route("/api", s.setupAPIRoutes)
 
-	s.router.Route("/api", func(r chi.Router) {
-		r.Use(authMiddleware.TryAttachUserID)       // Attach user ID to context
-		r.Use(middleware.Timeout(15 * time.Second)) // Set a timeout for all API routes
-		r.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))
-		r.Use(middleware.AllowContentType("application/json"))
+	// Only serve static files if SERVE_STATIC is set to "true"
+	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {
+		// Handle all other routes by serving index.html
+		s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+			indexFile, err := frontend.DistDirFS.Open("index.html")
+			if err != nil {
+				s.logger.Error("failed to load index.html",
+					zap.Error(err),
+					zap.String("request_id", middleware.GetReqID(r.Context())),
+				)
+				http.Error(w, "Error loading index.html", http.StatusInternalServerError)
+				return
+			}
+			defer indexFile.Close()
 
-		// Auth routes
-		r.Route("/auth", func(r chi.Router) {
-			r.Use(cors.Handler(cors.Options{
-				AllowedOrigins: []string{
-					"http://localhost:3000",         // Development
-					"https://codeshare.mitsimi.dev", // Production
-				},
-				AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-				AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-				ExposedHeaders:   []string{"Link"},
-				AllowCredentials: true,
-				MaxAge:           300,
-			}))
-
-			handler := api.NewAuthHandler(s.storage, s.secretKey)
-			r.Post("/signup", handler.Signup)
-			r.Post("/login", handler.Login)
-			r.Post("/logout", handler.Logout)
-			r.Post("/refresh", handler.RefreshToken)
-
-			// Protected profile routes
-			r.Route("/me", func(r chi.Router) {
-				r.Use(authMiddleware.RequireAuth)
-				r.Get("/", handler.GetCurrentUser)
-				r.Patch("/", handler.UpdateProfile)
-				r.Patch("/password", handler.UpdatePassword)
-				r.Patch("/avatar", handler.UpdateAvatar)
-			})
+			http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
 		})
-
-		// Snippet routes
-		r.Route("/snippets", func(r chi.Router) {
-			r.Use(cors.Handler(cors.Options{
-				AllowedOrigins: []string{
-					"http://localhost:3000",         // Development
-					"https://codeshare.mitsimi.dev", // Production
-				},
-				AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-				AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-				ExposedHeaders:   []string{"Link"},
-				AllowCredentials: true,
-				MaxAge:           300,
-			}))
-
-			handler := api.NewSnippetHandler(s.storage)
-
-			// Public routes
-			r.Group(func(r chi.Router) {
-				r.Get("/", handler.GetSnippets)
-				r.Get("/{id}", handler.GetSnippet)
-			})
-
-			// Protected routes
-			r.Group(func(r chi.Router) {
-				r.Use(authMiddleware.RequireAuth)
-				r.Post("/", handler.CreateSnippet)
-
-				r.Put("/{id}", handler.UpdateSnippet)
-				r.Delete("/{id}", handler.DeleteSnippet)
-				r.Patch("/{id}/like", handler.ToggleLikeSnippet)
-
-				//r.Get("/liked", func(w http.ResponseWriter, r *http.Request) {
-				//	s.logger.Info("API called: Get liked snippets",
-				//		zap.String("request_id", middleware.GetReqID(r.Context())),
-				//	)
-				//})
-				//r.Get("/saved", func(w http.ResponseWriter, r *http.Request) {
-				//	s.logger.Info("API called: Get liked snippets",
-				//		zap.String("request_id", middleware.GetReqID(r.Context())),
-				//	)
-				//})
-			})
-		})
-
-		// Only serve static files if SERVE_STATIC is set to "true"
-		if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {
-			// Handle all other routes by serving index.html
-			r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-				indexFile, err := frontend.DistDirFS.Open("index.html")
-				if err != nil {
-					s.logger.Error("failed to load index.html",
-						zap.Error(err),
-						zap.String("request_id", middleware.GetReqID(r.Context())),
-					)
-					http.Error(w, "Error loading index.html", http.StatusInternalServerError)
-					return
-				}
-				defer indexFile.Close()
-
-				http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
-			})
-		}
-	})
+	}
 }
 
 // startSessionCleanup starts a background goroutine to periodically clean up expired sessions
