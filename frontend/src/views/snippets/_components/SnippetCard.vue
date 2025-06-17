@@ -9,7 +9,6 @@
           {{ snippet.title }}
         </CardTitle>
         <Badge v-if="snippet.language" variant="secondary" class="shrink-0 text-xs">
-          <!-- TODO: Add language property to snippet type -->
           {{ getLanguageName(snippet.language) || 'Text' }}
         </Badge>
       </div>
@@ -51,11 +50,12 @@
         <div class="text-muted-foreground flex items-center gap-4 text-xs">
           <!-- Author info with avatar -->
           <div class="mt-3 flex items-center gap-2">
-            <div
-              class="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium"
-            >
-              {{ getAuthorInitials(snippet.author) }}
-            </div>
+            <Avatar class="ring-0">
+              <AvatarImage src="" :alt="snippet.author" />
+              <AvatarFallback class="bg-primary text-primary-foreground">{{
+                getAuthorInitials(snippet.author)
+              }}</AvatarFallback>
+            </Avatar>
             <div class="flex flex-col">
               <span class="text-foreground text-sm font-medium">{{ snippet.author }}</span>
               <span class="text-muted-foreground text-xs">
