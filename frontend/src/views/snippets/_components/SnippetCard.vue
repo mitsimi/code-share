@@ -96,24 +96,18 @@
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import type { Snippet } from '@/types'
-import { CopyIcon, BookmarkIcon } from 'lucide-vue-next'
+import { CopyIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
 import SaveButton from './SaveButton.vue'
 import { toast } from 'vue-sonner'
-import { useAuthStore } from '@/stores/auth'
 import { getLanguageExtension, getLanguageName } from '@/utils/languages'
-
-const authStore = useAuthStore()
 
 dayjs.extend(relativeTime)
 
 defineEmits<{
   (e: 'click'): void
 }>()
-
-// TODO: Replace these hardcoded values with actual props when available
-const hardcodedIsSaved = false // Add to snippet type or user state: isSaved: boolean
 
 const props = defineProps<{
   snippet: Snippet
@@ -144,15 +138,7 @@ const copyToClipboard = async () => {
     toast.success('Code copied to clipboard!')
   } catch (err) {
     console.error('Failed to copy code:', err)
-    // TODO: Add error toast
-    // You can use: toast.error('Failed to copy code')
   }
-}
-
-const toggleSave = () => {
-  // TODO: Implement save/bookmark functionality similar to LikeButton
-  // You might want to create a SaveButton component following the same pattern
-  console.log('Toggle save for snippet:', props.snippet.id)
 }
 </script>
 
