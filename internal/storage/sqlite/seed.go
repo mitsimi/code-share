@@ -72,8 +72,8 @@ func (s *SQLiteStorage) Seed() error {
 	for _, sampleSnippet := range storage.SampleSnippets {
 		// Check if snippet already exists using the actual author's ID
 		_, err := qtx.GetSnippet(s.ctx, db.GetSnippetParams{
-			UserID: userIDs[sampleSnippet.Author],
-			ID:     sampleSnippet.ID,
+			UserID:    userIDs[sampleSnippet.Author],
+			SnippetID: sampleSnippet.ID,
 		})
 		if err == nil {
 			continue // Skip if snippet already exists

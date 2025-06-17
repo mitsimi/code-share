@@ -70,14 +70,14 @@ SELECT
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
     u.username as author_username
 FROM snippets s
-LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?
+LEFT JOIN user_likes ul ON s.id = ul.snippet_id AND ul.user_id = ?1
 LEFT JOIN users u ON s.author = u.id
-WHERE s.id = ?
+WHERE s.id = ?2
 `
 
 type GetSnippetParams struct {
-	UserID string `json:"user_id"`
-	ID     string `json:"id"`
+	UserID    string `json:"user_id"`
+	SnippetID string `json:"snippet_id"`
 }
 
 type GetSnippetRow struct {
@@ -94,7 +94,7 @@ type GetSnippetRow struct {
 }
 
 func (q *Queries) GetSnippet(ctx context.Context, arg GetSnippetParams) (GetSnippetRow, error) {
-	row := q.queryRow(ctx, q.getSnippetStmt, getSnippet, arg.UserID, arg.ID)
+	row := q.queryRow(ctx, q.getSnippetStmt, getSnippet, arg.UserID, arg.SnippetID)
 	var i GetSnippetRow
 	err := row.Scan(
 		&i.ID,

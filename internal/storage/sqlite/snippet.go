@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
+	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/models"
 	"mitsimi.dev/codeShare/internal/storage"
 )
@@ -34,10 +36,10 @@ func (s *SQLiteStorage) GetSnippets(userID storage.UserID) ([]models.Snippet, er
 	return result, nil
 }
 
-func (s *SQLiteStorage) GetSnippet(userID storage.UserID, id string) (models.Snippet, error) {
+func (s *SQLiteStorage) GetSnippet(userID storage.UserID, snippetID string) (models.Snippet, error) {
 	snippet, err := s.q.GetSnippet(s.ctx, db.GetSnippetParams{
-		UserID: userID,
-		ID:     id,
+		UserID:    userID,
+		SnippetID: snippetID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -45,6 +47,18 @@ func (s *SQLiteStorage) GetSnippet(userID storage.UserID, id string) (models.Sni
 		}
 		return models.Snippet{}, err
 	}
+
+	isLiked, err := s.checkLikeExists(s.q, userID, snippetID)
+	if err != nil {
+		return models.Snippet{}, err
+	}
+
+	logger.Debug("THE FUCK IS THIS????!??!?!?!?!?",
+		zap.String("id", snippet.ID),
+		zap.String("title", snippet.Title),
+		zap.Bool("is_liked", isLiked),
+		zap.Bool("DB isLiked", snippet.IsLiked == 1),
+	)
 
 	return models.Snippet{
 		ID:        snippet.ID,
@@ -90,15 +104,15 @@ func (s *SQLiteStorage) UpdateSnippet(snippet models.Snippet) error {
 	return err
 }
 
-func (s *SQLiteStorage) DeleteSnippet(id storage.SnippetID) error {
-	return s.q.DeleteSnippet(s.ctx, id)
+func (s *SQLiteStorage) DeleteSnippet(snippetID storage.SnippetID) error {
+	return s.q.DeleteSnippet(s.ctx, snippetID)
 }
 
-func (s *SQLiteStorage) ToggleLikeSnippet(userID storage.UserID, id storage.SnippetID, isLike bool) error {
+func (s *SQLiteStorage) ToggleLikeSnippet(userID storage.UserID, snippetID storage.SnippetID, isLike bool) error {
 	// Check if snippet exists first
 	_, err := s.q.GetSnippet(s.ctx, db.GetSnippetParams{
-		UserID: userID,
-		ID:     id,
+		UserID:    userID,
+		SnippetID: snippetID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -118,37 +132,37 @@ func (s *SQLiteStorage) ToggleLikeSnippet(userID storage.UserID, id storage.Snip
 
 	// Like or unlike the snippet
 	if isLike {
-		exists, err := s.checkLikeExists(qtx, userID, id)
+		exists, err := s.checkLikeExists(qtx, userID, snippetID)
 		if err != nil {
 			return err
 		}
 		// If not already liked, add the like
 		if !exists {
 			if err := qtx.LikeSnippet(s.ctx, db.LikeSnippetParams{
-				SnippetID: id,
+				SnippetID: snippetID,
 				UserID:    userID,
 			}); err != nil {
 				return err
 			}
-			if err := qtx.IncrementLikesCount(s.ctx, id); err != nil {
+			if err := qtx.IncrementLikesCount(s.ctx, snippetID); err != nil {
 				return err
 			}
 		}
 	} else {
 		// Check if already unliked
-		exists, err := s.checkLikeExists(qtx, userID, id)
+		exists, err := s.checkLikeExists(qtx, userID, snippetID)
 		if err != nil {
 			return err
 		}
 		// If liked, remove the like
 		if exists {
 			if err := qtx.DeleteLike(s.ctx, db.DeleteLikeParams{
-				SnippetID: id,
+				SnippetID: snippetID,
 				UserID:    userID,
 			}); err != nil {
 				return err
 			}
-			if err := qtx.DecrementLikesCount(s.ctx, id); err != nil {
+			if err := qtx.DecrementLikesCount(s.ctx, snippetID); err != nil {
 				return err
 			}
 		}
