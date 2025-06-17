@@ -2,9 +2,9 @@
   <header
     class="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
   >
-    <div class="container mx-auto flex h-14 items-center px-4">
+    <div class="mx-auto flex h-14 max-w-7xl items-center px-4">
       <!-- Logo/Brand -->
-      <div class="mr-4 flex">
+      <div class="mx-4 flex">
         <router-link to="/" class="mr-6 flex items-center space-x-2">
           <span class="font-bold">CodeShare</span>
         </router-link>
