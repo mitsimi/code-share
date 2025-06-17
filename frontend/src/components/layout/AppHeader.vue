@@ -33,7 +33,7 @@
           </template>
           <template v-else>
             <div class="flex items-center space-x-2">
-              <ProfileMenu @logout="handleLogout" />
+              <UserMenu @logout="handleLogout" @close="closeMobileMenu" />
             </div>
           </template>
         </div>
@@ -86,10 +86,8 @@
               </Button>
             </template>
             <template v-else>
-              <Button variant="ghost" class="justify-start" @click="handleLogout">
-                <LogOut class="mr-2 h-4 w-4" />
-                Logout
-              </Button>
+              <UserInfo class="px-2 py-2" />
+              <MenuItems isMobile @logout="handleLogout" @close="closeMobileMenu" />
             </template>
           </div>
         </div>
@@ -101,12 +99,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import { Menu, X, LogOut } from 'lucide-vue-next'
+import { Menu, X, LogOut, UserIcon, Settings, Code, Heart, Bookmark } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 import ThemeSwitch from './ThemeSwitch.vue'
 import Separator from '../ui/separator/Separator.vue'
-import ProfileMenu from '../ProfileMenu.vue'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import UserInfo from '@/components/UserMenu/UserInfo.vue'
+import MenuItems from '@/components/UserMenu/MenuItems.vue'
 
 const authStore = useAuthStore()
 
