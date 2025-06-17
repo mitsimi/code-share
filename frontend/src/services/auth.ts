@@ -1,5 +1,5 @@
 import { useFetch } from '@/composables/useCustomFetch'
-import type { AuthResponse, LoginRequest, SignupRequest, User } from '@/types'
+import type { AuthResponse, LoginRequest, SignupRequest } from '@/types'
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
@@ -60,20 +60,6 @@ export const authService = {
 
     if (!data.value) {
       throw new Error('No response data received')
-    }
-
-    return data.value
-  },
-
-  async getCurrentUser(): Promise<User> {
-    const { data, error } = await useFetch<User>('/auth/me').json()
-
-    if (error.value) {
-      throw new Error('Not authenticated')
-    }
-
-    if (!data.value) {
-      throw new Error('No user data received')
     }
 
     return data.value
