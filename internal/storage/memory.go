@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"mitsimi.dev/codeShare/internal/auth"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
 	"mitsimi.dev/codeShare/internal/models"
 
@@ -63,11 +64,17 @@ func (s *MemoryStorage) CreateUser(username, email, password string) (db.User, e
 		}
 	}
 
+	// Hash the password
+	passwordHash, err := auth.HashPassword(password)
+	if err != nil {
+		return db.User{}, err
+	}
+
 	user := db.User{
 		ID:           uuid.NewString(),
 		Username:     username,
 		Email:        email,
-		PasswordHash: password,
+		PasswordHash: passwordHash,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
@@ -119,7 +126,7 @@ func (s *MemoryStorage) Login(email, password string) (string, error) {
 	defer s.mu.RUnlock()
 
 	for _, user := range s.users {
-		if user.Email == email && user.PasswordHash == password { // In a real app, use proper password comparison
+		if user.Email == email && auth.CheckPasswordHash(password, user.PasswordHash) {
 			return user.ID, nil
 		}
 	}
