@@ -41,9 +41,10 @@ export const authService = {
   async logout(): Promise<void> {
     const { error } = await useFetch('/auth/logout', {
       method: 'POST',
-    }).json()
+    })
 
     if (error.value) {
+      console.error('Logout error:', error.value)
       throw new Error('Failed to logout')
     }
   },
