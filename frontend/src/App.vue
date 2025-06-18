@@ -1,5 +1,6 @@
 <template>
   <div class="bg-background flex min-h-screen flex-col">
+    <DemoBanner />
     <AppHeader />
     <main class="my-12 grow">
       <RouterView />
@@ -11,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import DemoBanner from './components/layout/DemoBanner.vue'
 import { RouterView } from 'vue-router'
 import 'vue-sonner/style.css'
 import { Toaster } from 'vue-sonner'
