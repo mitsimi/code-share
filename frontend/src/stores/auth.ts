@@ -5,13 +5,6 @@ import { authService } from '@/services/auth'
 import { toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
 
-interface AuthState {
-  user: User | null
-  token: string | null
-  refreshToken: string | null
-  expiresAt: number | null
-}
-
 interface AuthenticatedUser {
   user: User
   token: string
