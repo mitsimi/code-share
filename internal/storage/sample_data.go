@@ -13,7 +13,7 @@ func (s *Storage) SeedSampleData(ctx context.Context) error {
 	userIDs := make([]string, len(sampleUsers))
 	for i, user := range sampleUsers {
 		// Set a default password for all sample users
-		passwordHash, err := auth.HashPassword("Password123!")
+		passwordHash, err := auth.HashPassword("password123")
 		if err != nil {
 			return err
 		}
@@ -35,7 +35,7 @@ func (s *Storage) SeedSampleData(ctx context.Context) error {
 	for i, snippet := range sampleSnippetsData {
 		// Assign snippets to users in a round-robin fashion
 		authorID := userIDs[i%len(userIDs)]
-		snippet.AuthorID = authorID
+		snippet.Author.ID = authorID
 
 		if err := s.CreateSnippet(ctx, &snippet); err != nil {
 			return err

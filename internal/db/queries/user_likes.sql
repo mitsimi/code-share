@@ -35,8 +35,9 @@ LIMIT 1;
 SELECT s.*, 
     CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
-    u.username AS author_username, 
     u.id AS author_id, 
+    u.username AS author_username, 
+    u.email AS author_email,
     u.avatar AS author_avatar
 FROM snippets s
 LEFT JOIN user_likes ul ON s.id = ul.snippet_id

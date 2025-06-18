@@ -3,7 +3,6 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"mitsimi.dev/codeShare/internal/domain"
 )
 
@@ -22,16 +21,16 @@ type UpdateSnippetRequest struct {
 
 // Response DTOs
 type SnippetResponse struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	Language  string    `json:"language"`
-	AuthorID  string    `json:"authorId"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Likes     int       `json:"likes"`
-	IsLiked   bool      `json:"isLiked"`
-	IsSaved   bool      `json:"isSaved"`
+	ID        string       `json:"id"`
+	Title     string       `json:"title"`
+	Content   string       `json:"content"`
+	Language  string       `json:"language"`
+	Author    UserResponse `json:"author"`
+	CreatedAt time.Time    `json:"createdAt"`
+	UpdatedAt time.Time    `json:"updatedAt"`
+	Likes     int          `json:"likes"`
+	IsLiked   bool         `json:"isLiked"`
+	IsSaved   bool         `json:"isSaved"`
 }
 
 // Conversion functions
@@ -41,7 +40,7 @@ func ToSnippetResponse(snippet *domain.Snippet) SnippetResponse {
 		Title:     snippet.Title,
 		Content:   snippet.Content,
 		Language:  snippet.Language,
-		AuthorID:  snippet.AuthorID,
+		Author:    ToUserResponse(snippet.Author),
 		CreatedAt: snippet.CreatedAt,
 		UpdatedAt: snippet.UpdatedAt,
 		Likes:     snippet.Likes,
@@ -50,16 +49,14 @@ func ToSnippetResponse(snippet *domain.Snippet) SnippetResponse {
 	}
 }
 
-func ToDomainSnippet(req CreateSnippetRequest, authorID string) *domain.Snippet {
-	now := time.Now()
+func ToDomainSnippet(req CreateSnippetRequest, userID string) *domain.Snippet {
 	return &domain.Snippet{
-		ID:        uuid.New().String(),
-		Title:     req.Title,
-		Content:   req.Content,
-		Language:  req.Language,
-		AuthorID:  authorID,
-		CreatedAt: now,
-		UpdatedAt: now,
+		Title:    req.Title,
+		Content:  req.Content,
+		Language: req.Language,
+		Author: &domain.User{
+			ID: userID,
+		},
 	}
 }
 

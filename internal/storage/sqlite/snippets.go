@@ -29,7 +29,7 @@ func (r *SnippetRepository) Create(ctx context.Context, snippet *domain.Snippet)
 		Title:    snippet.Title,
 		Content:  snippet.Content,
 		Language: snippet.Language,
-		Author:   snippet.AuthorID,
+		Author:   snippet.Author.ID,
 	})
 	return err
 }
@@ -47,11 +47,16 @@ func (r *SnippetRepository) GetByID(ctx context.Context, snippetID, userID strin
 	}
 
 	return &domain.Snippet{
-		ID:        snippet.ID,
-		Title:     snippet.Title,
-		Content:   snippet.Content,
-		Language:  snippet.Language,
-		AuthorID:  snippet.Author,
+		ID:       snippet.ID,
+		Title:    snippet.Title,
+		Content:  snippet.Content,
+		Language: snippet.Language,
+		Author: &domain.User{
+			ID:       snippet.AuthorID.String,
+			Username: snippet.AuthorUsername.String,
+			Email:    snippet.AuthorEmail.String,
+			Avatar:   snippet.AuthorAvatar.String,
+		},
 		CreatedAt: snippet.CreatedAt,
 		UpdatedAt: snippet.UpdatedAt,
 		Likes:     int(snippet.Likes),
@@ -75,11 +80,16 @@ func (r *SnippetRepository) GetAllByAuthor(ctx context.Context, authorID, userID
 	result := make([]*domain.Snippet, len(snippets))
 	for i, snippet := range snippets {
 		result[i] = &domain.Snippet{
-			ID:        snippet.ID,
-			Title:     snippet.Title,
-			Content:   snippet.Content,
-			Language:  snippet.Language,
-			AuthorID:  snippet.Author,
+			ID:       snippet.ID,
+			Title:    snippet.Title,
+			Content:  snippet.Content,
+			Language: snippet.Language,
+			Author: &domain.User{
+				ID:       snippet.AuthorID.String,
+				Username: snippet.AuthorUsername.String,
+				Email:    snippet.AuthorEmail.String,
+				Avatar:   snippet.AuthorAvatar.String,
+			},
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,
 			Likes:     int(snippet.Likes),
@@ -103,11 +113,16 @@ func (r *SnippetRepository) GetAll(ctx context.Context, userID string) ([]*domai
 	result := make([]*domain.Snippet, len(snippets))
 	for i, snippet := range snippets {
 		result[i] = &domain.Snippet{
-			ID:        snippet.ID,
-			Title:     snippet.Title,
-			Content:   snippet.Content,
-			Language:  snippet.Language,
-			AuthorID:  snippet.Author,
+			ID:       snippet.ID,
+			Title:    snippet.Title,
+			Content:  snippet.Content,
+			Language: snippet.Language,
+			Author: &domain.User{
+				ID:       snippet.AuthorID.String,
+				Username: snippet.AuthorUsername.String,
+				Email:    snippet.AuthorEmail.String,
+				Avatar:   snippet.AuthorAvatar.String,
+			},
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,
 			Likes:     int(snippet.Likes),

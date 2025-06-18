@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
+	"time"
 
 	"mitsimi.dev/codeShare/internal/api/dto"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -95,7 +97,7 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 	log.Debug("retrieved snippet",
 		zap.String("id", response.ID),
 		zap.String("title", response.Title),
-		zap.String("author", response.AuthorID),
+		zap.String("author", response.Author.ID),
 	)
 
 	w.WriteHeader(http.StatusOK)
@@ -126,18 +128,21 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// Convert to domain model
 	domainSnippet := dto.ToDomainSnippet(req, userID)
+	domainSnippet.ID = uuid.New().String()
+	domainSnippet.CreatedAt = time.Now()
+	domainSnippet.UpdatedAt = time.Now()
 
 	log.Debug("creating new snippet",
 		zap.String("title", domainSnippet.Title),
 		zap.String("content", domainSnippet.Content),
-		zap.String("author", domainSnippet.AuthorID),
+		zap.String("author", userID),
 	)
 
 	if err := h.snippets.Create(r.Context(), domainSnippet); err != nil {
 		log.Error("failed to create snippet",
 			zap.Error(err),
 			zap.String("title", domainSnippet.Title),
-			zap.String("userId", domainSnippet.AuthorID),
+			zap.String("userId", domainSnippet.Author.ID),
 		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -151,7 +156,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	log.Debug("created new snippet",
 		zap.String("id", s.ID),
 		zap.String("title", response.Title),
-		zap.String("author", response.AuthorID),
+		zap.String("author", response.Author.ID),
 	)
 
 	w.WriteHeader(http.StatusCreated)
@@ -189,9 +194,9 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if snippet.AuthorID != userID {
+	if snippet.Author.ID != userID {
 		log.Error("unauthorized update attempt",
-			zap.String("snippet_author", snippet.AuthorID),
+			zap.String("snippet_author", snippet.Author.ID),
 			zap.String("user_id", userID),
 		)
 		http.Error(w, "Only the author can update this snippet", http.StatusForbidden)
@@ -205,7 +210,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to update snippet",
 			zap.Error(err),
 			zap.String("title", snippet.Title),
-			zap.String("author", snippet.AuthorID),
+			zap.String("author", snippet.Author.ID),
 		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -215,7 +220,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 	response := dto.ToSnippetResponse(snippet)
 	log.Debug("updated snippet",
 		zap.String("title", response.Title),
-		zap.String("author", response.AuthorID),
+		zap.String("author", response.Author.ID),
 	)
 
 	w.WriteHeader(http.StatusOK)
@@ -242,9 +247,9 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	if snippet.AuthorID != userID {
+	if snippet.Author.ID != userID {
 		log.Error("unauthorized deletion attempt",
-			zap.String("snippet_author", snippet.AuthorID),
+			zap.String("snippet_author", snippet.Author.ID),
 			zap.String("user_id", userID),
 		)
 		http.Error(w, "Only the author can delete this snippet", http.StatusForbidden)

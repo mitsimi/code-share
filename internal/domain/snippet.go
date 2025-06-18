@@ -9,7 +9,7 @@ type Snippet struct {
 	Title     string
 	Content   string
 	Language  string
-	AuthorID  string
+	Author    *User
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Likes     int
