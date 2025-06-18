@@ -56,7 +56,7 @@ func (r *BookmarkRepository) ToggleSave(ctx context.Context, userID, snippetID s
 }
 
 func (r *BookmarkRepository) GetSavedSnippets(ctx context.Context, userID string) ([]*domain.Snippet, error) {
-	snippets, err := r.q.GetLikedSnippets(ctx, userID)
+	snippets, err := r.q.GetSavedSnippets(ctx, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.ErrNotFound
