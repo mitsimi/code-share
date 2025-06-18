@@ -88,11 +88,11 @@ const getSnippet = async (): Promise<Snippet> => {
     throw new Error('Failed to fetch snippet')
   }
 
-  if (!data.value) {
+  if (!data.value.data) {
     throw new Error('Snippet not found')
   }
 
-  return data.value
+  return data.value.data
 }
 
 const {

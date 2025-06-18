@@ -23,7 +23,7 @@ const { data: mySnippets, isLoading: isLoadingMySnippets } = useQuery({
       `/users/${authStore.user?.id}/snippets`,
     ).json()
     if (error.value) throw new Error('Failed to fetch your snippets')
-    return data.value || []
+    return data.value.data || []
   },
 })
 </script>

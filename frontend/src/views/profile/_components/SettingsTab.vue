@@ -192,9 +192,9 @@ const { mutate: updateAvatarMutation, isPending: isUpdatingAvatar } = useMutatio
     }).json()
 
     if (error.value) throw new Error('Failed to update avatar')
-    if (!data.value) throw new Error('No data received from server')
+    if (!data.value.data) throw new Error('No data received from server')
 
-    return data.value.avatar
+    return data.value.data.avatar
   },
   onSuccess: (newAvatarUrl) => {
     authStore.setUser({

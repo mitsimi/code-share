@@ -41,6 +41,8 @@ export const languages: Language[] = [
  * @returns The file extension for the language, or undefined if not found
  */
 export function getLanguageExtension(language: string): string | undefined {
+  if (!language) return undefined
+
   const normalizedLanguage = language.toLowerCase()
   const lang = languages.find(
     (l) => l.name.toLowerCase() === normalizedLanguage || l.aliases?.includes(normalizedLanguage),
@@ -54,10 +56,13 @@ export function getLanguageExtension(language: string): string | undefined {
  * @returns The display name for the language, or undefined if not found
  */
 export function getLanguageName(language: string): string | undefined {
+  if (!language) return undefined
+
   const normalizedLanguage = language.toLowerCase()
   const lang = languages.find(
     (l) => l.name.toLowerCase() === normalizedLanguage || l.aliases?.includes(normalizedLanguage),
   )
+
   return lang?.name
 }
 

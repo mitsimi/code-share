@@ -14,22 +14,17 @@ const showModal = ref(false)
 const queryClient = useQueryClient()
 
 const getSnippets = async (): Promise<Snippet[]> => {
+  console.log('Fetching snippets...')
   const { data, error } = await useFetch<Snippet[]>('/snippets', {
     timeout: 1000,
-    afterFetch: (ctx) => {
-      ctx.data = ctx.data.map((snippet: Snippet) => ({
-        ...snippet,
-        id: snippet.id,
-      }))
-      return ctx
-    },
   }).json()
 
   if (error.value) {
     throw new Error('Failed to fetch snippets')
   }
 
-  return data.value || []
+  console.log('Fetched snippets:', data.value)
+  return data.value.data || []
 }
 
 const { isPending, isError, data, error, refetch } = useQuery({
@@ -55,10 +50,10 @@ const createSnippet = async (formData: { title: string; code: string }): Promise
   }).json()
 
   if (error.value) {
-    throw new Error('Failed to create snippet')
+    throw new Error(error.value.message || 'Failed to create snippet')
   }
 
-  return data.value!
+  return data.value.data
 }
 
 const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({

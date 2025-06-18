@@ -21,7 +21,7 @@
         <div class="bg-muted/50 flex items-center justify-between border-b px-3 py-2">
           <div class="flex items-center gap-2">
             <span class="text-muted-foreground font-mono text-xs">
-              snippet.{{ getLanguageExtension(snippet.language || '') || 'txt' }}
+              snippet.{{ getLanguageExtension(snippet.language) || 'txt' }}
             </span>
           </div>
           <Button
