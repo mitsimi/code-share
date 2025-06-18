@@ -30,6 +30,10 @@
         <Button type="submit" class="w-full" :disabled="isLoading">
           {{ isLoading ? 'Logging in...' : 'Login' }}
         </Button>
+
+        <Separator />
+
+        <DemoLogin />
       </form>
 
       <div class="flex justify-center">
@@ -56,6 +60,8 @@ import { Input } from '@/components/ui/input'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
+import DemoLogin from './_components/DemoLogin.vue'
+import Separator from '@/components/ui/separator/Separator.vue'
 
 const router = useRouter()
 const route = useRoute()
