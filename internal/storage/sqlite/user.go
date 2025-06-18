@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
 	"mitsimi.dev/codeShare/internal/domain"
@@ -34,6 +35,9 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.UserCreation) 
 		PasswordHash: user.PasswordHash,
 	})
 	if err != nil {
+		if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+			return nil, repository.ErrAlreadyExists
+		}
 		return nil, repository.WrapError(err, "failed to create user")
 	}
 	return domain.ToDomainUser(newUser), nil

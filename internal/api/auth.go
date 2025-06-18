@@ -75,6 +75,14 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		PasswordHash: passwordHash,
 	})
 	if err != nil {
+		if repository.IsAlreadyExists(err) {
+			log.Error("username or email already exists",
+				zap.String("username", req.Username),
+				zap.String("email", req.Email),
+			)
+			http.Error(w, "Username or email already in use", http.StatusBadRequest)
+			return
+		}
 		log.Error("failed to create user",
 			zap.Error(err),
 			zap.String("username", req.Username),
