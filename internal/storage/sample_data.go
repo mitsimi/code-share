@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"mitsimi.dev/codeShare/internal/auth"
 	"mitsimi.dev/codeShare/internal/domain"
 )
@@ -19,6 +20,7 @@ func (s *Storage) SeedSampleData(ctx context.Context) error {
 		}
 
 		userCreation := domain.UserCreation{
+			ID:           uuid.New().String(),
 			Username:     user.Username,
 			Email:        user.Email,
 			PasswordHash: passwordHash,
@@ -35,7 +37,9 @@ func (s *Storage) SeedSampleData(ctx context.Context) error {
 	for i, snippet := range sampleSnippetsData {
 		// Assign snippets to users in a round-robin fashion
 		authorID := userIDs[i%len(userIDs)]
-		snippet.Author.ID = authorID
+		snippet.Author = &domain.User{
+			ID: authorID,
+		}
 
 		if snippet.Language == "" {
 			snippet.Language = "plainext" // Default language if not specified

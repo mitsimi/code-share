@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"mitsimi.dev/codeShare/internal/domain"
 	"mitsimi.dev/codeShare/internal/repository"
 )
@@ -79,6 +80,7 @@ func (s *Storage) ToggleSaveSnippet(ctx context.Context, userID, snippetID strin
 
 // User operations
 func (s *Storage) CreateUser(ctx context.Context, user *domain.UserCreation) (*domain.User, error) {
+	user.ID = uuid.New().String()
 	return s.users.Create(ctx, user)
 }
 
