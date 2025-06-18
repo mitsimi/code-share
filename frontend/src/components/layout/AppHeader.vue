@@ -29,7 +29,7 @@
         <div class="hidden items-center space-x-2 md:flex">
           <template v-if="!authStore.isAuthenticated()">
             <Button variant="ghost" size="sm" @click="handleLogin"> Login </Button>
-            <Button variant="reverse" size="sm" @click="handleSignup"> Sign Up </Button>
+            <Button variant="reverse" size="sm" @click="handleRegister"> Register </Button>
           </template>
           <template v-else>
             <div class="flex items-center space-x-2">
@@ -81,7 +81,7 @@
           <div class="flex flex-col space-y-2">
             <template v-if="!authStore.isAuthenticated()">
               <Button variant="ghost" class="justify-start" @click="handleLogin"> Login </Button>
-              <Button variant="secondary" class="justify-start" @click="handleSignup">
+              <Button variant="secondary" class="justify-start" @click="handleRegister">
                 Sign Up
               </Button>
             </template>
@@ -123,8 +123,8 @@ const handleLogin = async () => {
   router.push('/login')
 }
 
-const handleSignup = async () => {
-  router.push('/signup')
+const handleRegister = async () => {
+  router.push('/register')
 }
 
 const handleLogout = async () => {

@@ -1,5 +1,5 @@
 import { useCustomFetch } from '@/composables/useCustomFetch'
-import type { AuthResponse, LoginRequest, SignupRequest } from '@/types'
+import type { AuthResponse, LoginRequest, RegisterRequest } from '@/types'
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
@@ -26,15 +26,15 @@ export const authService = {
     return data.value.data
   },
 
-  async signup(userData: SignupRequest): Promise<AuthResponse> {
+  async register(userData: RegisterRequest): Promise<AuthResponse> {
     const useFetch = useCustomFetch()
-    const { data, error } = await useFetch<AuthResponse>('/auth/signup', {
+    const { data, error } = await useFetch<AuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     }).json()
 
     if (error.value) {
-      const errorMessage = error.value.message || 'Failed to sign up'
+      const errorMessage = error.value.message || 'Failed to register'
       throw new Error(errorMessage)
     }
 

@@ -25,7 +25,7 @@ export interface LoginRequest {
   password: string
 }
 
-export interface SignupRequest {
+export interface RegisterRequest {
   username: string
   email: string
   password: string

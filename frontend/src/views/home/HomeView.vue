@@ -219,9 +219,8 @@
             </Button>
             <Button
               size="lg"
-              variant="outline
-            "
-              class="text-base"
+              variant="outline"
+              class="bg-transparent text-base"
               @click="handleBrowseSnippets"
             >
               <LibraryIcon class="mr-2 h-4 w-4" />
@@ -351,7 +350,7 @@ const testimonials = [
 ]
 
 const handleGetStarted = () => {
-  router.push({ name: 'signup' })
+  router.push({ name: 'register' })
 }
 
 const handleBrowseSnippets = () => {

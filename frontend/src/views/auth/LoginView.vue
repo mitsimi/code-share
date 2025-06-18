@@ -1,46 +1,46 @@
 <template>
   <div class="bg-background flex min-h-[calc(100vh-4rem)] items-start justify-center p-4 pt-16">
-    <Card class="w-full max-w-md">
-      <CardHeader>
-        <CardTitle class="text-3xl font-bold">Login</CardTitle>
-        <CardDescription>Enter your credentials to access your account</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form @submit="onSubmit" class="space-y-4">
-          <FormField v-slot="{ componentField }" name="email">
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input v-bind="componentField" type="email" placeholder="Enter your email" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+    <div class="w-full max-w-md space-y-6">
+      <div class="space-y-2 text-center">
+        <h1 class="text-3xl font-bold">Login</h1>
+        <p class="text-muted-foreground">Enter your credentials to access your account</p>
+      </div>
 
-          <FormField v-slot="{ componentField }" name="password">
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input v-bind="componentField" type="password" placeholder="Enter your password" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+      <form @submit="onSubmit" class="space-y-4">
+        <FormField v-slot="{ componentField }" name="email">
+          <FormItem>
+            <FormLabel>Email</FormLabel>
+            <FormControl>
+              <Input v-bind="componentField" type="email" placeholder="Enter your email" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-          <Button type="submit" class="w-full" :disabled="isLoading">
-            {{ isLoading ? 'Logging in...' : 'Login' }}
-          </Button>
-        </form>
-      </CardContent>
-      <CardFooter class="flex justify-center">
+        <FormField v-slot="{ componentField }" name="password">
+          <FormItem>
+            <FormLabel>Password</FormLabel>
+            <FormControl>
+              <Input v-bind="componentField" type="password" placeholder="Enter your password" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <Button type="submit" class="w-full" :disabled="isLoading">
+          {{ isLoading ? 'Logging in...' : 'Login' }}
+        </Button>
+      </form>
+
+      <div class="flex justify-center">
         <p class="text-muted-foreground text-sm">
           Don't have an account?
-          <RouterLink to="/signup" class="text-primary font-medium hover:underline">
-            Sign up
+          <RouterLink to="/register" class="text-primary font-medium hover:underline">
+            Register
           </RouterLink>
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -54,14 +54,6 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 
