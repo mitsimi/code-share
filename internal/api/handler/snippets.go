@@ -117,6 +117,19 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Title == "" || req.Content == "" {
+		log.Error("invalid snippet data",
+			zap.String("title", req.Title),
+			zap.String("content", req.Content),
+		)
+		api.WriteError(w, http.StatusBadRequest, "Title and content cannot be empty")
+		return
+	}
+
+	if req.Language == "" {
+		req.Language = "plaintext" // Default language if not provided
+	}
+
 	if userID == "" {
 		log.Error("no user ID in context")
 		api.WriteError(w, http.StatusUnauthorized, "Not authenticated")
