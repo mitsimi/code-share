@@ -53,11 +53,11 @@
             <Avatar class="ring-0">
               <AvatarImage src="" :alt="snippet.author" />
               <AvatarFallback class="bg-primary text-primary-foreground">{{
-                getAuthorInitials(snippet.author)
+                snippet.author.username[0].toUpperCase()
               }}</AvatarFallback>
             </Avatar>
             <div class="flex flex-col">
-              <span class="text-foreground text-sm font-medium">{{ snippet.author }}</span>
+              <span class="text-foreground text-sm font-medium">{{ snippet.author.username }}</span>
               <span class="text-muted-foreground text-xs">
                 {{ dayjs(snippet.createdAt).fromNow() }}
               </span>
@@ -116,16 +116,6 @@ const truncatedContent = computed(() => {
   }
   return props.snippet.content.substring(0, maxLength) + '...'
 })
-
-// Helper functions
-const getAuthorInitials = (authorName: string): string => {
-  return authorName
-    .split(' ')
-    .map((name) => name.charAt(0))
-    .join('')
-    .toUpperCase()
-    .substring(0, 2)
-}
 
 const copyToClipboard = async () => {
   try {
