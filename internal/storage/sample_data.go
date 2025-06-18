@@ -37,6 +37,10 @@ func (s *Storage) SeedSampleData(ctx context.Context) error {
 		authorID := userIDs[i%len(userIDs)]
 		snippet.Author.ID = authorID
 
+		if snippet.Language == "" {
+			snippet.Language = "Plaintext" // Default language if not specified
+		}
+
 		if err := s.CreateSnippet(ctx, &snippet); err != nil {
 			return err
 		}
