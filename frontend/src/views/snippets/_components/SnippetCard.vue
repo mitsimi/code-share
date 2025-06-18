@@ -51,7 +51,7 @@
           <!-- Author info with avatar -->
           <div class="mt-3 flex items-center gap-2">
             <Avatar class="ring-0">
-              <AvatarImage src="" :alt="snippet.author" />
+              <AvatarImage :src="snippet.author.avatar" :alt="snippet.author" />
               <AvatarFallback class="bg-primary text-primary-foreground">{{
                 snippet.author.username[0].toUpperCase()
               }}</AvatarFallback>
@@ -96,7 +96,7 @@ import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
 import SaveButton from './SaveButton.vue'
 import { toast } from 'vue-sonner'
-import { getLanguageExtension, getLanguageName } from '@/utils/languages'
+import { getLanguageExtension, getLanguageName } from '@/lib/languages'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
