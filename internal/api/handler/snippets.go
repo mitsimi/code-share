@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/api/dto"
 
 	"mitsimi.dev/codeShare/internal/logger"
@@ -42,7 +43,7 @@ func NewSnippetHandler(
 // GetSnippets returns all snippets
 func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 	log := h.logger.With(zap.String("request_id", requestID), zap.String("user_id", userID))
 
 	snippets, err := h.snippets.GetAll(r.Context(), userID)
@@ -76,7 +77,7 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", id),
@@ -108,7 +109,7 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 // CreateSnippet creates a new snippet
 func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 	log := h.logger.With(zap.String("request_id", requestID), zap.String("user_id", userID))
 
 	var req dto.CreateSnippetRequest
@@ -169,7 +170,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", id),
@@ -232,7 +233,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 	snippetID := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", snippetID),
@@ -272,7 +273,7 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", id),
@@ -323,7 +324,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	requestID := middleware.GetReqID(r.Context())
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 	log := h.logger.With(
 		zap.String("request_id", requestID),
 		zap.String("snippet_id", id),

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"mitsimi.dev/codeShare/internal/api"
+	"mitsimi.dev/codeShare/internal/api/handler"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -34,7 +35,7 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 
 	// Auth routes
 	r.Route("/auth", func(r chi.Router) {
-		handler := api.NewAuthHandler(s.users, s.sessions, s.secretKey)
+		handler := handler.NewAuthHandler(s.users, s.sessions, s.secretKey)
 		r.Post("/register", handler.Register)
 		r.Post("/login", handler.Login)
 		r.Post("/logout", handler.Logout)
@@ -43,7 +44,7 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 
 	// User routes
 	r.Route("/users", func(r chi.Router) {
-		handler := api.NewUserHandler(s.users, s.snippets, s.likes, s.bookmarks)
+		handler := handler.NewUserHandler(s.users, s.snippets, s.likes, s.bookmarks)
 		r.Use(authMiddleware.RequireAuth)                // Protect user routes
 		r.Get("/{id}", handler.GetUser)                  // Get user by ID
 		r.Get("/{id}/snippets", handler.GetUserSnippets) // Get user's snippets
@@ -60,7 +61,7 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 
 	// Snippet routes
 	r.Route("/snippets", func(r chi.Router) {
-		handler := api.NewSnippetHandler(s.snippets, s.likes, s.bookmarks)
+		handler := handler.NewSnippetHandler(s.snippets, s.likes, s.bookmarks)
 
 		// Public routes
 		r.Group(func(r chi.Router) {

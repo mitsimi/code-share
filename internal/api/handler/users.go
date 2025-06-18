@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
+	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/api/dto"
 	"mitsimi.dev/codeShare/internal/domain"
 	"mitsimi.dev/codeShare/internal/logger"
@@ -65,7 +66,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 // UpdatePassword handles updating a user's password
 func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 
 	var req dto.UpdatePasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -102,7 +103,7 @@ func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 
 // UpdateAvatar handles updating a user's avatar URL
 func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 
 	var req dto.UpdateAvatarRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -135,7 +136,7 @@ func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 
 // UpdateProfile handles updating a user's profile information
 func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 
 	var req dto.UpdateUserInfoRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -172,7 +173,7 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 // GetUserSnippets returns all snippets created by a user
 func (h *UserHandler) GetUserSnippets(w http.ResponseWriter, r *http.Request) {
 	authorID := chi.URLParam(r, "id")
-	userID := GetUserID(r)
+	userID := api.GetUserID(r)
 
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(
