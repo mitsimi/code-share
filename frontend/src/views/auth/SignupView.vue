@@ -104,7 +104,6 @@ import PasswordInput from '@/components/ui/password-input.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 const isLoading = ref(false)
-const showRequirements = ref(false)
 
 const formSchema = toTypedSchema(
   z

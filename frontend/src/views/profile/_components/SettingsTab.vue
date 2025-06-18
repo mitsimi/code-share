@@ -186,15 +186,15 @@ const { handleSubmit, values } = useForm({
 const { mutate: updateAvatarMutation, isPending: isUpdatingAvatar } = useMutation({
   mutationKey: ['updateAvatar'],
   mutationFn: async (avatarUrl: string) => {
-    const { data, error } = await useFetch(`/users/${authStore.user?.id}/avatar`, {
+    const { data, error } = await useFetch(`/users/me/avatar`, {
       method: 'PATCH',
       body: JSON.stringify({ avatarUrl }),
     }).json()
 
     if (error.value) throw new Error('Failed to update avatar')
-    if (!data.value) throw new Error('No data received from server')
+    if (!data.value.data) throw new Error('No data received from server')
 
-    return data.value.avatar
+    return data.value.data.avatar
   },
   onSuccess: (newAvatarUrl) => {
     authStore.setUser({

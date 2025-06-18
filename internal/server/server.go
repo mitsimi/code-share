@@ -12,7 +12,7 @@ import (
 
 	"mitsimi.dev/codeShare/frontend"
 	"mitsimi.dev/codeShare/internal/logger"
-	"mitsimi.dev/codeShare/internal/storage"
+	"mitsimi.dev/codeShare/internal/repository"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -23,16 +23,31 @@ import (
 type Server struct {
 	router     *chi.Mux
 	httpServer *http.Server
-	storage    storage.Storage
+	snippets   repository.SnippetRepository
+	likes      repository.LikeRepository
+	bookmarks  repository.BookmarkRepository
+	users      repository.UserRepository
+	sessions   repository.SessionRepository
 	logger     *zap.Logger
 	secretKey  string
 }
 
 // New creates a new server instance
-func New(storage storage.Storage, secretKey string) *Server {
+func New(
+	snippets repository.SnippetRepository,
+	likes repository.LikeRepository,
+	bookmarks repository.BookmarkRepository,
+	users repository.UserRepository,
+	sessions repository.SessionRepository,
+	secretKey string,
+) *Server {
 	s := &Server{
 		router:    chi.NewRouter(),
-		storage:   storage,
+		snippets:  snippets,
+		likes:     likes,
+		bookmarks: bookmarks,
+		users:     users,
+		sessions:  sessions,
 		logger:    logger.Log,
 		secretKey: secretKey,
 	}
@@ -109,7 +124,7 @@ func (s *Server) startSessionCleanup() {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			if err := s.storage.DeleteExpiredSessions(); err != nil {
+			if err := s.sessions.DeleteExpired(context.Background()); err != nil {
 				s.logger.Error("Failed to delete expired sessions", zap.Error(err))
 			} else {
 				s.logger.Debug("Successfully cleaned up expired sessions")

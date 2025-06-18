@@ -1,114 +1,110 @@
-package storage
+package sqlite
 
 import (
+	"context"
 	"database/sql"
-	"errors"
 
-	"github.com/google/uuid"
-
-	"mitsimi.dev/codeShare/internal/auth"
-	"mitsimi.dev/codeShare/internal/storage"
-
+	"github.com/mattn/go-sqlite3"
+	"go.uber.org/zap"
 	db "mitsimi.dev/codeShare/internal/db/sqlc"
-	_ "modernc.org/sqlite"
+	"mitsimi.dev/codeShare/internal/domain"
+	"mitsimi.dev/codeShare/internal/logger"
+	"mitsimi.dev/codeShare/internal/repository"
 )
 
-// CreateUser creates a new user
-func (s *SQLiteStorage) CreateUser(username, email, password string) (db.User, error) {
-	// Hash the password
-	passwordHash, err := auth.HashPassword(password)
-	if err != nil {
-		return db.User{}, err
-	}
+var _ repository.UserRepository = (*UserRepository)(nil)
 
-	user, err := s.q.CreateUser(s.ctx, db.CreateUserParams{
-		ID:           uuid.NewString(),
-		Username:     username,
-		Email:        email,
-		PasswordHash: passwordHash,
+type UserRepository struct {
+	db *sql.DB
+	q  *db.Queries
+}
+
+func NewUserRepository(dbConn *sql.DB) *UserRepository {
+	return &UserRepository{
+		db: dbConn,
+		q:  db.New(dbConn),
+	}
+}
+
+func (r *UserRepository) Create(ctx context.Context, user *domain.UserCreation) (*domain.User, error) {
+	logger.Log.Debug("Creating new user", zap.String("username", user.Username), zap.String("email", user.Email), zap.String("password_hash", user.PasswordHash))
+	newUser, err := r.q.CreateUser(ctx, db.CreateUserParams{
+		ID:           user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
 	})
 	if err != nil {
-		return db.User{}, err
-	}
-	return user, nil
-}
-
-// GetUserByID gets a user by ID
-func (s *SQLiteStorage) GetUserByID(id storage.UserID) (db.User, error) {
-	user, err := s.q.GetUser(s.ctx, string(id))
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return db.User{}, errors.New("user not found")
+		if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+			return nil, repository.ErrAlreadyExists
 		}
-		return db.User{}, err
+		return nil, repository.WrapError(err, "failed to create user")
 	}
-	return user, nil
+	return domain.ToDomainUser(newUser), nil
 }
 
-// GetUserByUsername gets a user by username
-func (s *SQLiteStorage) GetUserByUsername(username string) (db.User, error) {
-	user, err := s.q.GetUserByUsername(s.ctx, username)
+func (r *UserRepository) GetByID(ctx context.Context, userID string) (*domain.User, error) {
+	user, err := r.q.GetUser(ctx, userID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return db.User{}, errors.New("user not found")
+		if err == sql.ErrNoRows {
+			return nil, repository.ErrNotFound
 		}
-		return db.User{}, err
+		return nil, repository.WrapError(err, "failed to get user by ID")
 	}
-	return user, nil
+	return domain.ToDomainUser(user), nil
+
 }
 
-// GetUserByEmail gets a user by email
-func (s *SQLiteStorage) GetUserByEmail(email string) (db.User, error) {
-	user, err := s.q.GetUserByEmail(s.ctx, email)
+func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
+	user, err := r.q.GetUserByUsername(ctx, username)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return db.User{}, errors.New("user not found")
+		if err == sql.ErrNoRows {
+			return nil, repository.ErrNotFound
 		}
-		return db.User{}, err
+		return nil, repository.WrapError(err, "failed to get user by username")
 	}
-	return user, nil
+	return domain.ToDomainUser(user), nil
 }
-
-// UpdateUser updates a user info
-func (s *SQLiteStorage) UpdateUser(userID storage.UserID, username, email string) (db.User, error) {
-	user, err := s.q.UpdateUserInfo(s.ctx, db.UpdateUserInfoParams{
-		ID:       userID,
-		Username: username,
-		Email:    email,
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	user, err := r.q.GetUserByEmail(ctx, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, repository.ErrNotFound
+		}
+		return nil, repository.WrapError(err, "failed to get user by email")
+	}
+	return domain.ToDomainUser(user), nil
+}
+func (r *UserRepository) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
+	updatedUser, err := r.q.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
 	})
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return db.User{}, errors.New("user not found")
-		}
-		return db.User{}, err
+		return nil, repository.WrapError(err, "failed to update user")
 	}
-	return user, nil
+	return domain.ToDomainUser(updatedUser), nil
 }
 
-// UpdateUserAvatar updates a user's avatar URL
-func (s *SQLiteStorage) UpdateUserAvatar(userID storage.UserID, avatarURL string) (db.User, error) {
-	user, err := s.q.UpdateUserAvatar(s.ctx, db.UpdateUserAvatarParams{
+func (r *UserRepository) UpdateAvatar(ctx context.Context, userID, avatarURL string) error {
+	_, err := r.q.UpdateUserAvatar(ctx, db.UpdateUserAvatarParams{
 		ID:     userID,
 		Avatar: sql.NullString{String: avatarURL, Valid: avatarURL != ""},
 	})
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return db.User{}, errors.New("user not found")
-		}
-		return db.User{}, err
+		return repository.WrapError(err, "failed to update user avatar")
 	}
-	return user, nil
+	return nil
 }
 
-// UpdateUserPassword updates a user's password
-func (s *SQLiteStorage) UpdateUserPassword(userID storage.UserID, password string) error {
-	passwordHash, err := auth.HashPassword(password)
-	if err != nil {
-		return err
-	}
-
-	return s.q.UpdateUserPassword(s.ctx, db.UpdateUserPasswordParams{
+func (r *UserRepository) UpdatePassword(ctx context.Context, userID, passwordHash string) error {
+	err := r.q.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
 		ID:           userID,
 		PasswordHash: passwordHash,
 	})
+	if err != nil {
+		return repository.WrapError(err, "failed to update user password")
+	}
+	return nil
 }

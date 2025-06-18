@@ -8,6 +8,8 @@ export const authService = {
       body: JSON.stringify(credentials),
     }).json()
 
+    console.log('Login response:', data.value, error.value)
+
     if (error.value) {
       const errorMessage =
         typeof error.value === 'string' ? error.value : error.value.message || 'Failed to login'
@@ -18,7 +20,7 @@ export const authService = {
       throw new Error('Invalid response from server')
     }
 
-    return data.value
+    return data.value.data
   },
 
   async signup(userData: SignupRequest): Promise<AuthResponse> {
@@ -31,11 +33,11 @@ export const authService = {
       throw new Error(error.value.message || 'Failed to sign up')
     }
 
-    if (!data.value) {
+    if (!data.value.data) {
       throw new Error('No response data received')
     }
 
-    return data.value
+    return data.value.data
   },
 
   async logout(): Promise<void> {

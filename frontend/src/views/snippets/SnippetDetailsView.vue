@@ -40,9 +40,16 @@
       <div class="bg-card text-card-foreground rounded-lg border-2 p-6 shadow">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
+          <div class="flex">
+            <SaveButton
+              v-if="authStore.isAuthenticated()"
+              :isSaved="snippet.isSaved"
+              :snippetId="snippet.id"
+            />
+            <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
+          </div>
         </div>
-        <p class="text-accent-foreground text-lg">By {{ snippet.author }}</p>
+        <p class="text-accent-foreground text-lg">By {{ snippet.author.username }}</p>
       </div>
 
       <!-- Code block -->
@@ -63,6 +70,10 @@ import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LikeButton from './_components/LikeButton.vue'
 import { ArrowLeftIcon } from 'lucide-vue-next'
+import SaveButton from './_components/SaveButton.vue'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -77,11 +88,11 @@ const getSnippet = async (): Promise<Snippet> => {
     throw new Error('Failed to fetch snippet')
   }
 
-  if (!data.value) {
+  if (!data.value.data) {
     throw new Error('Snippet not found')
   }
 
-  return data.value
+  return data.value.data
 }
 
 const {

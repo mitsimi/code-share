@@ -11,8 +11,10 @@ import (
 	"mitsimi.dev/codeShare/internal/config"
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/server"
-	storage "mitsimi.dev/codeShare/internal/storage/sqlite"
+	"mitsimi.dev/codeShare/internal/storage"
+	sqlite "mitsimi.dev/codeShare/internal/storage/sqlite"
 
+	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 )
 
@@ -31,23 +33,41 @@ func main() {
 		log.Fatal("Failed to initialize logger:", err)
 	}
 
-	// Initialize SQLite storage
-	store, err := storage.NewSQLiteStorage(cfg.DBPath)
+	// Initialize SQLite database
+	sqliteStorage, err := sqlite.New(cfg.DBPath)
 	if err != nil {
 		logger.Fatal("Failed to initialize SQLite storage", zap.Error(err))
 	}
+	defer sqliteStorage.Close()
+
+	// Initialize repositories
+	snippets := sqlite.NewSnippetRepository(sqliteStorage.DB())
+	likes := sqlite.NewLikeRepository(sqliteStorage.DB())
+	bookmarks := sqlite.NewBookmarkRepository(sqliteStorage.DB())
+	users := sqlite.NewUserRepository(sqliteStorage.DB())
+	sessions := sqlite.NewSessionRepository(sqliteStorage.DB())
+
+	// Create storage instance
+	storage := storage.NewStorage(snippets, likes, bookmarks, users, sessions)
 
 	if cfg.Seed {
 		logger.Debug("Seeding database")
-		// Seed the database with sample data
-		if err := store.Seed(); err != nil {
-			logger.Error("Warning: Failed to seed database", zap.Error(err))
+		if err := storage.SeedSampleData(context.Background()); err != nil {
+			logger.Error("Failed to seed database", zap.Error(err))
+		} else {
+			logger.Debug("Seeding finished successfully")
 		}
-		logger.Debug("Seeding finished successfully")
 	}
 
-	// Create server
-	srv := server.New(store, cfg.JWTSecret)
+	// Create server with repositories
+	srv := server.New(
+		snippets,
+		likes,
+		bookmarks,
+		users,
+		sessions,
+		cfg.JWTSecret,
+	)
 
 	// Channel to listen for interrupt signals
 	sigChan := make(chan os.Signal, 1)
@@ -73,13 +93,6 @@ func main() {
 	// Perform graceful shutdown
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Error("Graceful shutdown failed", zap.Error(err))
-	}
-
-	// Close storage connection
-	if err := store.Close(); err != nil {
-		logger.Error("Failed to close storage", zap.Error(err))
-	} else {
-		logger.Info("Storage closed successfully")
 	}
 
 	logger.Info("Application exited gracefully")

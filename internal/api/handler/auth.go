@@ -1,91 +1,115 @@
-package api
+package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"time"
 
+	"mitsimi.dev/codeShare/internal/api"
+	"mitsimi.dev/codeShare/internal/api/dto"
 	"mitsimi.dev/codeShare/internal/auth"
+	"mitsimi.dev/codeShare/internal/domain"
 	"mitsimi.dev/codeShare/internal/logger"
-	"mitsimi.dev/codeShare/internal/models"
-	"mitsimi.dev/codeShare/internal/storage"
+	"mitsimi.dev/codeShare/internal/repository"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
-// AuthHandler handles authentication-related HTTP requests
+// AuthHandler handles authentication requests
 type AuthHandler struct {
-	storage   storage.Storage
+	users     repository.UserRepository
+	sessions  repository.SessionRepository
 	logger    *zap.Logger
 	secretKey string
 }
 
 // NewAuthHandler creates a new auth handler
-func NewAuthHandler(storage storage.Storage, secretKey string) *AuthHandler {
+func NewAuthHandler(users repository.UserRepository, sessions repository.SessionRepository, secretKey string) *AuthHandler {
 	return &AuthHandler{
-		storage:   storage,
+		users:     users,
+		sessions:  sessions,
 		logger:    logger.Log,
 		secretKey: secretKey,
 	}
 }
 
 // Signup handles user registration
-func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(zap.String("request_id", requestID))
 
-	var req models.SignupRequest
+	var req dto.RegistrationRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Error("failed to decode request body", zap.Error(err))
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	// Validate email
 	if !isValidEmail(req.Email) {
 		log.Error("invalid email format", zap.String("email", req.Email))
-		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	// Validate password
 	if err := validatePassword(req.Password); err != nil {
 		log.Error("invalid password", zap.Error(err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// Create user
-	user, err := h.storage.CreateUser(req.Username, req.Email, req.Password)
+	passwordHash, err := auth.HashPassword(req.Password)
 	if err != nil {
+		log.Error("failed to hash password", zap.Error(err))
+		api.WriteError(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	user, err := h.users.Create(r.Context(), &domain.UserCreation{
+		ID:           uuid.New().String(),
+		Username:     req.Username,
+		Email:        req.Email,
+		PasswordHash: passwordHash,
+	})
+	if err != nil {
+		if repository.IsAlreadyExists(err) {
+			log.Error("username or email already exists",
+				zap.String("username", req.Username),
+				zap.String("email", req.Email),
+			)
+			api.WriteError(w, http.StatusBadRequest, "Username or email already in use")
+			return
+		}
 		log.Error("failed to create user",
 			zap.Error(err),
 			zap.String("username", req.Username),
 			zap.String("email", req.Email),
 		)
-		http.Error(w, "Failed to create user", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Failed to create user")
 		return
 	}
 
 	// Create tokens and session
-	response, sessionToken, err := h.createTokensAndSession(user.ID)
+	response, sessionToken, err := h.createTokensAndSession(r.Context(), user.ID)
 	if err != nil {
 		log.Error("failed to create tokens and session", zap.Error(err))
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
 	// Set session cookie
 	h.setCookie(w, r, sessionToken, response.ExpiresAt)
 
-	log.Info("user signed up successfully",
+	log.Debug("user signed up successfully",
 		zap.String("username", response.User.Username),
 		zap.String("email", response.User.Email),
 	)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	api.WriteSuccess(w, http.StatusCreated, "Registration successful", response)
 }
 
 // Login handles user authentication
@@ -93,42 +117,41 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 	log := h.logger.With(zap.String("request_id", requestID))
 
-	var req models.LoginRequest
+	var req dto.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Error("failed to decode request body", zap.Error(err))
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	// Authenticate user
-	userID, err := h.storage.Login(req.Email, req.Password)
+	userID, err := h.authenticateUser(r.Context(), req.Email, req.Password)
 	if err != nil {
 		log.Error("failed to login",
 			zap.Error(err),
 			zap.String("email", req.Email),
 		)
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		api.WriteError(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
 
 	// Create tokens and session
-	response, sessionToken, err := h.createTokensAndSession(userID)
+	response, sessionToken, err := h.createTokensAndSession(r.Context(), userID)
 	if err != nil {
 		log.Error("failed to create tokens and session", zap.Error(err))
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
 	// Set session cookie
 	h.setCookie(w, r, sessionToken, response.ExpiresAt)
 
-	log.Info("user logged in successfully",
+	log.Debug("user logged in successfully",
 		zap.String("username", response.User.Username),
 		zap.String("email", response.User.Email),
 	)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	api.WriteSuccess(w, http.StatusOK, "Login successful", response)
 }
 
 // Logout handles user logout
@@ -142,12 +165,12 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to get session cookie",
 			zap.Error(err),
 		)
-		http.Error(w, "Not authenticated", http.StatusUnauthorized)
+		api.WriteError(w, http.StatusUnauthorized, "Not authenticated")
 		return
 	}
 
 	// Delete session
-	if err := h.storage.DeleteSession(cookie.Value); err != nil {
+	if err := h.sessions.Delete(r.Context(), cookie.Value); err != nil {
 		log.Warn("failed to delete session from storage",
 			zap.Error(err),
 			zap.String("session_token", cookie.Value[:8]+"..."), // Only log first 8 chars for security
@@ -168,8 +191,8 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   -1,
 	})
 
-	log.Info("user logged out successfully")
-	w.WriteHeader(http.StatusNoContent)
+	log.Debug("user logged out successfully")
+	api.WriteSuccess(w, http.StatusOK, "Logout successful", nil)
 }
 
 // RefreshToken handles token refresh requests
@@ -183,7 +206,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Error("failed to decode request body", zap.Error(err))
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
@@ -192,18 +215,18 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	// Try session-based refresh first
 	if cookie, err := r.Cookie("session"); err == nil {
-		if session, err := h.storage.GetSession(cookie.Value); err == nil && session.ExpiresAt > time.Now().Unix() {
+		if session, err := h.sessions.GetByToken(r.Context(), cookie.Value); err == nil && session.ExpiresAt > time.Now().Unix() {
 			// Validate refresh token matches session
 			if req.RefreshToken != session.RefreshToken {
 				log.Error("refresh token mismatch")
-				http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
+				api.WriteError(w, http.StatusUnauthorized, "Invalid refresh token")
 				return
 			}
 
 			// Delete old session before creating new one
-			if err := h.storage.DeleteSession(cookie.Value); err != nil {
+			if err := h.sessions.Delete(r.Context(), cookie.Value); err != nil {
 				log.Error("failed to delete old session", zap.Error(err))
-				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				api.WriteError(w, http.StatusInternalServerError, "Internal server error")
 				return
 			}
 
@@ -217,13 +240,13 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		claims, err := auth.ValidateToken(req.RefreshToken, h.secretKey)
 		if err != nil {
 			log.Error("invalid refresh token", zap.Error(err))
-			http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
+			api.WriteError(w, http.StatusUnauthorized, "Invalid refresh token")
 			return
 		}
 
 		if !claims.IsRefresh {
 			log.Error("token is not a refresh token")
-			http.Error(w, "Invalid token type", http.StatusUnauthorized)
+			api.WriteError(w, http.StatusUnauthorized, "Invalid token type")
 			return
 		}
 
@@ -232,10 +255,10 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create new tokens and session
-	response, sessionToken, err := h.createTokensAndSession(userID)
+	response, sessionToken, err := h.createTokensAndSession(r.Context(), userID)
 	if err != nil {
 		log.Error("failed to create tokens and session", zap.Error(err))
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
@@ -247,23 +270,18 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		zap.String("email", response.User.Email),
 	)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	api.WriteSuccess(w, http.StatusOK, "Token refreshed successfully", response)
 }
 
-// UpdateProfileRequest represents the request body for updating a user's profile
-type UpdateProfileRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-}
+func (h *AuthHandler) authenticateUser(ctx context.Context, email, password string) (string, error) {
+	user, err := h.users.GetByEmail(ctx, email)
+	if err != nil {
+		return "", auth.ErrInvalidCredentials
+	}
 
-// UpdatePasswordRequest represents the request body for updating a user's password
-type UpdatePasswordRequest struct {
-	CurrentPassword string `json:"currentPassword"`
-	NewPassword     string `json:"newPassword"`
-}
+	if !auth.CheckPasswordHash(password, user.PasswordHash) {
+		return "", auth.ErrInvalidCredentials
+	}
 
-// UpdateAvatarRequest represents the request body for updating a user's avatar
-type UpdateAvatarRequest struct {
-	AvatarURL string `json:"avatarUrl"`
+	return user.ID, nil
 }

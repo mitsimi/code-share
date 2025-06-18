@@ -1,6 +1,7 @@
-package api
+package handler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,12 +9,14 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/google/uuid"
+	"mitsimi.dev/codeShare/internal/api/dto"
 	"mitsimi.dev/codeShare/internal/auth"
-	"mitsimi.dev/codeShare/internal/models"
+	"mitsimi.dev/codeShare/internal/domain"
 )
 
 // createTokensAndSession generates new tokens, creates a session, and returns the auth response
-func (h *AuthHandler) createTokensAndSession(userID string) (*models.AuthResponse, string, error) {
+func (h *AuthHandler) createTokensAndSession(ctx context.Context, userID string) (*dto.AuthResponse, string, error) {
 	// Generate access token
 	accessTokenResp, err := auth.GenerateToken(userID, h.secretKey, false)
 	if err != nil {
@@ -32,21 +35,29 @@ func (h *AuthHandler) createTokensAndSession(userID string) (*models.AuthRespons
 		return nil, "", fmt.Errorf("failed to generate session token: %w", err)
 	}
 
+	session := &domain.Session{
+		ID:           uuid.New().String(),
+		UserID:       userID,
+		Token:        sessionToken,
+		RefreshToken: refreshTokenResp.Token,
+		ExpiresAt:    refreshTokenResp.ExpiresAt,
+	}
+
 	// Create session in storage
-	if err := h.storage.CreateSession(userID, sessionToken, refreshTokenResp.Token, refreshTokenResp.ExpiresAt); err != nil {
+	if err := h.sessions.Create(ctx, session); err != nil {
 		return nil, "", fmt.Errorf("failed to create session: %w", err)
 	}
 
 	// Get user details
-	user, err := h.storage.GetUserByID(userID)
+	user, err := h.users.GetByID(ctx, userID)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to get user: %w", err)
 	}
 
-	response := &models.AuthResponse{
+	response := &dto.AuthResponse{
 		Token:        accessTokenResp.Token,
 		RefreshToken: refreshTokenResp.Token,
-		User:         models.FromDBUser(user),
+		User:         dto.ToUserResponse(user),
 		ExpiresAt:    accessTokenResp.ExpiresAt,
 	}
 

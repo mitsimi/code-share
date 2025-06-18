@@ -8,7 +8,7 @@ import (
 
 	"mitsimi.dev/codeShare/internal/auth"
 	"mitsimi.dev/codeShare/internal/logger"
-	"mitsimi.dev/codeShare/internal/storage"
+	"mitsimi.dev/codeShare/internal/repository"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,15 +21,17 @@ const userIDKey contextKey = "user_id"
 
 // AuthMiddleware is a middleware that checks for valid authentication
 type AuthMiddleware struct {
-	storage   storage.Storage
+	users     repository.UserRepository
+	sessions  repository.SessionRepository
 	logger    *zap.Logger
 	secretKey string
 }
 
 // NewAuthMiddleware creates a new auth middleware
-func NewAuthMiddleware(storage storage.Storage, secretKey string) *AuthMiddleware {
+func NewAuthMiddleware(users repository.UserRepository, sessions repository.SessionRepository, secretKey string) *AuthMiddleware {
 	return &AuthMiddleware{
-		storage:   storage,
+		users:     users,
+		sessions:  sessions,
 		logger:    logger.Log,
 		secretKey: secretKey,
 	}
@@ -40,11 +42,11 @@ func (m *AuthMiddleware) TryAttachUserID(next http.Handler) http.Handler {
 		requestID := middleware.GetReqID(r.Context())
 		log := m.logger.With(zap.String("request_id", requestID))
 
-		var userID storage.UserID
+		var userID string
 
 		// Try to get session from cookie first
 		if cookie, err := r.Cookie("session"); err == nil {
-			if session, err := m.storage.GetSession(cookie.Value); err == nil {
+			if session, err := m.sessions.GetByToken(r.Context(), cookie.Value); err == nil {
 				if session.ExpiresAt > time.Now().Unix() {
 					userID = session.UserID
 				}
@@ -96,7 +98,7 @@ func (m *AuthMiddleware) RequireSelfOrAdmin(next http.Handler) http.Handler {
 		}
 
 		// Check if the user is an admin or the same user
-		if !auth.IsAdmin(userID) && chi.URLParam(r, "id") != string(userID) {
+		if !auth.IsAdmin(userID) && chi.URLParam(r, "id") != userID {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
@@ -106,7 +108,7 @@ func (m *AuthMiddleware) RequireSelfOrAdmin(next http.Handler) http.Handler {
 }
 
 // GetUserID gets the user ID from the context
-func GetUserID(r *http.Request) storage.UserID {
-	userID, _ := r.Context().Value(userIDKey).(storage.UserID)
+func GetUserID(r *http.Request) string {
+	userID, _ := r.Context().Value(userIDKey).(string)
 	return userID
 }

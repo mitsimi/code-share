@@ -1,0 +1,18 @@
+type: http_request
+model: http_request
+id: rq_jv4amxbkfX
+createdAt: 2025-06-18T09:29:26.347527
+updatedAt: 2025-06-18T10:28:50.602366
+workspaceId: wk_gJPTxkB9Tw
+folderId: fl_kb6ND2zGAX
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: GetUserSnippets
+sortPriority: 2500.0
+url: ${[ BASE_URL ]}/users/me/snippets
+urlParameters: []
