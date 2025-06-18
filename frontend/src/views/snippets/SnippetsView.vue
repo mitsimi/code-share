@@ -23,7 +23,6 @@ const getSnippets = async (): Promise<Snippet[]> => {
     throw new Error('Failed to fetch snippets')
   }
 
-  console.log('Fetched snippets:', data.value)
   return data.value.data || []
 }
 

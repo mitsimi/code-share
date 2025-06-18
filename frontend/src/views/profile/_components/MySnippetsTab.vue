@@ -1,12 +1,13 @@
 <template>
   <SnippetsList
-    :snippets="mySnippets"
+    :snippets="snippetsToShow"
     :is-loading="isLoadingMySnippets"
     empty-message="You haven't created any snippets yet."
   />
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { useFetch } from '@/composables/useCustomFetch'
 import { useAuthStore } from '@/stores/auth'
@@ -24,4 +25,7 @@ const { data: mySnippets, isLoading: isLoadingMySnippets } = useQuery({
     return data.value.data || []
   },
 })
+
+// Provide default empty array when data is undefined
+const snippetsToShow = computed(() => mySnippets.value || [])
 </script>
