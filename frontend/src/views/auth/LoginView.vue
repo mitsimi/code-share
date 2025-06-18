@@ -7,11 +7,11 @@
       </div>
 
       <form @submit="onSubmit" class="space-y-4">
-        <FormField v-slot="{ componentField }" name="email">
+        <FormField v-slot="{ componentField }" name="username">
           <FormItem>
-            <FormLabel>Email</FormLabel>
+            <FormLabel>Username</FormLabel>
             <FormControl>
-              <Input v-bind="componentField" type="email" placeholder="Enter your email" />
+              <Input v-bind="componentField" type="text" placeholder="Enter your username" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -64,7 +64,7 @@ const isLoading = ref(false)
 
 const formSchema = toTypedSchema(
   z.object({
-    email: z.string().email('Please enter a valid email address'),
+    username: z.string(),
     password: z.string(),
   }),
 )

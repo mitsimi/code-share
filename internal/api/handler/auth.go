@@ -125,11 +125,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Authenticate user
-	userID, err := h.authenticateUser(r.Context(), req.Email, req.Password)
+	userID, err := h.authenticateUser(r.Context(), req.Username, req.Password)
 	if err != nil {
 		log.Error("failed to login",
 			zap.Error(err),
-			zap.String("email", req.Email),
+			zap.String("username", req.Username),
 		)
 		api.WriteError(w, http.StatusUnauthorized, "Invalid credentials")
 		return
@@ -273,8 +273,8 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	api.WriteSuccess(w, http.StatusOK, "Token refreshed successfully", response)
 }
 
-func (h *AuthHandler) authenticateUser(ctx context.Context, email, password string) (string, error) {
-	user, err := h.users.GetByEmail(ctx, email)
+func (h *AuthHandler) authenticateUser(ctx context.Context, username, password string) (string, error) {
+	user, err := h.users.GetByUsername(ctx, username)
 	if err != nil {
 		return "", auth.ErrInvalidCredentials
 	}
