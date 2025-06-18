@@ -51,7 +51,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 			zap.Error(err),
 			zap.String("user_id", userID),
 		)
-		http.Error(w, "User not found", http.StatusNotFound)
+		api.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 	log.Debug("retrieved user",
@@ -59,9 +59,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		zap.String("email", user.Email),
 	)
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(dto.ToUserResponse(user))
+	api.WriteSuccess(w, http.StatusOK, "User retrieved successfully", dto.ToUserResponse(user))
 }
 
 // UpdatePassword handles updating a user's password
@@ -70,35 +68,34 @@ func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.UpdatePasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	// Verify current password
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "Failed to get user", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.CurrentPassword)); err != nil {
-		http.Error(w, "Current password is incorrect", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Current password is incorrect")
 		return
 	}
 
 	// Hash and update new password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to hash password")
 		return
 	}
 	if err := h.users.UpdatePassword(r.Context(), userID, string(hashedPassword)); err != nil {
-		http.Error(w, "Failed to update password", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to update password")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
+	api.WriteSuccess(w, http.StatusOK, "Password updated successfully", nil)
 }
 
 // UpdateAvatar handles updating a user's avatar URL
@@ -107,12 +104,12 @@ func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.UpdateAvatarRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if req.AvatarURL == "" {
-		http.Error(w, "Avatar URL cannot be empty", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Avatar URL cannot be empty")
 		return
 	}
 
@@ -122,15 +119,12 @@ func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 	)
 	err := h.users.UpdateAvatar(r.Context(), userID, req.AvatarURL)
 	if err != nil {
-		http.Error(w, "Failed to update avatar", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to update avatar")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Avatar updated successfully",
-		"avatar":  req.AvatarURL,
+	api.WriteSuccess(w, http.StatusOK, "Avatar updated successfully", map[string]string{
+		"avatar": req.AvatarURL,
 	})
 }
 
@@ -140,12 +134,12 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.UpdateUserInfoRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if req.Username == "" || req.Email == "" {
-		http.Error(w, "Username and email cannot be empty", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Username and email cannot be empty")
 		return
 	}
 	h.logger.Debug("updating user profile",
@@ -161,13 +155,11 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	updatedUser, err := h.users.Update(r.Context(), user)
 	if err != nil {
-		http.Error(w, "Failed to update user info", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to update user info")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updatedUser)
+	api.WriteSuccess(w, http.StatusOK, "User info updated successfully", updatedUser)
 }
 
 // GetUserSnippets returns all snippets created by a user
@@ -189,7 +181,7 @@ func (h *UserHandler) GetUserSnippets(w http.ResponseWriter, r *http.Request) {
 			zap.String("author_id", authorID),
 			zap.String("user_id", userID),
 		)
-		http.Error(w, "Failed to retrieve snippets", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to retrieve snippets")
 		return
 	}
 
@@ -197,9 +189,7 @@ func (h *UserHandler) GetUserSnippets(w http.ResponseWriter, r *http.Request) {
 		zap.Int("count", len(snippets)),
 	)
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(snippets)
+	api.WriteSuccess(w, http.StatusOK, "User snippets retrieved successfully", snippets)
 }
 
 // GetUserLikedSnippets returns all snippets liked by a user
@@ -217,7 +207,7 @@ func (h *UserHandler) GetUserLikedSnippets(w http.ResponseWriter, r *http.Reques
 			zap.Error(err),
 			zap.String("user_id", userID),
 		)
-		http.Error(w, "Failed to retrieve liked snippets", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to retrieve liked snippets")
 		return
 	}
 
@@ -230,9 +220,7 @@ func (h *UserHandler) GetUserLikedSnippets(w http.ResponseWriter, r *http.Reques
 		zap.Int("count", len(snippets)),
 	)
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(responses)
+	api.WriteSuccess(w, http.StatusOK, "User liked snippets retrieved successfully", responses)
 }
 
 // GetUserSavedSnippets returns all snippets saved by a user
@@ -250,7 +238,7 @@ func (h *UserHandler) GetUserSavedSnippets(w http.ResponseWriter, r *http.Reques
 			zap.Error(err),
 			zap.String("user_id", userID),
 		)
-		http.Error(w, "Failed to retrieve saved snippets", http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, "Failed to retrieve saved snippets")
 		return
 	}
 
@@ -263,7 +251,5 @@ func (h *UserHandler) GetUserSavedSnippets(w http.ResponseWriter, r *http.Reques
 		zap.Int("count", len(snippets)),
 	)
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(responses)
+	api.WriteSuccess(w, http.StatusOK, "User saved snippets retrieved successfully", responses)
 }

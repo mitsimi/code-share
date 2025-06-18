@@ -51,7 +51,7 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to get snippets",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -68,9 +68,7 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		zap.Int("count", len(responses)),
 	)
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(responses)
+	api.WriteSuccess(w, http.StatusOK, "Snippets retrieved successfully", responses)
 }
 
 // GetSnippet returns a specific snippet
@@ -89,7 +87,7 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to get snippet",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -101,9 +99,7 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("author", response.Author.ID),
 	)
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	api.WriteSuccess(w, http.StatusOK, "Snippet retrieved successfully", response)
 }
 
 // CreateSnippet creates a new snippet
@@ -117,13 +113,13 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to decode request body",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if userID == "" {
 		log.Error("no user ID in context")
-		http.Error(w, "Not authenticated", http.StatusUnauthorized)
+		api.WriteError(w, http.StatusUnauthorized, "Not authenticated")
 		return
 	}
 
@@ -145,13 +141,11 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 			zap.String("title", domainSnippet.Title),
 			zap.String("userId", domainSnippet.Author.ID),
 		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
 	s, _ := h.snippets.GetByID(r.Context(), domainSnippet.ID, userID)
-
 	response := dto.ToSnippetResponse(s)
 
 	log.Debug("created new snippet",
@@ -160,10 +154,8 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("author", response.Author.ID),
 	)
 
-	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Location", "/snippets/"+s.ID)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	api.WriteSuccess(w, http.StatusCreated, "Snippet created successfully", response)
 }
 
 // UpdateSnippet updates an existing snippet
@@ -182,7 +174,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to decode request body",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -191,7 +183,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to get snippet for update",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -200,7 +192,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 			zap.String("snippet_author", snippet.Author.ID),
 			zap.String("user_id", userID),
 		)
-		http.Error(w, "Only the author can update this snippet", http.StatusForbidden)
+		api.WriteError(w, http.StatusForbidden, "Only the author can update this snippet")
 		return
 	}
 
@@ -213,7 +205,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 			zap.String("title", snippet.Title),
 			zap.String("author", snippet.Author.ID),
 		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -224,9 +216,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("author", response.Author.ID),
 	)
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	api.WriteSuccess(w, http.StatusOK, "Snippet updated successfully", response)
 }
 
 // DeleteSnippet deletes a snippet
@@ -245,7 +235,7 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to get snippet",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
 	if snippet.Author.ID != userID {
@@ -253,7 +243,7 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 			zap.String("snippet_author", snippet.Author.ID),
 			zap.String("user_id", userID),
 		)
-		http.Error(w, "Only the author can delete this snippet", http.StatusForbidden)
+		api.WriteError(w, http.StatusForbidden, "Only the author can delete this snippet")
 		return
 	}
 
@@ -261,12 +251,12 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to delete snippet",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
 	log.Debug("deleted snippet")
-	w.WriteHeader(http.StatusNoContent)
+	api.WriteSuccess(w, http.StatusOK, "Snippet deleted successfully", nil)
 }
 
 // ToggleLikeSnippet toggles the like status of a snippet
@@ -290,7 +280,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		log.Error("invalid action",
 			zap.String("action", action),
 		)
-		http.Error(w, "Invalid action", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid action")
 		return
 	}
 
@@ -299,7 +289,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 			zap.Error(err),
 			zap.String("action", action),
 		)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -309,15 +299,14 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		log.Error("failed to get updated snippet",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	log.Info("toggled snippet like",
 		zap.String("action", action),
 	)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(dto.ToSnippetResponse(snippet))
+	api.WriteSuccess(w, http.StatusOK, "Snippet like toggled successfully", dto.ToSnippetResponse(snippet))
 }
 
 // ToggleSaveSnippet toggles the save status of a snippet
@@ -341,7 +330,7 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 		log.Error("invalid action",
 			zap.String("action", action),
 		)
-		http.Error(w, "Invalid action", http.StatusBadRequest)
+		api.WriteError(w, http.StatusBadRequest, "Invalid action")
 		return
 	}
 
@@ -350,7 +339,7 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 			zap.Error(err),
 			zap.String("action", action),
 		)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -360,13 +349,12 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 		log.Error("failed to get updated snippet",
 			zap.Error(err),
 		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		api.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	log.Debug("toggled snippet save",
 		zap.String("action", action),
 	)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(dto.ToSnippetResponse(snippet))
+	api.WriteSuccess(w, http.StatusOK, "Snippet save toggled successfully", dto.ToSnippetResponse(snippet))
 }
