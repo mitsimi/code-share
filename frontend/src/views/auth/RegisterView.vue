@@ -88,7 +88,6 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { passwordSchema } from '@/lib/password'
 import PasswordInput from '@/components/ui/password-input.vue'
@@ -116,22 +115,6 @@ const { handleSubmit } = useForm({
 })
 
 const onSubmit = handleSubmit(async (values) => {
-  try {
-    isLoading.value = true
-    const { ...registerData } = values
-    const response = await authService.register(registerData)
-    authStore.setAuth({
-      user: response.user,
-      token: response.token,
-      refreshToken: response.refreshToken,
-      expiresAt: response.expiresAt,
-    })
-    router.push('/snippets')
-  } catch (error) {
-    console.log(error)
-    toast.error(error instanceof Error ? error.message : 'Failed to create account')
-  } finally {
-    isLoading.value = false
-  }
+  toast.info('Registration is disabled for this demo.')
 })
 </script>

@@ -56,6 +56,11 @@ func (s *Storage) SeedSampleData(ctx context.Context) error {
 // SampleUsers contains predefined sample users
 var sampleUsers = []domain.UserCreation{
 	{
+		Username:     "demo",
+		Email:        "demo@example.com",
+		PasswordHash: "", // Will be set during seeding
+	},
+	{
 		Username:     "john_doe",
 		Email:        "john@example.com",
 		PasswordHash: "", // Will be set during seeding
