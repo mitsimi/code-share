@@ -68,7 +68,7 @@
         <!-- Right side - Action buttons -->
         <div class="flex items-center gap-2">
           <!-- Save/Bookmark button -->
-          <div @click.stop>
+          <div v-if="authStore.isAuthenticated()" @click.stop>
             <SaveButton :isSaved="snippet.isSaved" :snippetId="snippet.id" />
           </div>
 
@@ -97,6 +97,9 @@ import LikeButton from './LikeButton.vue'
 import SaveButton from './SaveButton.vue'
 import { toast } from 'vue-sonner'
 import { getLanguageExtension, getLanguageName } from '@/utils/languages'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 dayjs.extend(relativeTime)
 
