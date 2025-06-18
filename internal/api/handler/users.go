@@ -117,6 +117,7 @@ func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 		zap.String("user_id", userID),
 		zap.String("avatar_url", req.AvatarURL),
 	)
+
 	err := h.users.UpdateAvatar(r.Context(), userID, req.AvatarURL)
 	if err != nil {
 		api.WriteError(w, http.StatusInternalServerError, "Failed to update avatar")
@@ -159,7 +160,7 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.WriteSuccess(w, http.StatusOK, "User info updated successfully", updatedUser)
+	api.WriteSuccess(w, http.StatusOK, "User info updated successfully", dto.ToUserResponse(updatedUser))
 }
 
 // GetUserSnippets returns all snippets created by a user
@@ -189,7 +190,12 @@ func (h *UserHandler) GetUserSnippets(w http.ResponseWriter, r *http.Request) {
 		zap.Int("count", len(snippets)),
 	)
 
-	api.WriteSuccess(w, http.StatusOK, "User snippets retrieved successfully", snippets)
+	responses := make([]dto.SnippetResponse, len(snippets))
+	for i, snippet := range snippets {
+		responses[i] = dto.ToSnippetResponse(snippet)
+	}
+
+	api.WriteSuccess(w, http.StatusOK, "User snippets retrieved successfully", responses)
 }
 
 // GetUserLikedSnippets returns all snippets liked by a user
