@@ -49,7 +49,7 @@ import { ref } from 'vue'
 import { CheckCircle2Icon, CircleIcon } from 'lucide-vue-next'
 import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { passwordRequirements } from '@/utils/password'
+import { passwordRequirements } from '@/lib/password'
 
 defineProps<{
   label: string

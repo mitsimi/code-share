@@ -98,7 +98,7 @@ import {
 } from '@/components/ui/card'
 import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
-import { passwordSchema } from '@/utils/password'
+import { passwordSchema } from '@/lib/password'
 import PasswordInput from '@/components/ui/password-input.vue'
 
 const router = useRouter()
