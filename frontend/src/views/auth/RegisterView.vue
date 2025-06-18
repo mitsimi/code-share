@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-background flex min-h-[calc(100vh-4rem)] items-start justify-center p-4 pt-16">
+  <div class="bg-background flex min-h-[calc(100vh-4rem)] items-start justify-center p-4">
     <div class="w-full max-w-md space-y-6">
       <div class="space-y-2 text-center">
         <h1 class="text-3xl font-bold">Register</h1>
