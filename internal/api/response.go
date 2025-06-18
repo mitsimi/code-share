@@ -9,7 +9,7 @@ import (
 )
 
 // WriteSuccess writes a standardized success response.
-func WriteSuccess(w http.ResponseWriter, statusCode int, message string, data interface{}) {
+func WriteSuccess(w http.ResponseWriter, statusCode int, message string, data any) {
 	resp := dto.APIResponse{
 		StatusCode: statusCode,
 		Message:    message,
