@@ -2,7 +2,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { type Snippet } from '@/types'
 import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
-import { useFetch } from '@/composables/useCustomFetch'
+import { snippetsService } from '@/services/snippets'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import SnippetGrid from './_components/SnippetGrid.vue'
@@ -13,50 +13,18 @@ const authStore = useAuthStore()
 const showModal = ref(false)
 const queryClient = useQueryClient()
 
-const getSnippets = async (): Promise<Snippet[]> => {
-  console.log('Fetching snippets...')
-  const { data, error } = await useFetch<Snippet[]>('/snippets', {
-    timeout: 1000,
-  }).json()
-
-  if (error.value) {
-    throw new Error('Failed to fetch snippets')
-  }
-
-  return data.value.data || []
-}
-
 const { isPending, isError, data, error, refetch } = useQuery({
   queryKey: ['snippets'],
-  queryFn: getSnippets,
+  queryFn: snippetsService.getSnippets,
   staleTime: 1000 * 60, // Consider data fresh for 1 minute
 })
 
-// Show toast notification when an error occurs
-/* watch(isError, (newIsError) => {
-  if (newIsError) {
-    toast.error('Failed to load snippets. Please try again.')
-  }
-}) */
-
-const createSnippet = async (formData: { title: string; code: string }): Promise<Snippet> => {
-  const { data, error } = await useFetch<Snippet>('/snippets', {
-    method: 'POST',
-    body: JSON.stringify({
+const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
+  mutationFn: (formData: { title: string; code: string }) =>
+    snippetsService.createSnippet({
       title: formData.title,
       content: formData.code,
     }),
-  }).json()
-
-  if (error.value) {
-    throw new Error(error.value.message || 'Failed to create snippet')
-  }
-
-  return data.value.data
-}
-
-const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
-  mutationFn: createSnippet,
   onSuccess: (newSnippet) => {
     // Update the cache with the new snippet
     queryClient.setQueryData(['snippets'], (oldData: Snippet[] | undefined) => {
@@ -69,8 +37,10 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
       description: `"${newSnippet.title}" has been added successfully!`,
     })
   },
-  onError: () => {
-    toast.error('Failed to create snippet. Please try again.')
+  onError: (error) => {
+    toast.error(
+      error instanceof Error ? error.message : 'Failed to create snippet. Please try again.',
+    )
   },
 })
 </script>

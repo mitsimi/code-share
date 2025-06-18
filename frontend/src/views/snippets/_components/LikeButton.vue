@@ -31,7 +31,7 @@ import { type Snippet } from '@/types'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useFetch } from '@/composables/useCustomFetch'
+import { snippetsService } from '@/services/snippets'
 import { toast } from 'vue-sonner'
 
 const authStore = useAuthStore()
@@ -53,32 +53,8 @@ const { mutate: updateLike } = useMutation<
   mutationKey: ['likeMutation', props.snippetId],
   mutationFn: async ({ snippetId, action }) => {
     isLoading.value = true
-    console.log(`Starting ${action} mutation for snippet:`, snippetId)
     try {
-      const { data, error } = await useFetch<Snippet>(
-        `/snippets/${snippetId}/like?action=${action}`,
-        {
-          method: 'PATCH',
-        },
-      ).json()
-
-      console.log('Response data:', data.value)
-      console.log('Response error:', error.value)
-
-      if (error.value) {
-        console.error('Error in mutation:', error.value)
-        throw new Error(`Failed to ${action}: ${error.value.message || 'Unknown error'}`)
-      }
-
-      if (!data.value) {
-        console.error('No data received from server')
-        throw new Error('No data received from server')
-      }
-
-      return data.value
-    } catch (err) {
-      console.error('Caught error in mutation:', err)
-      throw err
+      return await snippetsService.toggleLike(snippetId, action)
     } finally {
       isLoading.value = false
     }

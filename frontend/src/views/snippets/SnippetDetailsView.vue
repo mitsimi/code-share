@@ -1,5 +1,5 @@
 <template>
-  <main class="mx-auto my-12 max-w-7xl px-4 lg:w-fit lg:min-w-4xl">
+  <main class="mx-auto max-w-7xl px-4 lg:w-fit lg:min-w-4xl">
     <!-- Back button -->
     <Button variant="outline" @click="router.back()">
       <ArrowLeftIcon class="size-5" />
@@ -63,9 +63,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Snippet } from '@/types'
 import { useQuery } from '@tanstack/vue-query'
-import { useFetch } from '@/composables/useCustomFetch'
+import { snippetsService } from '@/services/snippets'
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LikeButton from './_components/LikeButton.vue'
@@ -78,23 +77,6 @@ const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
-const getSnippet = async (): Promise<Snippet> => {
-  const snippetId = route.params.snippetId as string
-  const { data, error } = await useFetch<Snippet>(`/snippets/${snippetId}`, {
-    timeout: 1000,
-  }).json()
-
-  if (error.value) {
-    throw new Error('Failed to fetch snippet')
-  }
-
-  if (!data.value.data) {
-    throw new Error('Snippet not found')
-  }
-
-  return data.value.data
-}
-
 const {
   data: snippet,
   isPending,
@@ -102,7 +84,7 @@ const {
   error,
 } = useQuery({
   queryKey: ['snippet', route.params.snippetId],
-  queryFn: getSnippet,
+  queryFn: () => snippetsService.getSnippet(route.params.snippetId as string),
 })
 
 onMounted(() => {

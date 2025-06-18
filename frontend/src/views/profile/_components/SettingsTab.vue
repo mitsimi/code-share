@@ -126,14 +126,14 @@ import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
-import { useFetch } from '@/composables/useCustomFetch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { passwordSchema } from '@/utils/password'
+import { passwordSchema } from '@/lib/password'
 import PasswordInput from '@/components/ui/password-input.vue'
 import { useMutation } from '@tanstack/vue-query'
+import { usersService } from '@/services/users'
 
 const authStore = useAuthStore()
 const avatarUrl = ref(authStore.user?.avatar || '')
@@ -185,17 +185,7 @@ const { handleSubmit, values } = useForm({
 // Avatar update mutation
 const { mutate: updateAvatarMutation, isPending: isUpdatingAvatar } = useMutation({
   mutationKey: ['updateAvatar'],
-  mutationFn: async (avatarUrl: string) => {
-    const { data, error } = await useFetch(`/users/me/avatar`, {
-      method: 'PATCH',
-      body: JSON.stringify({ avatarUrl }),
-    }).json()
-
-    if (error.value) throw new Error('Failed to update avatar')
-    if (!data.value.data) throw new Error('No data received from server')
-
-    return data.value.data.avatar
-  },
+  mutationFn: usersService.updateAvatar,
   onSuccess: (newAvatarUrl) => {
     authStore.setUser({
       ...authStore.user!,
@@ -221,28 +211,14 @@ const { mutate: updateProfileMutation, isPending: isUpdatingProfile } = useMutat
     const { currentPassword, newPassword, ...profileData } = values
 
     // Update profile
-    const { data, error } = await useFetch(`/users/${authStore.user?.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(profileData),
-    }).json()
-
-    if (error.value) throw new Error('Failed to update profile')
-    if (!data.value) throw new Error('No data received from server')
+    const updatedUser = await usersService.updateProfile(profileData)
 
     // Update password if provided
     if (currentPassword && newPassword) {
-      const { error: passwordError } = await useFetch(`/users/${authStore.user?.id}/password`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-        }),
-      }).json()
-
-      if (passwordError.value) throw new Error('Failed to update password')
+      await usersService.updatePassword({ currentPassword, newPassword })
     }
 
-    return data.value
+    return updatedUser
   },
   onSuccess: (data) => {
     authStore.setUser({

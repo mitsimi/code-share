@@ -1,6 +1,8 @@
 import { createFetch } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import type { Ref } from 'vue'
+import type { APIResponse } from '@/types'
 
 // Create a base fetch instance without auth handling
 const baseFetch = createFetch({
@@ -13,12 +15,23 @@ const baseFetch = createFetch({
   baseUrl: import.meta.env.VITE_API_URL || '/api',
 })
 
-// Create a composable that adds auth handling
+// Type-safe fetch response for successful requests
+export interface TypedFetchResponse<T> {
+  data: Ref<APIResponse<T> | null>
+  error: Ref<APIResponse | null>
+  execute: () => Promise<void>
+  canAbort: Ref<boolean>
+  abort: () => void
+  isFetching: Ref<boolean>
+  isFinished: Ref<boolean>
+}
+
+// Create a composable that adds auth handling and type safety
 export function useCustomFetch() {
   const authStore = useAuthStore()
   const router = useRouter()
 
-  return createFetch({
+  const createTypedFetch = createFetch({
     fetchOptions: {
       mode: 'cors',
       headers: {
@@ -27,11 +40,12 @@ export function useCustomFetch() {
     },
     baseUrl: import.meta.env.VITE_API_URL || '/api',
     options: {
+      immediate: true, // Auto-execute the fetch
       async beforeFetch({ options }) {
         // Ensure headers object exists
         options.headers = options.headers || {}
 
-        // We include the JWT token with every request
+        // Include the JWT token with every request
         if (authStore.token) {
           options.headers = {
             ...options.headers,
@@ -42,18 +56,31 @@ export function useCustomFetch() {
         return { options }
       },
       async onFetchError({ data, error, response }) {
-        // Try to parse as JSON first, if that fails, use the text response
-        let errorMessage = error
+        // Parse the error response as APIResponse
+        let apiError: APIResponse | null = null
+
         if (response) {
           try {
-            const jsonError = await response.text()
-            errorMessage = jsonError
+            const errorText = await response.text()
+            apiError = JSON.parse(errorText) as APIResponse
           } catch {
-            // If parsing fails, use the original error
-            errorMessage = error
+            // If parsing fails, create a basic APIResponse structure
+            apiError = {
+              statusCode: response.status,
+              message: response.statusText || 'An error occurred',
+              error: error || 'Unknown error',
+            }
+          }
+        } else {
+          // Network error or other fetch error
+          apiError = {
+            statusCode: 0,
+            message: 'Network error',
+            error: error || 'Failed to connect to server',
           }
         }
-        return { data, error: errorMessage }
+
+        return { data, error: apiError }
       },
       async afterFetch(ctx) {
         const { data, response } = ctx
@@ -72,6 +99,25 @@ export function useCustomFetch() {
       },
     },
   })
+
+  // Return a typed version of the fetch function
+  return function typedFetch<T = any>(url: string, options?: any) {
+    const response = createTypedFetch(url, options)
+
+    // Return with proper typing
+    return {
+      ...response,
+      // Override the json method to return properly typed response
+      json: () => {
+        const jsonResponse = response.json()
+        return {
+          ...jsonResponse,
+          data: jsonResponse.data as Ref<APIResponse<T> | null>,
+          error: jsonResponse.error as Ref<APIResponse | null>,
+        } as TypedFetchResponse<T>
+      },
+    }
+  }
 }
 
 // Export a default instance for backward compatibility
