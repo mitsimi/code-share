@@ -186,7 +186,7 @@ const { handleSubmit, values } = useForm({
 const { mutate: updateAvatarMutation, isPending: isUpdatingAvatar } = useMutation({
   mutationKey: ['updateAvatar'],
   mutationFn: async (avatarUrl: string) => {
-    const { data, error } = await useFetch(`/users/${authStore.user?.id}/avatar`, {
+    const { data, error } = await useFetch(`/users/me/avatar`, {
       method: 'PATCH',
       body: JSON.stringify({ avatarUrl }),
     }).json()

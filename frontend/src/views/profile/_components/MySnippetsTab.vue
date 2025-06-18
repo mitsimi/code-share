@@ -19,9 +19,7 @@ const authStore = useAuthStore()
 const { data: mySnippets, isLoading: isLoadingMySnippets } = useQuery({
   queryKey: ['my-snippets'],
   queryFn: async () => {
-    const { data, error } = await useFetch<Snippet[]>(
-      `/users/${authStore.user?.id}/snippets`,
-    ).json()
+    const { data, error } = await useFetch<Snippet[]>(`/users/me/snippets`).json()
     if (error.value) throw new Error('Failed to fetch your snippets')
     return data.value.data || []
   },

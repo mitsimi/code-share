@@ -19,7 +19,7 @@ const authStore = useAuthStore()
 const { data: likedSnippets, isLoading: isLoadingLiked } = useQuery({
   queryKey: ['liked-snippets'],
   queryFn: async () => {
-    const { data, error } = await useFetch<Snippet[]>(`/users/${authStore.user?.id}/liked`).json()
+    const { data, error } = await useFetch<Snippet[]>(`/users/me/liked`).json()
     if (error.value) throw new Error('Failed to fetch liked snippets')
     return data.value.data || []
   },

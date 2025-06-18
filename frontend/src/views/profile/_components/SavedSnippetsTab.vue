@@ -19,7 +19,7 @@ const authStore = useAuthStore()
 const { data: savedSnippets, isLoading: isLoadingSaved } = useQuery({
   queryKey: ['saved-snippets'],
   queryFn: async () => {
-    const { data, error } = await useFetch<Snippet[]>(`/users/${authStore.user?.id}/saved`).json()
+    const { data, error } = await useFetch<Snippet[]>(`/users/me/saved`).json()
     if (error.value) throw new Error('Failed to fetch saved snippets')
     console.log('Fetched saved snippets:', data.value)
     return data.value.data || []
