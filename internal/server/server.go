@@ -67,134 +67,6 @@ func New(
 	return s
 }
 
-// setupMiddleware configures the server middleware
-func (s *Server) setupMiddleware() {
-	// Add request ID to context
-	s.router.Use(middleware.RequestID)
-
-	// Use our structured logger
-	s.router.Use(logger.RequestLogger)
-
-	// Other middleware
-	s.router.Use(middleware.Recoverer)
-	s.router.Use(middleware.RealIP)
-	s.router.Use(middleware.CleanPath)
-	s.router.Use(middleware.GetHead)
-}
-
-// setupRoutes configures the server routes
-func (s *Server) setupRoutes() {
-	// Setup API routes
-	s.router.Route("/api", s.setupAPIRoutes)
-
-	// Only serve static files if SERVE_STATIC is set to "true"
-	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {
-		// Create a file server handler for the embedded dist directory
-		fs := http.FileServer(http.FS(frontend.DistDirFS))
-
-		// Handle static assets
-		s.router.HandleFunc("/assets/*", func(w http.ResponseWriter, r *http.Request) {
-			path := r.URL.Path
-			ext := filepath.Ext(path)
-			mimeType := mime.TypeByExtension(ext)
-
-			if mimeType != "" {
-				w.Header().Set("Content-Type", mimeType)
-			}
-			fs.ServeHTTP(w, r)
-		})
-
-		// Handle public files
-		publicFiles := []string{
-			"favicon.ico",
-			"favicon.svg",
-			"favicon-96x96.png",
-			"apple-touch-icon.png",
-			"site.webmanifest",
-			"web-app-manifest-192x192.png",
-			"web-app-manifest-512x512.png",
-		}
-
-		for _, filename := range publicFiles {
-			filename := filename // capture loop variable
-			s.router.HandleFunc("/"+filename, func(w http.ResponseWriter, r *http.Request) {
-				file, err := frontend.DistDirFS.Open(filename)
-				if err != nil {
-					s.logger.Error("failed to load public file",
-						zap.Error(err),
-						zap.String("filename", filename),
-						zap.String("request_id", middleware.GetReqID(r.Context())),
-					)
-					http.Error(w, "File not found", http.StatusNotFound)
-					return
-				}
-				defer file.Close()
-
-				// Set appropriate content type
-				ext := filepath.Ext(filename)
-				mimeType := mime.TypeByExtension(ext)
-				if mimeType != "" {
-					w.Header().Set("Content-Type", mimeType)
-				}
-
-				// For manifest files, set specific content type
-				if filename == "site.webmanifest" {
-					w.Header().Set("Content-Type", "application/manifest+json")
-				}
-
-				http.ServeContent(w, r, filename, time.Now(), file.(io.ReadSeeker))
-			})
-		}
-		// Handle all other routes by serving index.html
-		s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-			indexFile, err := frontend.DistDirFS.Open("index.html")
-			if err != nil {
-				s.logger.Error("failed to load index.html",
-					zap.Error(err),
-					zap.String("request_id", middleware.GetReqID(r.Context())),
-				)
-				http.Error(w, "Error loading index.html", http.StatusInternalServerError)
-				return
-			}
-			defer indexFile.Close()
-
-			http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
-		})
-	}
-}
-
-// startSessionCleanup starts a background goroutine to periodically clean up expired sessions
-func (s *Server) startSessionCleanup() {
-	go func() {
-		ticker := time.NewTicker(1 * time.Hour) // Run cleanup every hour
-		defer ticker.Stop()
-
-		for range ticker.C {
-			if err := s.sessions.DeleteExpired(context.Background()); err != nil {
-				s.logger.Error("Failed to delete expired sessions", zap.Error(err))
-			} else {
-				s.logger.Debug("Successfully cleaned up expired sessions")
-			}
-		}
-	}()
-}
-
-// startViewCleanup starts a background goroutine to periodically clean up old view tracking records
-func (s *Server) startViewCleanup() {
-	go func() {
-		ticker := time.NewTicker(24 * time.Hour) // Run cleanup daily
-		defer ticker.Stop()
-
-		for range ticker.C {
-			if err := s.viewTracker.CleanupOldViews(context.Background()); err != nil {
-				s.logger.Error("Failed to clean up old view tracking records", zap.Error(err))
-			} else {
-				s.logger.Debug("Successfully cleaned up old view tracking records")
-			}
-		}
-	}()
-}
-
 // Start starts the server
 func (s *Server) Start(port, env string) error {
 	s.httpServer = &http.Server{
@@ -232,4 +104,68 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 	s.logger.Info("server shutdown completed successfully")
 	return nil
+}
+
+// setupMiddleware configures the server middleware
+func (s *Server) setupMiddleware() {
+	// Add request ID to context
+	s.router.Use(middleware.RequestID)
+
+	// Use our structured logger
+	s.router.Use(logger.RequestLogger)
+
+	// Other middleware
+	s.router.Use(middleware.Recoverer)
+	s.router.Use(middleware.RealIP)
+	s.router.Use(middleware.CleanPath)
+	s.router.Use(middleware.GetHead)
+}
+
+// setupRoutes configures the server routes
+func (s *Server) setupRoutes() {
+	// Setup API routes
+	s.router.Route("/api", s.setupAPIRoutes)
+
+	// Only serve static files if SERVE_STATIC is set to "true"
+	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {
+		s.setupStaticRoutes()
+	}
+}
+
+func (s *Server) setupStaticRoutes() {
+	// Create a file server handler for the embedded dist directory
+	fs := http.FileServer(http.FS(frontend.DistDirFS))
+
+	// Handle static assets
+	s.router.HandleFunc("/assets/*", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		ext := filepath.Ext(path)
+		mimeType := mime.TypeByExtension(ext)
+
+		if mimeType != "" {
+			w.Header().Set("Content-Type", mimeType)
+		}
+		fs.ServeHTTP(w, r)
+	})
+
+	// Handle favicon
+	s.router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	})
+
+	// Handle all other routes by serving index.html
+	s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+		indexFile, err := frontend.DistDirFS.Open("index.html")
+		if err != nil {
+			s.logger.Error("failed to load index.html",
+				zap.Error(err),
+				zap.String("request_id", middleware.GetReqID(r.Context())),
+			)
+			http.Error(w, "Error loading index.html", http.StatusInternalServerError)
+			return
+		}
+		defer indexFile.Close()
+
+		http.ServeContent(w, r, "index.html", time.Now(), indexFile.(io.ReadSeeker))
+	})
 }
