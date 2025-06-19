@@ -2,15 +2,23 @@ type: http_request
 model: http_request
 id: rq_y2cDWqrHHz
 createdAt: 2025-05-26T19:58:26.474100
-updatedAt: 2025-05-26T19:58:33.773805
+updatedAt: 2025-06-18T15:29:32.011759
 workspaceId: wk_gJPTxkB9Tw
 folderId: fl_dMgTuuDT2c
 authentication: {}
 authenticationType: null
-body: {}
-bodyType: null
+body:
+  text: |-
+    {
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTU3ZmNlMC1iZjlhLTRlMjYtOTgzNy1jYzAxNGFkNWNlYTkiLCJpc19yZWZyZXNoIjp0cnVlLCJSZWdpc3RlcmVkQ2xhaW1zIjp7ImV4cCI6MTc1MDg2NTIyMywibmJmIjoxNzUwMjYwNDIzLCJpYXQiOjE3NTAyNjA0MjMsImp0aSI6ImRmZjljOWEzOTk1ZGNhMmFkZTYxYTI0OWRjNjJlY2ZlIn19.tEZPnMoY2pqAZVPgS3q6ms8SLz7HlIWPc41vU6xKieo"
+    }
+bodyType: application/json
 description: ''
-headers: []
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: hG2zbIT8Kz
 method: POST
 name: Refresh
 sortPriority: 2000.001
