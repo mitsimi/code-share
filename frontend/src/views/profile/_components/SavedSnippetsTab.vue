@@ -1,8 +1,11 @@
 <template>
-  <SnippetsList
+  <SnippetGrid
     :snippets="snippetsToShow"
     :is-loading="isLoadingSaved"
-    empty-message="You haven't saved any snippets yet."
+    :is-empty="!isLoadingSaved && snippetsToShow.length === 0"
+    empty-title="No saved snippets yet"
+    empty-message="Save interesting code snippets to build your personal collection."
+    :show-create-button="false"
   />
 </template>
 
@@ -11,7 +14,7 @@ import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { usersService } from '@/services/users'
 import { useAuthStore } from '@/stores/auth'
-import SnippetsList from './SnippetsList.vue'
+import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
 
 const authStore = useAuthStore()
 

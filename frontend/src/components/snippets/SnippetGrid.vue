@@ -61,9 +61,7 @@
     </div>
     <h3 class="text-foreground mb-3 text-2xl font-bold">Something went wrong</h3>
     <p class="text-muted-foreground mb-6 max-w-md">
-      {{
-        errorMessage || 'Failed to load code snippets. Please check your connection and try again.'
-      }}
+      {{ errorMessage }}
     </p>
     <Button @click="$emit('retry')" variant="outline" size="lg" class="gap-2">
       <RotateCcw class="h-4 w-4" />
@@ -77,13 +75,15 @@
       <FileCode class="text-muted-foreground h-16 w-16" />
     </div>
 
-    <h3 class="text-foreground mb-3 text-2xl font-bold">No code snippets found</h3>
+    <h3 class="text-foreground mb-3 text-2xl font-bold">
+      {{ emptyTitle }}
+    </h3>
 
     <p class="text-muted-foreground mb-6 max-w-md">
-      Be the first to share your code snippet with the community! Start building something amazing.
+      {{ emptyMessage }}
     </p>
 
-    <Button @click="$emit('create-snippet')" size="lg" class="gap-2">
+    <Button v-if="showCreateButton" @click="$emit('create-snippet')" size="lg" class="gap-2">
       <Plus class="h-4 w-4" />
       Share Your First Snippet
     </Button>
@@ -92,8 +92,8 @@
   <!-- Grid with Code Snippets -->
   <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     <div
-      v-for="(card, index) in cards"
-      :key="card.id"
+      v-for="(snippet, index) in snippets"
+      :key="snippet.id"
       class="cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:rotate-0"
       :class="{
         'rotate-1': index % 3 === 0,
@@ -101,7 +101,7 @@
         'rotate-0': index % 3 === 2,
       }"
     >
-      <SnippetCard :snippet="card" @click="handleCardClick(card)" />
+      <SnippetCard :snippet="snippet" @click="handleCardClick(snippet)" />
     </div>
   </div>
 </template>
@@ -113,13 +113,25 @@ import { Button } from '@/components/ui/button'
 import { AlertTriangle, RotateCcw, FileCode, Plus } from 'lucide-vue-next'
 import type { Snippet } from '@/types'
 
-defineProps<{
-  cards: Snippet[]
-  isLoading?: boolean
-  isEmpty?: boolean
-  isError?: boolean
-  errorMessage?: string
-}>()
+withDefaults(
+  defineProps<{
+    snippets: Snippet[]
+    isLoading?: boolean
+    isEmpty?: boolean
+    isError?: boolean
+    errorMessage?: string
+    emptyTitle?: string
+    emptyMessage?: string
+    showCreateButton?: boolean
+  }>(),
+  {
+    emptyTitle: 'No code snippets found',
+    emptyMessage:
+      'Be the first to share your code snippet with the community! Start building something amazing.',
+    errorMessage: 'Failed to load code snippets. Please check your connection and try again.',
+    showCreateButton: true,
+  },
+)
 
 defineEmits<{
   (e: 'retry'): void
@@ -128,7 +140,7 @@ defineEmits<{
 
 const router = useRouter()
 
-const handleCardClick = (card: Snippet) => {
-  router.push({ name: 'snippet-details', params: { snippetId: card.id } })
+const handleCardClick = (snippet: Snippet) => {
+  router.push({ name: 'snippet-details', params: { snippetId: snippet.id } })
 }
 </script>

@@ -47,7 +47,7 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
 <template>
   <main class="container mx-auto max-w-7xl px-8">
     <SnippetGrid
-      :cards="data || []"
+      :snippets="data || []"
       :is-loading="isPending"
       :is-empty="!isPending && (!data || data.length === 0)"
       :is-error="isError"

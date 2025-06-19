@@ -1,8 +1,11 @@
 <template>
-  <SnippetsList
+  <SnippetGrid
     :snippets="snippetsToShow"
     :is-loading="isLoadingLiked"
-    empty-message="You haven't liked any snippets yet."
+    :is-empty="!isLoadingLiked && snippetsToShow.length === 0"
+    empty-title="No liked snippets yet"
+    empty-message="When you like code snippets, they will appear here for easy access."
+    :show-create-button="false"
   />
 </template>
 
@@ -10,10 +13,7 @@
 import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { usersService } from '@/services/users'
-import { useAuthStore } from '@/stores/auth'
-import SnippetsList from './SnippetsList.vue'
-
-const authStore = useAuthStore()
+import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
 
 // Fetch liked snippets
 const { data: likedSnippets, isLoading: isLoadingLiked } = useQuery({

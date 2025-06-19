@@ -259,7 +259,6 @@ import {
   EditIcon,
 } from 'lucide-vue-next'
 import UserAvatar from '@/components/UserAvatar.vue'
-import { useAuthStore } from '@/stores/auth'
 import { getLanguageName, getLanguageExtension } from '@/lib/languages'
 import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
 import { toast } from 'vue-sonner'
@@ -270,7 +269,6 @@ import EditSnippetModal from './_components/EditSnippetModal.vue'
 
 dayjs.extend(relativeTime)
 
-const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -296,7 +294,7 @@ const { mutate: deleteSnippet, isPending: isDeleting } = useMutation({
     queryClient.invalidateQueries({ queryKey: ['snippets'] })
     queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
     // Navigate back
-    router.push('/snippets')
+    router.go(-1)
   },
   onError: (error) => {
     toast.error(error.message || 'Failed to delete snippet')

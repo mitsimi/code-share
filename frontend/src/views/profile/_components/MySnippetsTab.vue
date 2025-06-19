@@ -1,8 +1,8 @@
 <template>
-  <SnippetsList
+  <SnippetGrid
     :snippets="snippetsToShow"
     :is-loading="isLoadingMySnippets"
-    empty-message="You haven't created any snippets yet."
+    :is-empty="!isLoadingMySnippets && snippetsToShow.length === 0"
   />
 </template>
 
@@ -10,10 +10,7 @@
 import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { usersService } from '@/services/users'
-import { useAuthStore } from '@/stores/auth'
-import SnippetsList from './SnippetsList.vue'
-
-const authStore = useAuthStore()
+import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
 
 // Fetch user's snippets
 const { data: mySnippets, isLoading: isLoadingMySnippets } = useQuery({
