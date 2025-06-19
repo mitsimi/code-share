@@ -12,6 +12,7 @@ type Snippet struct {
 	Author    *User
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Views     int
 	Likes     int
 	IsLiked   bool
 	IsSaved   bool

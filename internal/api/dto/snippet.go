@@ -28,6 +28,7 @@ type SnippetResponse struct {
 	Author    UserResponse `json:"author"`
 	CreatedAt time.Time    `json:"createdAt"`
 	UpdatedAt time.Time    `json:"updatedAt"`
+	Views     int          `json:"views"`
 	Likes     int          `json:"likes"`
 	IsLiked   bool         `json:"isLiked"`
 	IsSaved   bool         `json:"isSaved"`
@@ -43,6 +44,7 @@ func ToSnippetResponse(snippet *domain.Snippet) SnippetResponse {
 		Author:    ToUserResponse(snippet.Author),
 		CreatedAt: snippet.CreatedAt,
 		UpdatedAt: snippet.UpdatedAt,
+		Views:     snippet.Views,
 		Likes:     snippet.Likes,
 		IsLiked:   snippet.IsLiked,
 		IsSaved:   snippet.IsSaved,

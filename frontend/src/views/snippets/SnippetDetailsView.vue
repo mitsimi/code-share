@@ -125,7 +125,7 @@
                   </div>
                   <div class="flex items-center gap-1">
                     <EyeIcon class="h-4 w-4" />
-                    <span>{{ Math.floor(Math.random() * 100) + 20 }} views</span>
+                    <span>{{ snippet.views }} {{ snippet.views === 1 ? 'view' : 'views' }}</span>
                   </div>
                 </div>
               </div>

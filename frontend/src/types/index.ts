@@ -4,6 +4,7 @@ export interface Snippet {
   content: string
   language: string
   author: User
+  views: number
   likes: number
   isLiked: boolean
   isSaved: boolean

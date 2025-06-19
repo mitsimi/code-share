@@ -69,3 +69,8 @@ RETURNING *;
 -- name: DeleteSnippet :exec
 DELETE FROM snippets
 WHERE id = ?;
+
+-- name: IncrementViews :exec
+UPDATE snippets
+SET views = views + 1
+WHERE id = @snippet_id;
