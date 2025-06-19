@@ -9,7 +9,7 @@
         : 'text-muted-foreground border-secondary-foreground hover:bg-secondary/10',
     ]"
   >
-    <span>{{ likes }}</span>
+    <span v-if="!hideCount">{{ likes }}</span>
     <template v-if="isLoading">
       <LoaderCircleIcon class="size-4 animate-spin" />
     </template>
@@ -37,11 +37,17 @@ import { toast } from 'vue-sonner'
 const authStore = useAuthStore()
 const queryClient = useQueryClient()
 
-const props = defineProps<{
-  snippetId: string
-  likes: number
-  isLiked: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    snippetId: string
+    likes: number
+    isLiked: boolean
+    hideCount?: boolean
+  }>(),
+  {
+    hideCount: false,
+  },
+)
 
 const isLoading = ref(false)
 
