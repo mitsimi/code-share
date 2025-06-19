@@ -10,7 +10,7 @@
       </div>
 
       <!-- Loading state -->
-      <div v-if="isPending" class="grid gap-8 lg:grid-cols-[30%_70%]">
+      <div v-if="isPending" class="space-y-8 md:grid md:grid-cols-[30%_70%] md:space-x-8">
         <!-- Left column skeleton -->
         <Card class="p-8">
           <div class="space-y-6">
@@ -137,29 +137,57 @@
                 <!--h3 class="text-foreground text-sm font-medium">Actions</h3-->
 
                 <!-- Save and Like buttons -->
-                <div v-if="authStore.isAuthenticated()" class="flex gap-2">
-                  <SaveButton
-                    variant="outline"
-                    size="sm"
-                    class="flex-1"
-                    :isSaved="snippet.isSaved"
-                    :snippetId="snippet.id"
-                  />
-                  <LikeButton
-                    variant="outline"
-                    size="sm"
-                    class="flex-1"
-                    :likes="snippet.likes"
-                    :isLiked="snippet.isLiked"
-                    :snippetId="snippet.id"
-                    :hideCount="true"
-                  />
-                </div>
+                <Authenticated>
+                  <div class="grid grid-cols-2 gap-2">
+                    <SaveButton
+                      variant="outline"
+                      size="sm"
+                      class="flex-1"
+                      :isSaved="snippet.isSaved"
+                      :snippetId="snippet.id"
+                    />
+                    <LikeButton
+                      variant="outline"
+                      size="sm"
+                      class="flex-1"
+                      :likes="snippet.likes"
+                      :isLiked="snippet.isLiked"
+                      :snippetId="snippet.id"
+                      :hideCount="true"
+                    />
+
+                    <!-- Author-only actions -->
+
+                    <IsAuthor :authorId="snippet.author.id">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        class="flex-1"
+                        @click="showEditModal = true"
+                      >
+                        <EditIcon class="size-4 shrink-0" />
+                        <span>Edit</span>
+                      </Button>
+                    </IsAuthor>
+                    <IsAuthor :authorId="snippet.author.id">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        class="flex-1"
+                        :disabled="isDeleting"
+                        @click="deleteSnippet()"
+                      >
+                        <Trash2Icon class="size-4 shrink-0" />
+                        <span>Delete</span>
+                      </Button>
+                    </IsAuthor>
+                  </div>
+                </Authenticated>
 
                 <!-- Share button -->
                 <Button variant="outline" size="sm" @click="shareSnippet" class="w-full">
-                  <ShareIcon class="mr-2 h-4 w-4" />
-                  Share
+                  <ShareIcon class="size-4 shrink-0" />
+                  <span class="ml-2 hidden sm:inline">Share</span>
                 </Button>
               </div>
             </div>
@@ -201,14 +229,24 @@
           </Card>
         </div>
       </div>
+
+      <!-- Edit Modal -->
+      <EditSnippetModal
+        v-if="snippet"
+        :show="showEditModal"
+        :is-loading="isUpdating"
+        :snippet="snippet"
+        @close="showEditModal = false"
+        @submit="updateSnippet"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeftIcon,
@@ -217,6 +255,8 @@ import {
   CopyIcon,
   ShareIcon,
   AlertCircleIcon,
+  Trash2Icon,
+  EditIcon,
 } from 'lucide-vue-next'
 import LikeButton from './_components/LikeButton.vue'
 import SaveButton from './_components/SaveButton.vue'
@@ -227,12 +267,15 @@ import { toast } from 'vue-sonner'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import CardContent from '@/components/ui/card/CardContent.vue'
+import EditSnippetModal from './_components/EditSnippetModal.vue'
 
 dayjs.extend(relativeTime)
 
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+
+const queryClient = useQueryClient()
 
 const {
   data: snippet,
@@ -242,6 +285,39 @@ const {
 } = useQuery({
   queryKey: ['snippet', route.params.snippetId],
   queryFn: () => snippetsService.getSnippet(route.params.snippetId as string),
+})
+
+// Delete mutation
+const { mutate: deleteSnippet, isPending: isDeleting } = useMutation({
+  mutationFn: () => snippetsService.deleteSnippet(route.params.snippetId as string),
+  onSuccess: () => {
+    toast.success('Snippet deleted successfully')
+    // Invalidate and remove queries
+    queryClient.removeQueries({ queryKey: ['snippet', route.params.snippetId] })
+    queryClient.invalidateQueries({ queryKey: ['snippets'] })
+    queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+    // Navigate back
+    router.push('/snippets')
+  },
+  onError: (error) => {
+    toast.error(error.message || 'Failed to delete snippet')
+  },
+})
+
+// Update mutation
+const { mutate: updateSnippet, isPending: isUpdating } = useMutation({
+  mutationFn: (formData: { title: string; content: string; language: string }) =>
+    snippetsService.updateSnippet(route.params.snippetId as string, formData),
+  onSuccess: (updatedSnippet) => {
+    toast.success('Snippet updated successfully')
+    // Update queries
+    queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
+    queryClient.invalidateQueries({ queryKey: ['snippets'] })
+    queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+  },
+  onError: (error) => {
+    toast.error(error.message || 'Failed to update snippet')
+  },
 })
 
 const copyToClipboard = async () => {
@@ -279,6 +355,8 @@ const shareSnippet = async () => {
     }
   }
 }
+
+const showEditModal = ref(false)
 
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'auto' })

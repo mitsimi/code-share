@@ -1,12 +1,12 @@
 <template>
   <Button
-    variant="ghost"
+    :variant="variant"
     @click.stop="authStore.isAuthenticated() && toggleSave()"
     :class="[
       { 'pointer-events-none': !authStore.isAuthenticated() },
       isSaved
         ? 'text-primary border-primary hover:bg-primary/10'
-        : 'text-muted-foreground border-secondary-foreground hover:bg-secondary/10',
+        : 'text-muted-foreground hover:bg-secondary/10',
     ]"
   >
     <template v-if="isLoading">
@@ -32,14 +32,21 @@ import { useAuthStore } from '@/stores/auth'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { toast } from 'vue-sonner'
+import type { ButtonProps } from '@/components/ui/button'
 
 const authStore = useAuthStore()
 const queryClient = useQueryClient()
 
-const props = defineProps<{
-  snippetId: string
-  isSaved: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    snippetId: string
+    isSaved: boolean
+    variant?: ButtonProps['variant']
+  }>(),
+  {
+    variant: 'ghost',
+  },
+)
 
 const isLoading = ref(false)
 

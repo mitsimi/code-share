@@ -1,12 +1,12 @@
 <template>
   <Button
-    variant="ghost"
+    :variant="variant"
     @click.stop="authStore.isAuthenticated() && toggleLike()"
     :class="[
       { 'pointer-events-none': !authStore.isAuthenticated() },
       isLiked
         ? 'text-primary border-primary hover:bg-primary/10'
-        : 'text-muted-foreground border-secondary-foreground hover:bg-secondary/10',
+        : 'text-muted-foreground hover:bg-secondary/10',
     ]"
   >
     <span v-if="!hideCount">{{ likes }}</span>
@@ -33,6 +33,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { toast } from 'vue-sonner'
+import type { Button, ButtonProps } from '@/components/ui/button'
 
 const authStore = useAuthStore()
 const queryClient = useQueryClient()
@@ -43,8 +44,10 @@ const props = withDefaults(
     likes: number
     isLiked: boolean
     hideCount?: boolean
+    variant?: ButtonProps['variant']
   }>(),
   {
+    variant: 'ghost',
     hideCount: false,
   },
 )

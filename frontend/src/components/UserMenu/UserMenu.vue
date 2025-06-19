@@ -24,8 +24,6 @@
 import { useAuthStore } from '@/stores/auth'
 import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import UserInfo from './UserMenu/UserInfo.vue'
-import MenuItems from './UserMenu/MenuItems.vue'
 
 const props = defineProps<{
   isMobile?: boolean
