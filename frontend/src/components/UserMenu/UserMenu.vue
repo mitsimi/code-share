@@ -3,12 +3,8 @@
     <!-- Desktop Version (Dropdown) -->
     <DropdownMenu v-if="!isMobile">
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <span>{{ authStore.user?.username }}</span>
-          <Avatar class="size-8">
-            <AvatarImage :src="authStore.user?.avatar || ''" />
-            <AvatarFallback>{{ authStore.user?.username[0].toUpperCase() }}</AvatarFallback>
-          </Avatar>
+        <Button variant="ghost">
+          <UserAvatar :user="authStore.user" class="flex-row-reverse gap-2" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent class="w-56" align="end">
@@ -26,15 +22,8 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import UserInfo from './UserMenu/UserInfo.vue'
-import MenuItems from './UserMenu/MenuItems.vue'
 
 const props = defineProps<{
   isMobile?: boolean

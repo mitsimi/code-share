@@ -2,7 +2,7 @@
   <div class="min-h-screen">
     <!-- Hero Section -->
     <section class="bg-background relative overflow-hidden">
-      <div class="container mx-auto px-4 pb-16 sm:py-16">
+      <div class="container mx-auto px-8 pb-16 sm:py-16">
         <div class="mx-auto max-w-4xl text-center">
           <div class="mb-8">
             <Badge variant="secondary" class="mb-4">

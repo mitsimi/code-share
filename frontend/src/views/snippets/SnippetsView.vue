@@ -5,7 +5,6 @@ import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import SnippetGrid from './_components/SnippetGrid.vue'
 import SnippetModal from './_components/SnippetModal.vue'
 
 const authStore = useAuthStore()
@@ -46,7 +45,7 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
 </script>
 
 <template>
-  <main class="mx-auto max-w-7xl px-4">
+  <main class="container mx-auto max-w-7xl px-8">
     <SnippetGrid
       :cards="data || []"
       :is-loading="isPending"
@@ -58,7 +57,9 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
     />
   </main>
 
-  <FloatingActionButton v-show="authStore.isAuthenticated()" @click="showModal = true" />
+  <Authenticated>
+    <FloatingActionButton @click="showModal = true" />
+  </Authenticated>
 
   <SnippetModal
     :show="showModal"

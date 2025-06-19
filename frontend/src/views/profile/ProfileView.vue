@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto max-w-4xl px-4">
+  <div class="container mx-auto max-w-7xl px-8">
     <div class="mb-8">
       <h1 class="text-3xl font-bold">Profile Settings</h1>
       <p class="text-muted-foreground mt-2">Manage your account settings and preferences</p>

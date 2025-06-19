@@ -49,19 +49,8 @@
         <!-- Left side - Tags and stats -->
         <div class="text-muted-foreground flex items-center gap-4 text-xs">
           <!-- Author info with avatar -->
-          <div class="mt-3 flex items-center gap-2">
-            <Avatar class="ring-0">
-              <AvatarImage :src="snippet.author.avatar" :alt="snippet.author" />
-              <AvatarFallback class="bg-primary text-primary-foreground">{{
-                snippet.author.username[0].toUpperCase()
-              }}</AvatarFallback>
-            </Avatar>
-            <div class="flex flex-col">
-              <span class="text-foreground text-sm font-medium">{{ snippet.author.username }}</span>
-              <span class="text-muted-foreground text-xs">
-                {{ dayjs(snippet.createdAt).fromNow() }}
-              </span>
-            </div>
+          <div class="mt-3">
+            <UserAvatar :user="snippet.author" :subtitle="dayjs(snippet.createdAt).fromNow()" />
           </div>
         </div>
 
@@ -95,7 +84,9 @@ import { CopyIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
 import SaveButton from './SaveButton.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { toast } from 'vue-sonner'
+import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
 import { getLanguageExtension, getLanguageName } from '@/lib/languages'
 import { useAuthStore } from '@/stores/auth'
 
@@ -122,10 +113,11 @@ const truncatedContent = computed(() => {
 
 const copyToClipboard = async () => {
   try {
-    await navigator.clipboard.writeText(props.snippet.content)
+    await copyTextToClipboard(props.snippet.content)
     toast.success('Code copied to clipboard!')
   } catch (err) {
     console.error('Failed to copy code:', err)
+    toast.error('Failed to copy code to clipboard')
   }
 }
 </script>

@@ -32,7 +32,7 @@ const buttonVariants = cva(
   },
 )
 
-interface Props {
+export interface Props {
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
   size?: NonNullable<Parameters<typeof buttonVariants>[0]>['size']
   as?: string

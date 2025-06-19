@@ -1,24 +1,23 @@
 <template>
   <Button
-    variant="ghost"
-    @click.stop="authStore.isAuthenticated() && toggleLike()"
+    :variant="variant"
+    @click.stop="authStore.isAuthenticated() && toggleSave()"
     :class="[
       { 'pointer-events-none': !authStore.isAuthenticated() },
-      isLiked
+      isSaved
         ? 'text-primary border-primary hover:bg-primary/10'
-        : 'text-muted-foreground border-secondary-foreground hover:bg-secondary/10',
+        : 'text-muted-foreground hover:bg-secondary/10',
     ]"
   >
-    <span>{{ likes }}</span>
     <template v-if="isLoading">
       <LoaderCircleIcon class="size-4 animate-spin" />
     </template>
     <template v-else>
-      <Heart
+      <BookmarkIcon
         class="size-4 transition-transform duration-200"
-        :class="{ 'scale-110': isLiked }"
-        :fill="isLiked ? 'currentColor' : 'none'"
-        :stroke="isLiked ? 'currentColor' : 'currentColor'"
+        :class="{ 'scale-110': isSaved }"
+        :fill="isSaved ? 'currentColor' : 'none'"
+        :stroke="isSaved ? 'currentColor' : 'currentColor'"
         stroke-width="2"
       />
     </template>
@@ -26,35 +25,41 @@
 </template>
 
 <script setup lang="ts">
-import { Heart, LoaderCircleIcon } from 'lucide-vue-next'
+import { BookmarkIcon, LoaderCircleIcon } from 'lucide-vue-next'
 import { type Snippet } from '@/types'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { toast } from 'vue-sonner'
+import type { ButtonProps } from '@/components/ui/button'
 
 const authStore = useAuthStore()
 const queryClient = useQueryClient()
 
-const props = defineProps<{
-  snippetId: string
-  likes: number
-  isLiked: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    snippetId: string
+    isSaved: boolean
+    variant?: ButtonProps['variant']
+  }>(),
+  {
+    variant: 'ghost',
+  },
+)
 
 const isLoading = ref(false)
 
-const { mutate: updateLike } = useMutation<
+const { mutate: updateSave } = useMutation<
   Snippet,
   Error,
-  { snippetId: string; action: 'like' | 'unlike' }
+  { snippetId: string; action: 'save' | 'unsave' }
 >({
-  mutationKey: ['likeMutation', props.snippetId],
+  mutationKey: ['saveMutation', props.snippetId],
   mutationFn: async ({ snippetId, action }) => {
     isLoading.value = true
     try {
-      return await snippetsService.toggleLike(snippetId, action)
+      return await snippetsService.toggleSave(snippetId, action)
     } finally {
       isLoading.value = false
     }
@@ -69,20 +74,20 @@ const { mutate: updateLike } = useMutation<
       return oldData.map((snippet) => (snippet.id === updatedSnippet.id ? updatedSnippet : snippet))
     })
 
-    // Invalidate liked snippets query to trigger a refetch
+    // Invalidate saved snippets query to trigger a refetch
+    queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-    queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
   },
   onError: (error) => {
-    console.error('Like mutation failed:', error)
+    console.error('Save mutation failed:', error)
     toast.error(error.message || 'Please try again')
   },
 })
 
-const toggleLike = () => {
+const toggleSave = () => {
   if (!props.snippetId) {
-    console.error('Cannot toggle like: snippetId is missing')
+    console.error('Cannot toggle save: snippetId is missing')
     return
   }
 
@@ -90,7 +95,7 @@ const toggleLike = () => {
     return
   }
 
-  const action = props.isLiked ? 'unlike' : 'like'
-  updateLike({ snippetId: props.snippetId, action })
+  const action = props.isSaved ? 'unsave' : 'save'
+  updateSave({ snippetId: props.snippetId, action })
 }
 </script>
