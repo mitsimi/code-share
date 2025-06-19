@@ -212,7 +212,7 @@
               <Button
                 variant="ghost"
                 size="sm"
-                @click="copyToClipboard"
+                @click="copySnippetToClipboard"
                 class="text-muted-foreground hover:text-foreground gap-2"
               >
                 <CopyIcon class="h-4 w-4" />
@@ -261,6 +261,7 @@ import {
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { getLanguageName, getLanguageExtension } from '@/lib/languages'
+import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
 import { toast } from 'vue-sonner'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -318,11 +319,11 @@ const { mutate: updateSnippet, isPending: isUpdating } = useMutation({
   },
 })
 
-const copyToClipboard = async () => {
+const copySnippetToClipboard = async () => {
   if (!snippet.value) return
 
   try {
-    await navigator.clipboard.writeText(snippet.value.content)
+    await copyTextToClipboard(snippet.value.content)
     toast.success('Code copied to clipboard!')
   } catch (err) {
     console.error('Failed to copy code:', err)
@@ -340,17 +341,24 @@ const shareSnippet = async () => {
         text: `Check out this code snippet: ${snippet.value?.title}`,
         url: url,
       })
-    } catch (err) {
-      console.log('Share cancelled')
+      return // Successfully shared, don't fall back
+    } catch (err: any) {
+      // Only fall back to clipboard if sharing is not supported
+      // Don't fall back if user just cancelled (AbortError)
+      if (err.name === 'AbortError') {
+        return // User cancelled, do nothing
+      }
+      console.log('Native share failed, falling back to clipboard')
     }
-  } else {
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.success('Link copied to clipboard!')
-    } catch (err) {
-      console.error('Failed to copy link:', err)
-      toast.error('Failed to copy link')
-    }
+  }
+
+  // Fallback: copy to clipboard
+  try {
+    await copyTextToClipboard(url)
+    toast.success('Link copied to clipboard!')
+  } catch (err) {
+    console.error('Failed to copy link:', err)
+    toast.error('Failed to copy link')
   }
 }
 
