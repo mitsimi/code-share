@@ -20,7 +20,6 @@
 <script setup lang="ts">
 import { LoaderCircleIcon } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import SnippetCard from '@/views/snippets/_components/SnippetCard.vue'
 import type { Snippet } from '@/types'
 
 const router = useRouter()
