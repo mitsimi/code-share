@@ -258,8 +258,6 @@ import {
   Trash2Icon,
   EditIcon,
 } from 'lucide-vue-next'
-import LikeButton from './_components/LikeButton.vue'
-import SaveButton from './_components/SaveButton.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { getLanguageName, getLanguageExtension } from '@/lib/languages'

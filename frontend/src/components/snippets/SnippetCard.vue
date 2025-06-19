@@ -86,6 +86,7 @@ import LikeButton from './LikeButton.vue'
 import SaveButton from './SaveButton.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { toast } from 'vue-sonner'
+import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
 import { getLanguageExtension, getLanguageName } from '@/lib/languages'
 import { useAuthStore } from '@/stores/auth'
 
@@ -112,10 +113,11 @@ const truncatedContent = computed(() => {
 
 const copyToClipboard = async () => {
   try {
-    await navigator.clipboard.writeText(props.snippet.content)
+    await copyTextToClipboard(props.snippet.content)
     toast.success('Code copied to clipboard!')
   } catch (err) {
     console.error('Failed to copy code:', err)
+    toast.error('Failed to copy code to clipboard')
   }
 }
 </script>

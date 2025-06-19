@@ -5,7 +5,6 @@ import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import SnippetGrid from './_components/SnippetGrid.vue'
 import SnippetModal from './_components/SnippetModal.vue'
 
 const authStore = useAuthStore()
