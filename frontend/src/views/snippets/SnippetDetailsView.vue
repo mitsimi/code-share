@@ -231,7 +231,7 @@
       </div>
 
       <!-- Edit Modal -->
-      <EditSnippetModal
+      <SnippetFormModal
         v-if="snippet"
         :show="showEditModal"
         :is-loading="isUpdating"
@@ -265,7 +265,7 @@ import { toast } from 'vue-sonner'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import CardContent from '@/components/ui/card/CardContent.vue'
-import EditSnippetModal from './_components/EditSnippetModal.vue'
+import SnippetFormModal from './_components/SnippetFormModal.vue'
 
 dayjs.extend(relativeTime)
 
@@ -303,8 +303,12 @@ const { mutate: deleteSnippet, isPending: isDeleting } = useMutation({
 
 // Update mutation
 const { mutate: updateSnippet, isPending: isUpdating } = useMutation({
-  mutationFn: (formData: { title: string; content: string; language: string }) =>
-    snippetsService.updateSnippet(route.params.snippetId as string, formData),
+  mutationFn: (formData: { title: string; content: string; language?: string }) =>
+    snippetsService.updateSnippet(route.params.snippetId as string, {
+      title: formData.title,
+      content: formData.content,
+      language: formData.language || snippet.value?.language || '',
+    }),
   onSuccess: (updatedSnippet) => {
     toast.success('Snippet updated successfully')
     // Update queries

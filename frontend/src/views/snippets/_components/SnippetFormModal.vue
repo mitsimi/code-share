@@ -2,9 +2,13 @@
   <Dialog :open="show" @update:open="$emit('close')">
     <DialogContent class="sm:max-w-[600px]">
       <DialogHeader>
-        <DialogTitle>Edit Snippet</DialogTitle>
+        <DialogTitle>{{ isEditMode ? 'Edit Snippet' : 'Create New Snippet' }}</DialogTitle>
         <DialogDescription>
-          Update your code snippet. Make sure to provide a clear title and description.
+          {{
+            isEditMode
+              ? 'Update your code snippet. Make sure to provide a clear title and description.'
+              : 'Share your code snippet with the community. Make sure to provide a clear title and description.'
+          }}
         </DialogDescription>
       </DialogHeader>
 
@@ -75,10 +79,10 @@
         </div>
 
         <div class="flex justify-end gap-3">
-          <Button type="button" variant="outline" @click="$emit('close')"> Cancel </Button>
+          <Button type="button" variant="outline" @click="handleCancel"> Cancel </Button>
           <Button type="submit" variant="reverse" :disabled="isLoading">
             <LoaderCircleIcon v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
-            Save Changes
+            {{ isEditMode ? 'Save Changes' : 'Create Snippet' }}
           </Button>
         </div>
       </form>
@@ -115,13 +119,16 @@ import { getAvailableLanguages, getLanguageName } from '@/lib/languages'
 const props = defineProps<{
   show: boolean
   isLoading: boolean
-  snippet: Snippet
+  snippet?: Snippet // Optional - if provided, we're in edit mode
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'submit', data: { title: string; content: string; language: string }): void
+  (e: 'submit', data: { title: string; content: string; language?: string }): void
 }>()
+
+// Determine if we're in edit mode based on whether a snippet is provided
+const isEditMode = computed(() => !!props.snippet)
 
 const formData = ref({
   title: '',
@@ -151,33 +158,59 @@ const handleLanguageSelect = (event: any) => {
   formData.value.language = language.value
 }
 
-// Update form data when snippet changes
-watch(
-  () => props.snippet,
-  (newSnippet) => {
-    if (newSnippet) {
-      formData.value = {
-        title: newSnippet.title,
-        content: newSnippet.content,
-        language: newSnippet.language.toLowerCase(),
-      }
+// Reset form data when modal closes
+const resetForm = () => {
+  formData.value = {
+    title: '',
+    content: '',
+    language: '',
+  }
+  selectedLanguage.value = null
+}
 
-      // Set the selected language for the combobox
-      const matchedLanguage = languageOptions.value.find(
-        (lang) => lang.value === newSnippet.language.toLowerCase(),
-      )
-      selectedLanguage.value = matchedLanguage || null
+// Update form data when snippet changes (edit mode) or when modal opens (create mode)
+watch(
+  [() => props.snippet, () => props.show],
+  ([newSnippet, showModal]) => {
+    if (showModal) {
+      if (newSnippet && isEditMode.value) {
+        // Edit mode: populate with existing snippet data
+        formData.value = {
+          title: newSnippet.title,
+          content: newSnippet.content,
+          language: newSnippet.language.toLowerCase(),
+        }
+
+        // Set the selected language for the combobox
+        const matchedLanguage = languageOptions.value.find(
+          (lang) => lang.value === newSnippet.language.toLowerCase(),
+        )
+        selectedLanguage.value = matchedLanguage || null
+      } else {
+        // Create mode: reset form
+        resetForm()
+      }
     }
   },
   { immediate: true },
 )
 
 const handleSubmit = () => {
-  emit('submit', {
+  const submitData: { title: string; content: string; language?: string } = {
     title: formData.value.title,
     content: formData.value.content,
-    language: getLanguageName(formData.value.language) || formData.value.language,
-  })
+  }
+
+  // Only include language if it's set or we're in edit mode
+  if (formData.value.language || isEditMode.value) {
+    submitData.language = getLanguageName(formData.value.language) || formData.value.language
+  }
+
+  emit('submit', submitData)
+}
+
+const handleCancel = () => {
+  resetForm()
   emit('close')
 }
 </script>

@@ -5,7 +5,7 @@ import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import SnippetModal from './_components/SnippetModal.vue'
+import SnippetFormModal from './_components/SnippetFormModal.vue'
 
 const authStore = useAuthStore()
 
@@ -19,10 +19,11 @@ const { isPending, isError, data, error, refetch } = useQuery({
 })
 
 const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
-  mutationFn: (formData: { title: string; code: string }) =>
+  mutationFn: (formData: { title: string; content: string; language?: string }) =>
     snippetsService.createSnippet({
       title: formData.title,
-      content: formData.code,
+      content: formData.content,
+      language: formData.language,
     }),
   onSuccess: (newSnippet) => {
     // Update the cache with the new snippet
@@ -61,7 +62,7 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
     <FloatingActionButton @click="showModal = true" />
   </Authenticated>
 
-  <SnippetModal
+  <SnippetFormModal
     :show="showModal"
     :is-loading="isSubmitting"
     @close="showModal = false"
