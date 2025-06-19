@@ -11,6 +11,52 @@ import (
 	"time"
 )
 
+const checkRecentView = `-- name: CheckRecentView :one
+SELECT 
+    snippet_id,
+    viewer_identifier,
+    last_viewed_at,
+    (strftime('%s', 'now') - strftime('%s', last_viewed_at)) as seconds_since_last_view
+FROM snippet_views 
+WHERE snippet_id = ?1 
+AND viewer_identifier = ?2
+LIMIT 1
+`
+
+type CheckRecentViewParams struct {
+	SnippetID        string `json:"snippet_id"`
+	ViewerIdentifier string `json:"viewer_identifier"`
+}
+
+type CheckRecentViewRow struct {
+	SnippetID            string       `json:"snippet_id"`
+	ViewerIdentifier     string       `json:"viewer_identifier"`
+	LastViewedAt         sql.NullTime `json:"last_viewed_at"`
+	SecondsSinceLastView interface{}  `json:"seconds_since_last_view"`
+}
+
+func (q *Queries) CheckRecentView(ctx context.Context, arg CheckRecentViewParams) (CheckRecentViewRow, error) {
+	row := q.queryRow(ctx, q.checkRecentViewStmt, checkRecentView, arg.SnippetID, arg.ViewerIdentifier)
+	var i CheckRecentViewRow
+	err := row.Scan(
+		&i.SnippetID,
+		&i.ViewerIdentifier,
+		&i.LastViewedAt,
+		&i.SecondsSinceLastView,
+	)
+	return i, err
+}
+
+const cleanupOldViews = `-- name: CleanupOldViews :exec
+DELETE FROM snippet_views 
+WHERE last_viewed_at < datetime('now', '-30 days')
+`
+
+func (q *Queries) CleanupOldViews(ctx context.Context) error {
+	_, err := q.exec(ctx, q.cleanupOldViewsStmt, cleanupOldViews)
+	return err
+}
+
 const createSnippet = `-- name: CreateSnippet :one
 INSERT INTO snippets (
     id,
@@ -289,6 +335,45 @@ func (q *Queries) IncrementViews(ctx context.Context, snippetID string) error {
 	_, err := q.exec(ctx, q.incrementViewsStmt, incrementViews, snippetID)
 	return err
 }
+
+const recordView = `-- name: RecordView :exec
+INSERT OR REPLACE INTO snippet_views (
+    snippet_id, 
+    viewer_identifier, 
+    ip_address, 
+    last_viewed_at, 
+    view_count
+) VALUES (
+    ?1,
+    ?2,
+    ?3,
+    CURRENT_TIMESTAMP,
+    CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM snippet_views 
+            WHERE snippet_id = ?1 
+            AND viewer_identifier = ?2
+        ) THEN (
+            SELECT view_count + 1 FROM snippet_views 
+            WHERE snippet_id = ?1 
+            AND viewer_identifier = ?2
+        )
+        ELSE 1
+    END
+)
+`
+
+type RecordViewParams struct {
+	SnippetID        string         `json:"snippet_id"`
+	ViewerIdentifier string         `json:"viewer_identifier"`
+	IpAddress        sql.NullString `json:"ip_address"`
+}
+
+func (q *Queries) RecordView(ctx context.Context, arg RecordViewParams) error {
+	_, err := q.exec(ctx, q.recordViewStmt, recordView, arg.SnippetID, arg.ViewerIdentifier, arg.IpAddress)
+	return err
+}
+
 const updateSnippet = `-- name: UpdateSnippet :one
 UPDATE snippets
 SET 

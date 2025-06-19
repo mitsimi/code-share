@@ -78,7 +78,7 @@ func (s *Server) setupAPIRoutes(r chi.Router) {
 
 	// Snippet routes
 	r.Route("/snippets", func(r chi.Router) {
-		handler := handler.NewSnippetHandler(s.snippets, s.likes, s.bookmarks)
+		handler := handler.NewSnippetHandler(s.snippets, s.likes, s.bookmarks, s.viewTracker)
 
 		// Public routes
 		r.Group(func(r chi.Router) {

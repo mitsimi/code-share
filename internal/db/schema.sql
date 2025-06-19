@@ -54,6 +54,17 @@ CREATE TABLE IF NOT EXISTS user_saves (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Snippet Views Tracking Table
+CREATE TABLE IF NOT EXISTS snippet_views (
+    snippet_id TEXT NOT NULL,
+    viewer_identifier TEXT NOT NULL, -- user_id for authenticated, session_token for anonymous
+    ip_address TEXT,
+    last_viewed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    view_count INTEGER DEFAULT 1,
+    PRIMARY KEY (snippet_id, viewer_identifier),
+    FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
+);
+
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_snippets_created_at ON snippets(created_at DESC);
 

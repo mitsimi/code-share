@@ -74,3 +74,44 @@ WHERE id = ?;
 UPDATE snippets
 SET views = views + 1
 WHERE id = @snippet_id;
+
+-- name: CheckRecentView :one
+SELECT 
+    snippet_id,
+    viewer_identifier,
+    last_viewed_at,
+    (strftime('%s', 'now') - strftime('%s', last_viewed_at)) as seconds_since_last_view
+FROM snippet_views 
+WHERE snippet_id = @snippet_id 
+AND viewer_identifier = @viewer_identifier
+LIMIT 1;
+
+-- name: RecordView :exec
+INSERT OR REPLACE INTO snippet_views (
+    snippet_id, 
+    viewer_identifier, 
+    ip_address, 
+    last_viewed_at, 
+    view_count
+) VALUES (
+    @snippet_id,
+    @viewer_identifier,
+    @ip_address,
+    CURRENT_TIMESTAMP,
+    CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM snippet_views 
+            WHERE snippet_id = @snippet_id 
+            AND viewer_identifier = @viewer_identifier
+        ) THEN (
+            SELECT view_count + 1 FROM snippet_views 
+            WHERE snippet_id = @snippet_id 
+            AND viewer_identifier = @viewer_identifier
+        )
+        ELSE 1
+    END
+);
+
+-- name: CleanupOldViews :exec
+DELETE FROM snippet_views 
+WHERE last_viewed_at < datetime('now', '-30 days');

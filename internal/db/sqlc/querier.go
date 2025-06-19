@@ -10,6 +10,8 @@ import (
 
 type Querier interface {
 	CheckLikeExists(ctx context.Context, arg CheckLikeExistsParams) (int64, error)
+	CheckRecentView(ctx context.Context, arg CheckRecentViewParams) (CheckRecentViewRow, error)
+	CleanupOldViews(ctx context.Context) error
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateSnippet(ctx context.Context, arg CreateSnippetParams) (Snippet, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
@@ -29,7 +31,9 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	IncrementLikesCount(ctx context.Context, id string) error
+	IncrementViews(ctx context.Context, snippetID string) error
 	LikeSnippet(ctx context.Context, arg LikeSnippetParams) error
+	RecordView(ctx context.Context, arg RecordViewParams) error
 	SaveSnippet(ctx context.Context, arg SaveSnippetParams) error
 	UpdateLikesCount(ctx context.Context, arg UpdateLikesCountParams) error
 	UpdateSessionExpiry(ctx context.Context, arg UpdateSessionExpiryParams) error
