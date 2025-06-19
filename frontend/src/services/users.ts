@@ -32,6 +32,20 @@ export const usersService = {
     return data.value?.data || []
   },
 
+  async getMe(): Promise<User> {
+    const { data, error } = await useFetch<User>('/users/me').json()
+
+    if (error.value) {
+      throw new Error(error.value.message || 'Failed to fetch user profile')
+    }
+
+    if (!data.value?.data) {
+      throw new Error('No user data received from server')
+    }
+
+    return data.value.data
+  },
+
   async updateProfile(profileData: { username: string; email: string }): Promise<User> {
     const { data, error } = await useFetch<User>('/users/me', {
       method: 'PATCH',

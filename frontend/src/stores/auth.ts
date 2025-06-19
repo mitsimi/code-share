@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { User } from '@/types'
 import { authService } from '@/services/auth'
+import { usersService } from '@/services/users'
 import { toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
 
@@ -142,15 +143,18 @@ export const useAuthStore = defineStore('auth', () => {
     const hasStoredAuth = loadAuthFromStorage()
     if (hasStoredAuth && isAuthenticated()) {
       try {
-        // If we have stored auth and it's not expired, we can use it directly
-        // No need to verify with the server since we have the token
-        if (!token.value || !refreshToken.value || !expiresAt.value) {
-          throw new Error('Missing auth data')
+        // Verify the session is still valid by calling the backend
+        const currentUser = await usersService.getMe()
+
+        // Update user data in case it changed on the server
+        setUser(currentUser)
+
+        // Schedule token refresh since session is valid
+        if (expiresAt.value) {
+          scheduleTokenRefresh(expiresAt.value)
         }
-        // Schedule token refresh
-        scheduleTokenRefresh(expiresAt.value)
       } catch (error) {
-        // If there's an issue with the stored auth, try to refresh the token
+        // Session is invalid, try to refresh the token
         try {
           await refreshAccessToken()
         } catch (refreshError) {
