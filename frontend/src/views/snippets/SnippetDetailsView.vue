@@ -1,65 +1,208 @@
 <template>
-  <main class="mx-auto max-w-7xl px-4 lg:w-fit lg:min-w-4xl">
-    <!-- Back button -->
-    <Button variant="outline" @click="router.back()">
-      <ArrowLeftIcon class="size-5" />
-      Back
-    </Button>
-
-    <!-- Loading state -->
-    <div v-if="isPending" class="mt-6 space-y-6">
-      <!-- Snippet header skeleton -->
-      <div class="rounded-lg border-2 bg-white p-6 shadow">
-        <div class="mb-4 flex items-center justify-between">
-          <div class="h-8 w-3/4 animate-pulse rounded-lg bg-gray-200"></div>
-          <div class="h-10 w-20 animate-pulse rounded-lg bg-gray-200"></div>
-        </div>
-        <div class="h-6 w-1/4 animate-pulse rounded-lg bg-gray-200"></div>
+  <div class="bg-background min-h-screen">
+    <div class="container mx-auto max-w-7xl px-8">
+      <!-- Navigation -->
+      <div class="mb-8">
+        <Button variant="outline" @click="router.back()" class="gap-2">
+          <ArrowLeftIcon class="h-4 w-4" />
+          Back to snippets
+        </Button>
       </div>
 
-      <!-- Code block skeleton -->
-      <div class="rounded-lg border-2 bg-white p-6 shadow">
-        <div class="space-y-2">
-          <div class="h-80 w-full animate-pulse rounded-lg bg-gray-200"></div>
-        </div>
-      </div>
-    </div>
+      <!-- Loading state -->
+      <div v-if="isPending" class="grid gap-8 lg:grid-cols-[30%_70%]">
+        <!-- Left column skeleton -->
+        <Card class="p-8">
+          <div class="space-y-6">
+            <!-- Title skeleton -->
+            <div class="space-y-3">
+              <div class="bg-muted h-8 w-3/4 animate-pulse rounded-lg"></div>
+              <div class="bg-muted h-6 w-1/3 animate-pulse rounded-lg"></div>
+            </div>
 
-    <!-- Error state -->
-    <div
-      v-else-if="isError"
-      class="border-destructive bg-destructive/10 mt-6 rounded-lg border-2 p-6"
-    >
-      <h2 class="text-destructive text-xl font-bold">Error</h2>
-      <p class="text-destructive mt-2">{{ error?.message || 'An unexpected error occurred' }}</p>
-    </div>
+            <!-- Author skeleton -->
+            <div class="flex items-center gap-4 border-t pt-4">
+              <div class="bg-muted h-12 w-12 animate-pulse rounded-full"></div>
+              <div class="space-y-2">
+                <div class="bg-muted h-4 w-24 animate-pulse rounded"></div>
+                <div class="bg-muted h-3 w-16 animate-pulse rounded"></div>
+              </div>
+            </div>
 
-    <!-- Snippet content -->
-    <div v-else-if="snippet" class="mt-6 space-y-6">
-      <!-- Snippet header -->
-      <div class="bg-card text-card-foreground rounded-lg border-2 p-6 shadow">
-        <div class="mb-4 flex items-center justify-between">
-          <h1 class="text-3xl font-bold">{{ snippet.title }}</h1>
-          <div class="flex">
-            <SaveButton
-              v-if="authStore.isAuthenticated()"
-              :isSaved="snippet.isSaved"
-              :snippetId="snippet.id"
-            />
-            <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
+            <!-- Stats skeleton -->
+            <div class="flex gap-6 pt-4">
+              <div class="bg-muted h-4 w-16 animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-16 animate-pulse rounded"></div>
+            </div>
+
+            <!-- Actions skeleton -->
+            <div class="flex gap-2 pt-4">
+              <div class="bg-muted h-10 w-16 animate-pulse rounded"></div>
+              <div class="bg-muted h-10 w-16 animate-pulse rounded"></div>
+            </div>
           </div>
-        </div>
-        <p class="text-accent-foreground text-lg">By {{ snippet.author.username }}</p>
+        </Card>
+
+        <!-- Right column skeleton -->
+        <Card class="p-8">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b pb-4">
+              <div class="bg-muted h-5 w-32 animate-pulse rounded"></div>
+              <div class="bg-muted h-8 w-20 animate-pulse rounded"></div>
+            </div>
+            <div class="space-y-2">
+              <div class="bg-muted h-4 w-full animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-5/6 animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-4/5 animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-3/4 animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-2/3 animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-3/4 animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-5/6 animate-pulse rounded"></div>
+              <div class="bg-muted h-4 w-1/2 animate-pulse rounded"></div>
+            </div>
+          </div>
+        </Card>
       </div>
 
-      <!-- Code block -->
-      <div class="bg-card rounded-lg border-2 p-6 shadow">
-        <pre
-          class="bg-muted overflow-x-auto rounded-lg p-4 font-mono text-sm"
-        ><code>{{ snippet.content }}</code></pre>
+      <!-- Error state -->
+      <Card v-else-if="isError" class="border-destructive bg-destructive/5 p-8">
+        <div class="space-y-4 text-center">
+          <div
+            class="bg-destructive/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+          >
+            <AlertCircleIcon class="text-destructive h-8 w-8" />
+          </div>
+          <div>
+            <h2 class="text-destructive mb-2 text-xl font-bold">Something went wrong</h2>
+            <p class="text-destructive/80">
+              {{ error?.message || 'An unexpected error occurred while loading the snippet.' }}
+            </p>
+          </div>
+          <Button variant="outline" @click="router.back()" class="mt-4"> Go back </Button>
+        </div>
+      </Card>
+
+      <!-- Snippet content -->
+      <div v-else-if="snippet" class="space-y-8">
+        <!-- Title - Full width -->
+        <div class="text-start">
+          <h1 class="text-foreground text-4xl font-bold tracking-tight break-words">
+            {{ snippet.title }}
+          </h1>
+        </div>
+
+        <!-- Two column layout -->
+        <div class="space-y-8 md:grid md:grid-cols-[30%_70%] md:space-x-8">
+          <!-- Left column: Metadata and actions -->
+          <Card class="h-fit p-8">
+            <div class="space-y-6">
+              <!-- Author info -->
+              <UserAvatar :user="snippet.author" :subtitle="dayjs(snippet.createdAt).fromNow()" />
+
+              <Separator />
+
+              <!-- Metadata -->
+              <div class="space-y-4">
+                <!-- Language -->
+                <div v-if="snippet.language" class="text-muted-foreground text-sm">
+                  <span class="text-foreground font-medium">Language:</span>
+                  {{ getLanguageName(snippet.language) || 'Plain Text' }}
+                </div>
+
+                <!-- Creation date -->
+                <div class="text-muted-foreground text-sm">
+                  <span class="text-foreground font-medium">Created:</span>
+                  {{ dayjs(snippet.createdAt).format('MMMM D, YYYY') }}
+                </div>
+
+                <!-- Stats -->
+                <div
+                  class="text-muted-foreground flex items-center gap-2 text-sm md:flex-col md:items-start lg:flex-row lg:gap-6"
+                >
+                  <div class="flex items-center gap-1">
+                    <HeartIcon class="h-4 w-4" />
+                    <span>{{ snippet.likes }} {{ snippet.likes === 1 ? 'like' : 'likes' }}</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <EyeIcon class="h-4 w-4" />
+                    <span>{{ Math.floor(Math.random() * 100) + 20 }} views</span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <!-- Actions -->
+              <div class="space-y-3">
+                <!--h3 class="text-foreground text-sm font-medium">Actions</h3-->
+
+                <!-- Save and Like buttons -->
+                <div v-if="authStore.isAuthenticated()" class="flex gap-2">
+                  <SaveButton
+                    variant="outline"
+                    size="sm"
+                    class="flex-1"
+                    :isSaved="snippet.isSaved"
+                    :snippetId="snippet.id"
+                  />
+                  <LikeButton
+                    variant="outline"
+                    size="sm"
+                    class="flex-1"
+                    :likes="snippet.likes"
+                    :isLiked="snippet.isLiked"
+                    :snippetId="snippet.id"
+                    :hideCount="true"
+                  />
+                </div>
+
+                <!-- Share button -->
+                <Button variant="outline" size="sm" @click="shareSnippet" class="w-full">
+                  <ShareIcon class="mr-2 h-4 w-4" />
+                  Share
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+          <!-- Right column: Code display -->
+          <Card class="min-w-0 gap-0 overflow-hidden py-0">
+            <div class="bg-muted/30 flex items-center justify-between border-b px-6 py-4">
+              <!-- File header -->
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                  <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                  <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+                  <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                </div>
+                <span class="text-muted-foreground font-mono text-sm">
+                  snippet.{{ getLanguageExtension(snippet.language) || 'txt' }}
+                </span>
+              </div>
+
+              <!-- Copy button -->
+              <Button
+                variant="ghost"
+                size="sm"
+                @click="copyToClipboard"
+                class="text-muted-foreground hover:text-foreground gap-2"
+              >
+                <CopyIcon class="h-4 w-4" />
+                Copy
+              </Button>
+            </div>
+
+            <!-- Code content -->
+            <CardContent class="min-w-0 overflow-y-auto p-6">
+              <pre
+                class="text-foreground/90 overflow-x-auto font-mono text-sm leading-relaxed"
+              ><code>{{ snippet.content }}</code></pre>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -67,13 +210,27 @@ import { useQuery } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import {
+  ArrowLeftIcon,
+  HeartIcon,
+  EyeIcon,
+  CopyIcon,
+  ShareIcon,
+  AlertCircleIcon,
+} from 'lucide-vue-next'
 import LikeButton from './_components/LikeButton.vue'
-import { ArrowLeftIcon } from 'lucide-vue-next'
 import SaveButton from './_components/SaveButton.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { useAuthStore } from '@/stores/auth'
+import { getLanguageName, getLanguageExtension } from '@/lib/languages'
+import { toast } from 'vue-sonner'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import CardContent from '@/components/ui/card/CardContent.vue'
+
+dayjs.extend(relativeTime)
 
 const authStore = useAuthStore()
-
 const route = useRoute()
 const router = useRouter()
 
@@ -86,6 +243,42 @@ const {
   queryKey: ['snippet', route.params.snippetId],
   queryFn: () => snippetsService.getSnippet(route.params.snippetId as string),
 })
+
+const copyToClipboard = async () => {
+  if (!snippet.value) return
+
+  try {
+    await navigator.clipboard.writeText(snippet.value.content)
+    toast.success('Code copied to clipboard!')
+  } catch (err) {
+    console.error('Failed to copy code:', err)
+    toast.error('Failed to copy code to clipboard')
+  }
+}
+
+const shareSnippet = async () => {
+  const url = window.location.href
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: snippet.value?.title,
+        text: `Check out this code snippet: ${snippet.value?.title}`,
+        url: url,
+      })
+    } catch (err) {
+      console.log('Share cancelled')
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Link copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy link:', err)
+      toast.error('Failed to copy link')
+    }
+  }
+}
 
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'auto' })
