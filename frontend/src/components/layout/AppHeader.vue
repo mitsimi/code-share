@@ -27,15 +27,15 @@
       <div class="flex flex-1 items-center justify-end space-x-2">
         <!-- Desktop Auth Buttons -->
         <div class="hidden items-center space-x-2 md:flex">
-          <template v-if="!authStore.isAuthenticated()">
+          <Unauthenticated>
             <Button variant="ghost" size="sm" @click="handleLogin"> Login </Button>
             <Button variant="reverse" size="sm" @click="handleRegister"> Register </Button>
-          </template>
-          <template v-else>
+          </Unauthenticated>
+          <Authenticated>
             <div class="flex items-center space-x-2">
               <UserMenu @logout="handleLogout" @close="closeMobileMenu" />
             </div>
-          </template>
+          </Authenticated>
         </div>
 
         <!-- Theme Toggle -->
@@ -79,16 +79,16 @@
 
           <!-- Mobile Auth Buttons -->
           <div class="flex flex-col space-y-2">
-            <template v-if="!authStore.isAuthenticated()">
+            <Unauthenticated>
               <Button variant="ghost" class="justify-start" @click="handleLogin"> Login </Button>
               <Button variant="secondary" class="justify-start" @click="handleRegister">
                 Sign Up
               </Button>
-            </template>
-            <template v-else>
+            </Unauthenticated>
+            <Authenticated>
               <UserInfo class="px-2 py-2" />
               <MenuItems isMobile @logout="handleLogout" @close="closeMobileMenu" />
-            </template>
+            </Authenticated>
           </div>
         </div>
       </div>
@@ -106,6 +106,7 @@ import Separator from '../ui/separator/Separator.vue'
 import UserInfo from '@/components/UserMenu/UserInfo.vue'
 import MenuItems from '@/components/UserMenu/MenuItems.vue'
 import { MenuIcon, XIcon } from 'lucide-vue-next'
+import Unauthenticated from '../access/Unauthenticated.vue'
 
 const authStore = useAuthStore()
 
@@ -120,16 +121,18 @@ const navigationLinks = [
 ]
 
 const handleLogin = async () => {
+  isMobileMenuOpen.value = false
   router.push('/login')
 }
 
 const handleRegister = async () => {
+  isMobileMenuOpen.value = false
   router.push('/register')
 }
 
 const handleLogout = async () => {
   await authStore.logout()
-  router.push('/login')
+  isMobileMenuOpen.value = false
 }
 
 // Mobile menu handling

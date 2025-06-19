@@ -57,7 +57,9 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
     />
   </main>
 
-  <FloatingActionButton v-show="authStore.isAuthenticated()" @click="showModal = true" />
+  <Authenticated>
+    <FloatingActionButton @click="showModal = true" />
+  </Authenticated>
 
   <SnippetModal
     :show="showModal"
