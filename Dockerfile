@@ -46,6 +46,9 @@ RUN apk add --no-cache ca-certificates
 # Copy the built Go binary
 COPY --from=go-builder /app/main .
 
+# Create data directory
+RUN mkdir -p /app/data
+
 # Expose the port the app runs on
 EXPOSE 8080
 
