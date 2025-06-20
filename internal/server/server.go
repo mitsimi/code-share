@@ -13,6 +13,7 @@ import (
 	"mitsimi.dev/codeShare/frontend"
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/repository"
+	"mitsimi.dev/codeShare/internal/services"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,15 +22,17 @@ import (
 
 // Server represents the application server
 type Server struct {
-	router     *chi.Mux
-	httpServer *http.Server
-	snippets   repository.SnippetRepository
-	likes      repository.LikeRepository
-	bookmarks  repository.BookmarkRepository
-	users      repository.UserRepository
-	sessions   repository.SessionRepository
-	logger     *zap.Logger
-	secretKey  string
+	router      *chi.Mux
+	httpServer  *http.Server
+	snippets    repository.SnippetRepository
+	likes       repository.LikeRepository
+	bookmarks   repository.BookmarkRepository
+	users       repository.UserRepository
+	sessions    repository.SessionRepository
+	views       repository.ViewRepository
+	viewTracker *services.ViewTracker
+	logger      *zap.Logger
+	secretKey   string
 }
 
 // New creates a new server instance
@@ -39,21 +42,28 @@ func New(
 	bookmarks repository.BookmarkRepository,
 	users repository.UserRepository,
 	sessions repository.SessionRepository,
+	views repository.ViewRepository,
 	secretKey string,
 ) *Server {
+	// Create view tracker
+	viewTracker := services.NewViewTracker(views)
+
 	s := &Server{
-		router:    chi.NewRouter(),
-		snippets:  snippets,
-		likes:     likes,
-		bookmarks: bookmarks,
-		users:     users,
-		sessions:  sessions,
-		logger:    logger.Log,
-		secretKey: secretKey,
+		router:      chi.NewRouter(),
+		snippets:    snippets,
+		likes:       likes,
+		bookmarks:   bookmarks,
+		users:       users,
+		sessions:    sessions,
+		views:       views,
+		viewTracker: viewTracker,
+		logger:      logger.Log,
+		secretKey:   secretKey,
 	}
 	s.setupMiddleware()
 	s.setupRoutes()
 	s.startSessionCleanup()
+	s.startViewCleanup()
 	return s
 }
 
@@ -128,6 +138,22 @@ func (s *Server) startSessionCleanup() {
 				s.logger.Error("Failed to delete expired sessions", zap.Error(err))
 			} else {
 				s.logger.Debug("Successfully cleaned up expired sessions")
+			}
+		}
+	}()
+}
+
+// startViewCleanup starts a background goroutine to periodically clean up old view tracking records
+func (s *Server) startViewCleanup() {
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour) // Run cleanup daily
+		defer ticker.Stop()
+
+		for range ticker.C {
+			if err := s.viewTracker.CleanupOldViews(context.Background()); err != nil {
+				s.logger.Error("Failed to clean up old view tracking records", zap.Error(err))
+			} else {
+				s.logger.Debug("Successfully cleaned up old view tracking records")
 			}
 		}
 	}()

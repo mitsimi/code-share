@@ -11,6 +11,52 @@ import (
 	"time"
 )
 
+const checkRecentView = `-- name: CheckRecentView :one
+SELECT 
+    snippet_id,
+    viewer_identifier,
+    last_viewed_at,
+    (strftime('%s', 'now') - strftime('%s', last_viewed_at)) as seconds_since_last_view
+FROM snippet_views 
+WHERE snippet_id = ?1 
+AND viewer_identifier = ?2
+LIMIT 1
+`
+
+type CheckRecentViewParams struct {
+	SnippetID        string `json:"snippet_id"`
+	ViewerIdentifier string `json:"viewer_identifier"`
+}
+
+type CheckRecentViewRow struct {
+	SnippetID            string       `json:"snippet_id"`
+	ViewerIdentifier     string       `json:"viewer_identifier"`
+	LastViewedAt         sql.NullTime `json:"last_viewed_at"`
+	SecondsSinceLastView interface{}  `json:"seconds_since_last_view"`
+}
+
+func (q *Queries) CheckRecentView(ctx context.Context, arg CheckRecentViewParams) (CheckRecentViewRow, error) {
+	row := q.queryRow(ctx, q.checkRecentViewStmt, checkRecentView, arg.SnippetID, arg.ViewerIdentifier)
+	var i CheckRecentViewRow
+	err := row.Scan(
+		&i.SnippetID,
+		&i.ViewerIdentifier,
+		&i.LastViewedAt,
+		&i.SecondsSinceLastView,
+	)
+	return i, err
+}
+
+const cleanupOldViews = `-- name: CleanupOldViews :exec
+DELETE FROM snippet_views 
+WHERE last_viewed_at < datetime('now', '-30 days')
+`
+
+func (q *Queries) CleanupOldViews(ctx context.Context) error {
+	_, err := q.exec(ctx, q.cleanupOldViewsStmt, cleanupOldViews)
+	return err
+}
+
 const createSnippet = `-- name: CreateSnippet :one
 INSERT INTO snippets (
     id,
@@ -21,7 +67,7 @@ INSERT INTO snippets (
 ) VALUES (
     ?, ?, ?, ?, ?
 )
-RETURNING id, title, language, content, author, created_at, updated_at, likes
+RETURNING id, title, language, content, author, created_at, updated_at, likes, views
 `
 
 type CreateSnippetParams struct {
@@ -50,6 +96,7 @@ func (q *Queries) CreateSnippet(ctx context.Context, arg CreateSnippetParams) (S
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Likes,
+		&i.Views,
 	)
 	return i, err
 }
@@ -66,7 +113,7 @@ func (q *Queries) DeleteSnippet(ctx context.Context, id string) error {
 
 const getSnippet = `-- name: GetSnippet :one
 SELECT 
-    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes, s.views,
     CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
     u.id AS author_id, 
@@ -94,6 +141,7 @@ type GetSnippetRow struct {
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Likes          int64          `json:"likes"`
+	Views          int64          `json:"views"`
 	IsSaved        int64          `json:"is_saved"`
 	IsLiked        int64          `json:"is_liked"`
 	AuthorID       sql.NullString `json:"author_id"`
@@ -114,6 +162,7 @@ func (q *Queries) GetSnippet(ctx context.Context, arg GetSnippetParams) (GetSnip
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Likes,
+		&i.Views,
 		&i.IsSaved,
 		&i.IsLiked,
 		&i.AuthorID,
@@ -126,7 +175,7 @@ func (q *Queries) GetSnippet(ctx context.Context, arg GetSnippetParams) (GetSnip
 
 const getSnippets = `-- name: GetSnippets :many
 SELECT 
-    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes, s.views,
     CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
     u.id AS author_id, 
@@ -149,6 +198,7 @@ type GetSnippetsRow struct {
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Likes          int64          `json:"likes"`
+	Views          int64          `json:"views"`
 	IsSaved        int64          `json:"is_saved"`
 	IsLiked        int64          `json:"is_liked"`
 	AuthorID       sql.NullString `json:"author_id"`
@@ -175,6 +225,7 @@ func (q *Queries) GetSnippets(ctx context.Context, userID string) ([]GetSnippets
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Likes,
+			&i.Views,
 			&i.IsSaved,
 			&i.IsLiked,
 			&i.AuthorID,
@@ -197,7 +248,7 @@ func (q *Queries) GetSnippets(ctx context.Context, userID string) ([]GetSnippets
 
 const getSnippetsByAuthor = `-- name: GetSnippetsByAuthor :many
 SELECT 
-    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes,
+    s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes, s.views,
     CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
     u.id AS author_id, 
@@ -226,6 +277,7 @@ type GetSnippetsByAuthorRow struct {
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Likes          int64          `json:"likes"`
+	Views          int64          `json:"views"`
 	IsSaved        int64          `json:"is_saved"`
 	IsLiked        int64          `json:"is_liked"`
 	AuthorID       sql.NullString `json:"author_id"`
@@ -252,6 +304,7 @@ func (q *Queries) GetSnippetsByAuthor(ctx context.Context, arg GetSnippetsByAuth
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Likes,
+			&i.Views,
 			&i.IsSaved,
 			&i.IsLiked,
 			&i.AuthorID,
@@ -272,6 +325,55 @@ func (q *Queries) GetSnippetsByAuthor(ctx context.Context, arg GetSnippetsByAuth
 	return items, nil
 }
 
+const incrementViews = `-- name: IncrementViews :exec
+UPDATE snippets
+SET views = views + 1
+WHERE id = ?1
+`
+
+func (q *Queries) IncrementViews(ctx context.Context, snippetID string) error {
+	_, err := q.exec(ctx, q.incrementViewsStmt, incrementViews, snippetID)
+	return err
+}
+
+const recordView = `-- name: RecordView :exec
+INSERT OR REPLACE INTO snippet_views (
+    snippet_id, 
+    viewer_identifier, 
+    ip_address, 
+    last_viewed_at, 
+    view_count
+) VALUES (
+    ?1,
+    ?2,
+    ?3,
+    CURRENT_TIMESTAMP,
+    CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM snippet_views 
+            WHERE snippet_id = ?1 
+            AND viewer_identifier = ?2
+        ) THEN (
+            SELECT view_count + 1 FROM snippet_views 
+            WHERE snippet_id = ?1 
+            AND viewer_identifier = ?2
+        )
+        ELSE 1
+    END
+)
+`
+
+type RecordViewParams struct {
+	SnippetID        string         `json:"snippet_id"`
+	ViewerIdentifier string         `json:"viewer_identifier"`
+	IpAddress        sql.NullString `json:"ip_address"`
+}
+
+func (q *Queries) RecordView(ctx context.Context, arg RecordViewParams) error {
+	_, err := q.exec(ctx, q.recordViewStmt, recordView, arg.SnippetID, arg.ViewerIdentifier, arg.IpAddress)
+	return err
+}
+
 const updateSnippet = `-- name: UpdateSnippet :one
 UPDATE snippets
 SET 
@@ -280,7 +382,7 @@ SET
     language = ?3,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?4
-RETURNING id, title, language, content, author, created_at, updated_at, likes
+RETURNING id, title, language, content, author, created_at, updated_at, likes, views
 `
 
 type UpdateSnippetParams struct {
@@ -307,6 +409,7 @@ func (q *Queries) UpdateSnippet(ctx context.Context, arg UpdateSnippetParams) (S
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Likes,
+		&i.Views,
 	)
 	return i, err
 }

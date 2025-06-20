@@ -27,6 +27,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.checkLikeExistsStmt, err = db.PrepareContext(ctx, checkLikeExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckLikeExists: %w", err)
 	}
+	if q.checkRecentViewStmt, err = db.PrepareContext(ctx, checkRecentView); err != nil {
+		return nil, fmt.Errorf("error preparing query CheckRecentView: %w", err)
+	}
+	if q.cleanupOldViewsStmt, err = db.PrepareContext(ctx, cleanupOldViews); err != nil {
+		return nil, fmt.Errorf("error preparing query CleanupOldViews: %w", err)
+	}
 	if q.createSessionStmt, err = db.PrepareContext(ctx, createSession); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateSession: %w", err)
 	}
@@ -84,8 +90,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.incrementLikesCountStmt, err = db.PrepareContext(ctx, incrementLikesCount); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementLikesCount: %w", err)
 	}
+	if q.incrementViewsStmt, err = db.PrepareContext(ctx, incrementViews); err != nil {
+		return nil, fmt.Errorf("error preparing query IncrementViews: %w", err)
+	}
 	if q.likeSnippetStmt, err = db.PrepareContext(ctx, likeSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query LikeSnippet: %w", err)
+	}
+	if q.recordViewStmt, err = db.PrepareContext(ctx, recordView); err != nil {
+		return nil, fmt.Errorf("error preparing query RecordView: %w", err)
 	}
 	if q.saveSnippetStmt, err = db.PrepareContext(ctx, saveSnippet); err != nil {
 		return nil, fmt.Errorf("error preparing query SaveSnippet: %w", err)
@@ -116,6 +128,16 @@ func (q *Queries) Close() error {
 	if q.checkLikeExistsStmt != nil {
 		if cerr := q.checkLikeExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing checkLikeExistsStmt: %w", cerr)
+		}
+	}
+	if q.checkRecentViewStmt != nil {
+		if cerr := q.checkRecentViewStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing checkRecentViewStmt: %w", cerr)
+		}
+	}
+	if q.cleanupOldViewsStmt != nil {
+		if cerr := q.cleanupOldViewsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing cleanupOldViewsStmt: %w", cerr)
 		}
 	}
 	if q.createSessionStmt != nil {
@@ -213,9 +235,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing incrementLikesCountStmt: %w", cerr)
 		}
 	}
+	if q.incrementViewsStmt != nil {
+		if cerr := q.incrementViewsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing incrementViewsStmt: %w", cerr)
+		}
+	}
 	if q.likeSnippetStmt != nil {
 		if cerr := q.likeSnippetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing likeSnippetStmt: %w", cerr)
+		}
+	}
+	if q.recordViewStmt != nil {
+		if cerr := q.recordViewStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing recordViewStmt: %w", cerr)
 		}
 	}
 	if q.saveSnippetStmt != nil {
@@ -293,6 +325,8 @@ type Queries struct {
 	db                        DBTX
 	tx                        *sql.Tx
 	checkLikeExistsStmt       *sql.Stmt
+	checkRecentViewStmt       *sql.Stmt
+	cleanupOldViewsStmt       *sql.Stmt
 	createSessionStmt         *sql.Stmt
 	createSnippetStmt         *sql.Stmt
 	createUserStmt            *sql.Stmt
@@ -312,7 +346,9 @@ type Queries struct {
 	getUserByEmailStmt        *sql.Stmt
 	getUserByUsernameStmt     *sql.Stmt
 	incrementLikesCountStmt   *sql.Stmt
+	incrementViewsStmt        *sql.Stmt
 	likeSnippetStmt           *sql.Stmt
+	recordViewStmt            *sql.Stmt
 	saveSnippetStmt           *sql.Stmt
 	updateLikesCountStmt      *sql.Stmt
 	updateSessionExpiryStmt   *sql.Stmt
@@ -327,6 +363,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                        tx,
 		tx:                        tx,
 		checkLikeExistsStmt:       q.checkLikeExistsStmt,
+		checkRecentViewStmt:       q.checkRecentViewStmt,
+		cleanupOldViewsStmt:       q.cleanupOldViewsStmt,
 		createSessionStmt:         q.createSessionStmt,
 		createSnippetStmt:         q.createSnippetStmt,
 		createUserStmt:            q.createUserStmt,
@@ -346,7 +384,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserByEmailStmt:        q.getUserByEmailStmt,
 		getUserByUsernameStmt:     q.getUserByUsernameStmt,
 		incrementLikesCountStmt:   q.incrementLikesCountStmt,
+		incrementViewsStmt:        q.incrementViewsStmt,
 		likeSnippetStmt:           q.likeSnippetStmt,
+		recordViewStmt:            q.recordViewStmt,
 		saveSnippetStmt:           q.saveSnippetStmt,
 		updateLikesCountStmt:      q.updateLikesCountStmt,
 		updateSessionExpiryStmt:   q.updateSessionExpiryStmt,

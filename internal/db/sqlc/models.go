@@ -27,6 +27,15 @@ type Snippet struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Likes     int64     `json:"likes"`
+	Views     int64     `json:"views"`
+}
+
+type SnippetView struct {
+	SnippetID        string         `json:"snippet_id"`
+	ViewerIdentifier string         `json:"viewer_identifier"`
+	IpAddress        sql.NullString `json:"ip_address"`
+	LastViewedAt     sql.NullTime   `json:"last_viewed_at"`
+	ViewCount        sql.NullInt64  `json:"view_count"`
 }
 
 type User struct {

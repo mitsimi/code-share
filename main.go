@@ -46,6 +46,7 @@ func main() {
 	bookmarks := sqlite.NewBookmarkRepository(sqliteStorage.DB())
 	users := sqlite.NewUserRepository(sqliteStorage.DB())
 	sessions := sqlite.NewSessionRepository(sqliteStorage.DB())
+	views := sqlite.NewViewRepository(sqliteStorage.DB())
 
 	// Create storage instance
 	storage := storage.NewStorage(snippets, likes, bookmarks, users, sessions)
@@ -66,6 +67,7 @@ func main() {
 		bookmarks,
 		users,
 		sessions,
+		views,
 		cfg.JWTSecret,
 	)
 

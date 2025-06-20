@@ -27,7 +27,7 @@ func (q *Queries) DeleteSavedSnippet(ctx context.Context, arg DeleteSavedSnippet
 }
 
 const getSavedSnippets = `-- name: GetSavedSnippets :many
-SELECT s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes, 
+SELECT s.id, s.title, s.language, s.content, s.author, s.created_at, s.updated_at, s.likes, s.views, 
     CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END as is_liked,
     CASE WHEN us.user_id IS NOT NULL THEN 1 ELSE 0 END as is_saved,
     u.id AS author_id, 
@@ -51,6 +51,7 @@ type GetSavedSnippetsRow struct {
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Likes          int64          `json:"likes"`
+	Views          int64          `json:"views"`
 	IsLiked        int64          `json:"is_liked"`
 	IsSaved        int64          `json:"is_saved"`
 	AuthorID       sql.NullString `json:"author_id"`
@@ -77,6 +78,7 @@ func (q *Queries) GetSavedSnippets(ctx context.Context, userID string) ([]GetSav
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Likes,
+			&i.Views,
 			&i.IsLiked,
 			&i.IsSaved,
 			&i.AuthorID,

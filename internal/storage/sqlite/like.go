@@ -98,6 +98,7 @@ func (r *LikeRepository) GetLikedSnippets(ctx context.Context, userID string) ([
 			},
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,
+			Views:     int(snippet.Views),
 			Likes:     int(snippet.Likes),
 			IsLiked:   snippet.IsLiked == 1,
 			IsSaved:   snippet.IsSaved == 1,

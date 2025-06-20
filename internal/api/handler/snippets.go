@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"slices"
@@ -8,6 +9,7 @@ import (
 
 	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/api/dto"
+	"mitsimi.dev/codeShare/internal/services"
 
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/repository"
@@ -20,10 +22,11 @@ import (
 
 // SnippetHandler handles snippet-related HTTP requests
 type SnippetHandler struct {
-	snippets  repository.SnippetRepository
-	likes     repository.LikeRepository
-	bookmarks repository.BookmarkRepository
-	logger    *zap.Logger
+	snippets    repository.SnippetRepository
+	likes       repository.LikeRepository
+	bookmarks   repository.BookmarkRepository
+	viewTracker *services.ViewTracker
+	logger      *zap.Logger
 }
 
 // NewSnippetHandler creates a new snippet handler
@@ -31,12 +34,14 @@ func NewSnippetHandler(
 	snippets repository.SnippetRepository,
 	likes repository.LikeRepository,
 	bookmarks repository.BookmarkRepository,
+	viewTracker *services.ViewTracker,
 ) *SnippetHandler {
 	return &SnippetHandler{
-		snippets:  snippets,
-		likes:     likes,
-		bookmarks: bookmarks,
-		logger:    logger.Log,
+		snippets:    snippets,
+		likes:       likes,
+		bookmarks:   bookmarks,
+		viewTracker: viewTracker,
+		logger:      logger.Log,
 	}
 }
 
@@ -90,6 +95,22 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
+
+	// Track view asynchronously to avoid blocking the response
+	go func() {
+		// Create a separate context with timeout for view tracking
+		// Don't use r.Context() as it gets cancelled when the response is sent
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := h.viewTracker.TrackView(ctx, r, id, userID); err != nil {
+			log.Error("failed to track view",
+				zap.Error(err),
+				zap.String("snippet_id", id),
+				zap.String("user_id", userID),
+			)
+		}
+	}()
 
 	response := dto.ToSnippetResponse(snippet)
 
