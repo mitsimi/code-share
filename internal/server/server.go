@@ -84,31 +84,67 @@ func (s *Server) setupMiddleware() {
 
 // setupRoutes configures the server routes
 func (s *Server) setupRoutes() {
-	// Create a file server handler for the embedded dist directory
-	fs := http.FileServer(http.FS(frontend.DistDirFS))
-
-	// Handle static assets
-	s.router.HandleFunc("/assets/*", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path
-		ext := filepath.Ext(path)
-		mimeType := mime.TypeByExtension(ext)
-
-		if mimeType != "" {
-			w.Header().Set("Content-Type", mimeType)
-		}
-		fs.ServeHTTP(w, r)
-	})
-
-	// Handle favicon
-	s.router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		fs.ServeHTTP(w, r)
-	})
-
 	// Setup API routes
 	s.router.Route("/api", s.setupAPIRoutes)
 
 	// Only serve static files if SERVE_STATIC is set to "true"
 	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {
+		// Create a file server handler for the embedded dist directory
+		fs := http.FileServer(http.FS(frontend.DistDirFS))
+
+		// Handle static assets
+		s.router.HandleFunc("/assets/*", func(w http.ResponseWriter, r *http.Request) {
+			path := r.URL.Path
+			ext := filepath.Ext(path)
+			mimeType := mime.TypeByExtension(ext)
+
+			if mimeType != "" {
+				w.Header().Set("Content-Type", mimeType)
+			}
+			fs.ServeHTTP(w, r)
+		})
+
+		// Handle public files
+		publicFiles := []string{
+			"favicon.ico",
+			"favicon.svg",
+			"favicon-96x96.png",
+			"apple-touch-icon.png",
+			"site.webmanifest",
+			"web-app-manifest-192x192.png",
+			"web-app-manifest-512x512.png",
+		}
+
+		for _, filename := range publicFiles {
+			filename := filename // capture loop variable
+			s.router.HandleFunc("/"+filename, func(w http.ResponseWriter, r *http.Request) {
+				file, err := frontend.DistDirFS.Open(filename)
+				if err != nil {
+					s.logger.Error("failed to load public file",
+						zap.Error(err),
+						zap.String("filename", filename),
+						zap.String("request_id", middleware.GetReqID(r.Context())),
+					)
+					http.Error(w, "File not found", http.StatusNotFound)
+					return
+				}
+				defer file.Close()
+
+				// Set appropriate content type
+				ext := filepath.Ext(filename)
+				mimeType := mime.TypeByExtension(ext)
+				if mimeType != "" {
+					w.Header().Set("Content-Type", mimeType)
+				}
+
+				// For manifest files, set specific content type
+				if filename == "site.webmanifest" {
+					w.Header().Set("Content-Type", "application/manifest+json")
+				}
+
+				http.ServeContent(w, r, filename, time.Now(), file.(io.ReadSeeker))
+			})
+		}
 		// Handle all other routes by serving index.html
 		s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 			indexFile, err := frontend.DistDirFS.Open("index.html")
