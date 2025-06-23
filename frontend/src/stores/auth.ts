@@ -116,6 +116,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const isAuthenticated = () => {
+    // Checks if the user is authenticated:
+    // - token.value: access token is present
+    // - user.value: user object is present
+    // - expiresAt.value: token expiration timestamp is present
+    // - expiresAt.value > Date.now() / 1000: token has not expired
     return !!token.value && !!user.value && !!expiresAt.value && expiresAt.value > Date.now() / 1000
   }
 

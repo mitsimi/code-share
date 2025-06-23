@@ -83,10 +83,12 @@
       {{ emptyMessage }}
     </p>
 
-    <Button v-if="showCreateButton" @click="$emit('create-snippet')" size="lg" class="gap-2">
-      <Plus class="h-4 w-4" />
-      Share Your First Snippet
-    </Button>
+    <Authenticated>
+      <Button v-if="showCreateButton" @click="$emit('create-snippet')" size="lg" class="gap-2">
+        <Plus class="h-4 w-4" />
+        Share Your First Snippet
+      </Button>
+    </Authenticated>
   </div>
 
   <!-- Grid with Code Snippets -->
