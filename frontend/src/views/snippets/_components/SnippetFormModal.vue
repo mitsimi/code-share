@@ -44,7 +44,13 @@
             <ComboboxList>
               <ComboboxEmpty> No language found. </ComboboxEmpty>
 
-              <ComboboxGroup>
+              <ComboboxGroup
+                class="overflow-y-auto"
+                :style="{
+                  maxHeight: 'min(400px, calc(100vh - 200px))',
+                }"
+                ref="comboboxGroupRef"
+              >
                 <ComboboxItem
                   v-for="language in filteredLanguages"
                   :key="language.value"
