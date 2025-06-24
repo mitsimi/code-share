@@ -156,7 +156,7 @@
           </p>
         </div>
 
-        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-8 sm:grid-cols-2">
           <TestimonialCard
             v-for="testimonial in testimonials"
             :key="testimonial.name"
@@ -346,6 +346,13 @@ const testimonials = [
     name: 'David Chen',
     role: 'Computer Science Student',
     avatar: 'DC',
+  },
+  {
+    quote:
+      'Innovative, practical and especially inspiring for coders who are interested in learning about other, perhaps more advanced coders work. Useful for basically any programmer!',
+    name: 'Nico Katshi',
+    role: 'Computer Science Student',
+    avatar: 'NK',
   },
 ]
 
