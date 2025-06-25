@@ -8,84 +8,223 @@ export interface WebSocketMessage {
   timestamp: number
 }
 
+export enum SubscriptionType {
+  USER_ACTIONS = 'user_actions',
+  SNIPPET_UPDATES = 'snippet_updates',
+  SNIPPET_STATS = 'snippet_stats',
+}
+
 export interface Subscription {
-  type: 'user_actions' | 'post_updates' | 'post_stats'
+  type: SubscriptionType
   post_id?: string
 }
 
-class WebSocketService {
+export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error'
+
+export interface WebSocketConfig {
+  url: string
+  maxReconnectAttempts?: number
+  reconnectDelay?: (attempt: number) => number
+}
+
+export type MessageHandler = (message: WebSocketMessage) => void
+export type ConnectionStateHandler = (state: ConnectionState) => void
+
+export class WebSocketService {
   private ws: WebSocket | null = null
-  private subscriptions = new Set<string>()
-  private messageHandlers = new Map<string, Function[]>()
+  private config: Required<WebSocketConfig>
+  private messageHandlers = new Map<string, MessageHandler[]>()
+  private connectionStateHandlers: ConnectionStateHandler[] = []
+  private messageQueue: any[] = []
+  private reconnectAttempts = 0
+  private reconnectTimer: number | null = null
+  private _connectionState: ConnectionState = 'disconnected'
 
-  connect() {
-    const wsUrl = `ws://localhost:8080/ws`
-    this.ws = new WebSocket(wsUrl)
-
-    this.ws.onopen = () => {
-      console.log('WebSocket connected')
-    }
-
-    this.ws.onmessage = (event) => {
-      const message: WebSocketMessage = JSON.parse(event.data)
-      console.log('Received message', message)
-      //this.handleMessage(message)
-    }
-
-    this.ws.onclose = () => {
-      console.log('WebSocket disconnected')
+  constructor(config: WebSocketConfig) {
+    this.config = {
+      url: config.url,
+      maxReconnectAttempts: config.maxReconnectAttempts ?? 5,
+      reconnectDelay:
+        config.reconnectDelay ?? ((attempt) => Math.min(1000 * Math.pow(2, attempt), 30000)),
     }
   }
 
-  subscribe(subscription: Subscription) {
-    if (!this.ws) {
-      this.connect()
+  get connectionState(): ConnectionState {
+    return this._connectionState
+  }
+
+  get isConnected(): boolean {
+    return this._connectionState === 'connected'
+  }
+
+  get isConnecting(): boolean {
+    return this._connectionState === 'connecting'
+  }
+
+  // Connection management
+  connect(): void {
+    if (this._connectionState === 'connecting' || this._connectionState === 'connected') {
+      return
     }
 
-    const subKey = this.getSubscriptionKey(subscription)
-    if (this.subscriptions.has(subKey)) return
+    this.setConnectionState('connecting')
 
-    this.subscriptions.add(subKey)
-    this.send({
-      type: 'subscribe',
-      data: subscription,
-    })
+    try {
+      this.ws = new WebSocket(this.config.url)
+      this.setupEventHandlers()
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error)
+      this.setConnectionState('error')
+    }
   }
 
-  unsubscribe(subscription: Subscription) {
-    if (!this.ws) {
-      this.connect()
+  disconnect(): void {
+    this.clearReconnectTimer()
+
+    if (this.ws) {
+      this.ws.close(1000, 'Client disconnecting')
+      this.ws = null
     }
 
-    const subKey = this.getSubscriptionKey(subscription)
-    this.subscriptions.delete(subKey)
-    this.send({
-      type: 'unsubscribe',
-      data: subscription,
-    })
+    this.setConnectionState('disconnected')
+    this.messageQueue = []
+    this.reconnectAttempts = 0
   }
 
-  private handleMessage(message: WebSocketMessage) {
-    const handlers = this.messageHandlers.get(message.type) || []
-    handlers.forEach((handler) => handler(message))
+  // Message handling
+  send(data: any): void {
+    if (this.isConnected && this.ws) {
+      this.ws.send(JSON.stringify(data))
+    } else {
+      this.messageQueue.push(data)
+
+      // Auto-connect if not already connecting
+      if (!this.isConnecting) {
+        this.connect()
+      }
+    }
   }
 
-  onMessage(type: string, handler: Function) {
+  onMessage(type: string, handler: MessageHandler): () => void {
     if (!this.messageHandlers.has(type)) {
       this.messageHandlers.set(type, [])
     }
     this.messageHandlers.get(type)!.push(handler)
-  }
 
-  private send(data: any) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(data))
+    // Return unsubscribe function
+    return () => {
+      const handlers = this.messageHandlers.get(type)
+      if (handlers) {
+        const index = handlers.indexOf(handler)
+        if (index > -1) {
+          handlers.splice(index, 1)
+        }
+      }
     }
   }
 
-  private getSubscriptionKey(sub: Subscription): string {
-    return `${sub.type}:${sub.post_id || 'global'}`
+  onConnectionStateChange(handler: ConnectionStateHandler): () => void {
+    this.connectionStateHandlers.push(handler)
+
+    // Return unsubscribe function
+    return () => {
+      const index = this.connectionStateHandlers.indexOf(handler)
+      if (index > -1) {
+        this.connectionStateHandlers.splice(index, 1)
+      }
+    }
+  }
+
+  // Private methods
+  private setupEventHandlers(): void {
+    if (!this.ws) return
+
+    this.ws.onopen = () => {
+      console.log('WebSocket connected')
+      this.setConnectionState('connected')
+      this.reconnectAttempts = 0
+      this.processMessageQueue()
+    }
+
+    this.ws.onmessage = (event) => {
+      try {
+        const message: WebSocketMessage = JSON.parse(event.data)
+        this.handleMessage(message)
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error)
+      }
+    }
+
+    this.ws.onclose = (event) => {
+      console.log('WebSocket disconnected', event.code, event.reason)
+      this.setConnectionState('disconnected')
+      this.ws = null
+
+      // Attempt reconnection if it wasn't a clean close
+      if (event.code !== 1000 && this.reconnectAttempts < this.config.maxReconnectAttempts) {
+        this.scheduleReconnect()
+      }
+    }
+
+    this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error)
+      this.setConnectionState('error')
+    }
+  }
+
+  private handleMessage(message: WebSocketMessage): void {
+    const handlers = this.messageHandlers.get(message.type) || []
+    handlers.forEach((handler) => {
+      try {
+        handler(message)
+      } catch (error) {
+        console.error('Error in WebSocket message handler:', error)
+      }
+    })
+  }
+
+  private setConnectionState(state: ConnectionState): void {
+    if (this._connectionState !== state) {
+      this._connectionState = state
+      this.connectionStateHandlers.forEach((handler) => {
+        try {
+          handler(state)
+        } catch (error) {
+          console.error('Error in connection state handler:', error)
+        }
+      })
+    }
+  }
+
+  private processMessageQueue(): void {
+    while (this.messageQueue.length > 0 && this.isConnected && this.ws) {
+      const message = this.messageQueue.shift()
+      this.ws.send(JSON.stringify(message))
+    }
+  }
+
+  private scheduleReconnect(): void {
+    this.clearReconnectTimer()
+
+    const delay = this.config.reconnectDelay(this.reconnectAttempts)
+    this.reconnectAttempts++
+
+    console.log(`Scheduling WebSocket reconnect attempt ${this.reconnectAttempts} in ${delay}ms`)
+
+    this.reconnectTimer = window.setTimeout(() => {
+      this.connect()
+    }, delay)
+  }
+
+  private clearReconnectTimer(): void {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
+    }
   }
 }
 
-export const wsService = new WebSocketService()
+// Create singleton instance
+export const wsService = new WebSocketService({
+  url: 'ws://localhost:8080/ws',
+})

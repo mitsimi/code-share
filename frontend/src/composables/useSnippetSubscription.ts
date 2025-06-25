@@ -1,17 +1,18 @@
 import { onMounted, onUnmounted, watch } from 'vue'
 import { useWebSocket } from './useWebsocket'
 import { useAuthStore } from '@/stores/auth'
+import { SubscriptionType } from '@/services/websocket'
 
 export function useSnippetList() {
   const { subscribe, unsubscribe } = useWebSocket()
 
   onMounted(() => {
     // Subscribe to general post updates
-    subscribe({ type: 'post_updates' })
+    subscribe({ type: SubscriptionType.SNIPPET_UPDATES })
   })
 
   onUnmounted(() => {
-    unsubscribe({ type: 'post_updates' })
+    unsubscribe({ type: SubscriptionType.SNIPPET_UPDATES })
   })
 }
 
@@ -21,20 +22,20 @@ export function useSnippetDetails(snippetId: string) {
   onMounted(() => {
     // Subscribe to specific post stats
     subscribe({
-      type: 'post_stats',
+      type: SubscriptionType.SNIPPET_STATS,
       post_id: snippetId,
     })
 
     // Subscribe to post content updates
     subscribe({
-      type: 'post_updates',
+      type: SubscriptionType.SNIPPET_UPDATES,
       post_id: snippetId,
     })
   })
 
   onUnmounted(() => {
-    unsubscribe({ type: 'post_stats', post_id: snippetId })
-    unsubscribe({ type: 'post_updates', post_id: snippetId })
+    unsubscribe({ type: SubscriptionType.SNIPPET_STATS, post_id: snippetId })
+    unsubscribe({ type: SubscriptionType.SNIPPET_UPDATES, post_id: snippetId })
   })
 }
 
@@ -46,9 +47,9 @@ export function useUserActions() {
     isAuthenticated,
     (authStatus) => {
       if (authStatus) {
-        subscribe({ type: 'user_actions' })
+        subscribe({ type: SubscriptionType.USER_ACTIONS })
       } else {
-        unsubscribe({ type: 'user_actions' })
+        unsubscribe({ type: SubscriptionType.USER_ACTIONS })
       }
     },
     { immediate: true },

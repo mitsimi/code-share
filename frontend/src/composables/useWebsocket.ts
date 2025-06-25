@@ -1,20 +1,23 @@
-import { wsService, type WebSocketMessage } from '@/services/websocket'
+import { useWebSocketStore } from '@/stores/websocket'
+import { type WebSocketMessage } from '@/services/websocket'
 import { useQueryClient } from '@tanstack/vue-query'
+import { onUnmounted } from 'vue'
 
 export function useWebSocket() {
+  const wsStore = useWebSocketStore()
   const queryClient = useQueryClient()
 
   // Setup message handlers for TanStack Query integration
-  wsService.onMessage('user_post_like', (message: WebSocketMessage) => {
+  const unsubscribeLike = wsStore.onMessage('user_post_like', (message: WebSocketMessage) => {
     // Update user's like status in cache
     console.log('user_post_like', message)
   })
 
-  wsService.onMessage('post_stats', (message: WebSocketMessage) => {
+  const unsubscribeStats = wsStore.onMessage('post_stats', (message: WebSocketMessage) => {
     console.log('post_stats', message)
   })
 
-  wsService.onMessage('post_update', (message: WebSocketMessage) => {
+  const unsubscribeUpdate = wsStore.onMessage('post_update', (message: WebSocketMessage) => {
     // Invalidate and refetch post data
     console.log('post_update', message)
     queryClient.setQueryData(['snippet', message.data.snippet_id], (old: any) => {
@@ -28,9 +31,25 @@ export function useWebSocket() {
     })
   })
 
+  // Cleanup handlers when component unmounts
+  onUnmounted(() => {
+    unsubscribeLike()
+    unsubscribeStats()
+    unsubscribeUpdate()
+  })
+
   return {
-    connect: wsService.connect.bind(wsService),
-    subscribe: wsService.subscribe.bind(wsService),
-    unsubscribe: wsService.unsubscribe.bind(wsService),
+    // State
+    isConnected: wsStore.isConnected,
+    isConnecting: wsStore.isConnecting,
+    connectionState: wsStore.connectionState,
+    subscriptions: wsStore.subscriptions,
+
+    // Methods
+    connect: wsStore.connect,
+    subscribe: wsStore.subscribe,
+    unsubscribe: wsStore.unsubscribe,
+    onMessage: wsStore.onMessage,
+    cleanupAuthenticatedSubscriptions: wsStore.cleanupAuthenticatedSubscriptions,
   }
 }
