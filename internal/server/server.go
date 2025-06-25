@@ -11,12 +11,14 @@ import (
 	"time"
 
 	"mitsimi.dev/codeShare/frontend"
+	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/repository"
 	"mitsimi.dev/codeShare/internal/services"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"go.uber.org/zap"
 )
 
@@ -123,8 +125,29 @@ func (s *Server) setupMiddleware() {
 
 // setupRoutes configures the server routes
 func (s *Server) setupRoutes() {
+	// Create auth middleware
+	authMiddleware := api.NewAuthMiddleware(s.users, s.sessions, s.secretKey)
+
+	s.router.Use(authMiddleware.TryAttachUserID) // Attach user ID to context
+	s.router.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:3000",         // Development
+			"https://codeshare.mitsimi.dev", // Production
+		},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
+	// Setup WebSocket routes (must be before API routes to avoid middleware conflicts)
+	s.setupWebSocketRoutes()
+
 	// Setup API routes
-	s.router.Route("/api", s.setupAPIRoutes)
+	s.router.Route("/api", func(r chi.Router) {
+		s.setupAPIRoutes(r, authMiddleware)
+	})
 
 	// Only serve static files if SERVE_STATIC is set to "true"
 	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {

@@ -8,27 +8,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 )
 
 // setupAPIRoutes configures all API routes
-func (s *Server) setupAPIRoutes(r chi.Router) {
-	// Create auth middleware
-	authMiddleware := api.NewAuthMiddleware(s.users, s.sessions, s.secretKey)
-
-	r.Use(authMiddleware.TryAttachUserID) // Attach user ID to context
-	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:3000",         // Development
-			"https://codeshare.mitsimi.dev", // Production
-		},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}))
-
+func (s *Server) setupAPIRoutes(r chi.Router, authMiddleware *api.AuthMiddleware) {
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Timeout(15 * time.Second)) // Set a timeout for all API routes
 		r.Use(middleware.SetHeader("Content-Type", "application/json; charset=utf-8"))
