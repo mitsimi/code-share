@@ -213,6 +213,7 @@ const handleSubmit = () => {
   }
 
   emit('submit', submitData)
+  emit('close')
 }
 
 const handleCancel = () => {
