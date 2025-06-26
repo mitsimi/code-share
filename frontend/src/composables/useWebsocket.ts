@@ -24,8 +24,7 @@ export function useWebSocket() {
     (message: WebSocketMessage) => {
       // Handle user action data with proper typing
       const actionData = message.data as UserActionData
-
-      snippetsStore.handleUserAction(actionData.snippet_id, actionData.action, actionData.value)
+      snippetsStore.handleUserAction(actionData)
 
       // Invalidate related queries to ensure consistency
       queryClient.invalidateQueries({ queryKey: ['my-snippets'] })

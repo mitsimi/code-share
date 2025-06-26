@@ -42,6 +42,7 @@ type UserActionData struct {
 	Action    string `json:"action"` // "like", "unlike", "save", "unsave"
 	SnippetID string `json:"snippet_id"`
 	Value     bool   `json:"value"` // true for like/save, false for unlike/unsave
+	LikeCount int    `json:"like_count,omitempty"`
 }
 
 // Snippet updates data - for single snippet view (includes content + stats)

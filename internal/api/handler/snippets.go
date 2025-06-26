@@ -364,6 +364,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 			Action:    action,
 			SnippetID: id,
 			Value:     snippet.IsLiked,
+			LikeCount: snippet.Likes,
 		})
 		h.wsHub.BroadcastSnippetStatsUpdate(id, &snippet.Views, &snippet.Likes)
 	}

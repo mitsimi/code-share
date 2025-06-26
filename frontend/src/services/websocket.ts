@@ -41,6 +41,7 @@ export interface UserActionData {
   action: string // "like", "unlike", "save", "unsave"
   snippet_id: string
   value: boolean // true for like/save, false for unlike/unsave
+  like_count?: number
 }
 
 // Snippet update data structure from backend

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Snippet } from '@/types'
+import type { UserActionData } from '@/services/websocket'
 
 export const useSnippetsStore = defineStore('snippets', () => {
   // State - using Map for O(1) lookups
@@ -53,24 +54,31 @@ export const useSnippetsStore = defineStore('snippets', () => {
   }
 
   // WebSocket-specific actions
-  const handleUserAction = (snippetId: string, action: string, value: boolean) => {
-    const snippet = snippetsMap.value.get(snippetId)
+  const handleUserAction = (actionData: UserActionData) => {
+    const snippet = snippetsMap.value.get(actionData.snippet_id)
     if (!snippet) return
 
     const updated = { ...snippet }
 
-    switch (action) {
+    switch (actionData.action) {
       case 'like':
+        updated.isLiked = actionData.value
+        updated.likes = actionData.like_count ?? updated.likes + 1
       case 'unlike':
-        updated.isLiked = value
+        updated.isLiked = actionData.value
+        updated.likes = actionData.like_count
+          ? actionData.like_count
+          : updated.likes - 1 <= 0
+            ? 0
+            : updated.likes - 1
         break
       case 'save':
       case 'unsave':
-        updated.isSaved = value
+        updated.isSaved = actionData.value
         break
     }
 
-    snippetsMap.value.set(snippetId, updated)
+    snippetsMap.value.set(actionData.snippet_id, updated)
   }
 
   const handleContentUpdate = (
