@@ -304,6 +304,12 @@ export class WebSocketService {
 }
 
 // Create singleton instance
+const getWebSocketUrl = (): string => {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  const host = window.location.host
+  return `${protocol}//${host}/ws`
+}
+
 export const wsService = new WebSocketService({
-  url: 'ws://localhost:8080/ws',
+  url: getWebSocketUrl(),
 })
