@@ -14,7 +14,7 @@ func (s *Server) startSessionCleanup() {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			if err := s.sessions.DeleteExpired(context.Background()); err != nil {
+			if err := s.repos.Sessions.DeleteExpired(context.Background()); err != nil {
 				s.logger.Error("Failed to delete expired sessions", zap.Error(err))
 			} else {
 				s.logger.Debug("Successfully cleaned up expired sessions")

@@ -19,7 +19,7 @@ func (s *Server) setupAPIRoutes(r chi.Router, authMiddleware *api.AuthMiddleware
 
 		// Auth routes
 		r.Route("/auth", func(r chi.Router) {
-			handler := handler.NewAuthHandler(s.users, s.sessions, s.secretKey)
+			handler := handler.NewAuthHandler(s.repos.Users, s.repos.Sessions, s.secretKey)
 			r.Post("/register", handler.Register)
 			r.Post("/login", handler.Login)
 			r.Post("/logout", handler.Logout)
@@ -28,7 +28,7 @@ func (s *Server) setupAPIRoutes(r chi.Router, authMiddleware *api.AuthMiddleware
 
 		// User routes
 		r.Route("/users", func(r chi.Router) {
-			handler := handler.NewUserHandler(s.users, s.snippets, s.likes, s.bookmarks)
+			handler := handler.NewUserHandler(s.repos.Users, s.repos.Snippets, s.repos.Likes, s.repos.Bookmarks)
 			r.Use(authMiddleware.RequireAuth) // Protect user routes
 
 			r.Route("/{id}", func(r chi.Router) {
@@ -62,7 +62,7 @@ func (s *Server) setupAPIRoutes(r chi.Router, authMiddleware *api.AuthMiddleware
 
 		// Snippet routes
 		r.Route("/snippets", func(r chi.Router) {
-			handler := handler.NewSnippetHandler(s.snippets, s.likes, s.bookmarks, s.viewTracker, s.wsHub)
+			handler := handler.NewSnippetHandler(s.repos.Snippets, s.repos.Likes, s.repos.Bookmarks, s.viewTracker, s.wsHub)
 
 			// Public routes
 			r.Group(func(r chi.Router) {

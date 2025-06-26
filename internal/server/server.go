@@ -25,12 +25,7 @@ import (
 type Server struct {
 	router             *chi.Mux
 	httpServer         *http.Server
-	snippets           repository.SnippetRepository
-	likes              repository.LikeRepository
-	bookmarks          repository.BookmarkRepository
-	users              repository.UserRepository
-	sessions           repository.SessionRepository
-	views              repository.ViewRepository
+	repos              *repository.Container
 	viewTracker        *services.ViewTracker
 	wsHub              *ws.Hub
 	logger             *zap.Logger
@@ -41,28 +36,18 @@ type Server struct {
 
 // New creates a new server instance
 func New(
-	snippets repository.SnippetRepository,
-	likes repository.LikeRepository,
-	bookmarks repository.BookmarkRepository,
-	users repository.UserRepository,
-	sessions repository.SessionRepository,
-	views repository.ViewRepository,
+	repos *repository.Container,
 	secretKey string,
 	serveStatic bool,
 	corsAllowedOrigins []string,
 ) *Server {
 	// Create view tracker
-	viewTracker := services.NewViewTracker(views)
+	viewTracker := services.NewViewTracker(repos.Views)
 	wsHub := ws.NewHub()
 
 	s := &Server{
 		router:             chi.NewRouter(),
-		snippets:           snippets,
-		likes:              likes,
-		bookmarks:          bookmarks,
-		users:              users,
-		sessions:           sessions,
-		views:              views,
+		repos:              repos,
 		viewTracker:        viewTracker,
 		wsHub:              wsHub,
 		logger:             logger.Log,
@@ -139,7 +124,7 @@ func (s *Server) setupMiddleware() {
 // setupRoutes configures the server routes
 func (s *Server) setupRoutes() {
 	// Create auth middleware
-	authMiddleware := api.NewAuthMiddleware(s.users, s.sessions, s.secretKey)
+	authMiddleware := api.NewAuthMiddleware(s.repos.Users, s.repos.Sessions, s.secretKey)
 
 	s.router.Use(authMiddleware.TryAttachUserID) // Attach user ID to context
 	s.router.Use(cors.Handler(cors.Options{
