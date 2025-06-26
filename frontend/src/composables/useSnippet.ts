@@ -8,13 +8,11 @@ export function useSnippet(snippetId: string) {
   const snippetsStore = useSnippetsStore()
   const queryClient = useQueryClient()
 
-  // Use TanStack Query for fetching, but sync data to Pinia store
   const { isPending, isError, error, refetch } = useQuery({
     queryKey: ['snippet', snippetId],
     queryFn: async () => {
       try {
         const data = await snippetsService.getSnippet(snippetId)
-        // Store the fetched snippet in the Map
         snippetsStore.addSnippet(data)
         return data
       } catch (err) {
@@ -36,8 +34,10 @@ export function useSnippet(snippetId: string) {
 
       // Also update TanStack Query cache for consistency
       queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
-      queryClient.invalidateQueries({ queryKey: ['snippets'] })
+
       queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
 
       toast.success('Snippet updated successfully')
     },
@@ -55,8 +55,10 @@ export function useSnippet(snippetId: string) {
 
       // Remove from TanStack Query cache
       queryClient.removeQueries({ queryKey: ['snippet', snippetId] })
-      queryClient.invalidateQueries({ queryKey: ['snippets'] })
+
       queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
 
       toast.success('Snippet deleted successfully')
     },
