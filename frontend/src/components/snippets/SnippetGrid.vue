@@ -114,6 +114,7 @@ import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RotateCcw, FileCode, Plus } from 'lucide-vue-next'
 import type { Snippet } from '@/types'
+import { useSnippetList } from '@/composables/useSnippetSubscription'
 
 withDefaults(
   defineProps<{
@@ -145,4 +146,6 @@ const router = useRouter()
 const handleCardClick = (snippet: Snippet) => {
   router.push({ name: 'snippet-details', params: { snippetId: snippet.id } })
 }
+
+useSnippetList()
 </script>

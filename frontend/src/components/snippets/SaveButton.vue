@@ -33,8 +33,10 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { toast } from 'vue-sonner'
 import type { ButtonProps } from '@/components/ui/button'
+import { useSnippetsStore } from '@/stores/snippets'
 
 const authStore = useAuthStore()
+const snippetsStore = useSnippetsStore()
 const queryClient = useQueryClient()
 
 const props = withDefaults(
@@ -65,22 +67,21 @@ const { mutate: updateSave } = useMutation<
     }
   },
   onSuccess: (updatedSnippet) => {
-    // Update the snippet in the details view
     queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
 
-    // Update the snippet in the list view
-    queryClient.setQueryData(['snippets'], (oldData: Snippet[] | undefined) => {
-      if (!oldData) return [updatedSnippet]
-      return oldData.map((snippet) => (snippet.id === updatedSnippet.id ? updatedSnippet : snippet))
+    snippetsStore.updateSnippet(updatedSnippet.id, {
+      isSaved: updatedSnippet.isSaved,
     })
 
-    // Invalidate saved snippets query to trigger a refetch
     queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
   },
-  onError: (error) => {
-    console.error('Save mutation failed:', error)
+  onError: (error, { snippetId, action }) => {
+    const revertAction = action === 'save' ? 'unsave' : 'save'
+    snippetsStore.handleUserAction(snippetId, revertAction, action === 'unsave')
+
+    console.error('Like mutation failed:', error)
     toast.error(error.message || 'Please try again')
   },
 })

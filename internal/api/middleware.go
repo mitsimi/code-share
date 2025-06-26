@@ -78,7 +78,7 @@ func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 		if userID == "" {
 			requestID := middleware.GetReqID(r.Context())
 			log := m.logger.With(zap.String("request_id", requestID))
-			log.Error("authentication required but not provided")
+			log.Error("authentication required but not provided", zap.String("path", r.URL.Path))
 			http.Error(w, "Not authenticated", http.StatusUnauthorized)
 			return
 		}

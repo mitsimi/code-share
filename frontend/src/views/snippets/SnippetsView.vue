@@ -1,58 +1,35 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import { type Snippet } from '@/types'
-import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
-import { snippetsService } from '@/services/snippets'
 import { ref } from 'vue'
-import { toast } from 'vue-sonner'
 import SnippetFormModal from './_components/SnippetFormModal.vue'
+import { useSnippets } from '@/composables/useSnippets'
 
 const authStore = useAuthStore()
-
 const showModal = ref(false)
-const queryClient = useQueryClient()
 
-const { isPending, isError, data, error, refetch } = useQuery({
-  queryKey: ['snippets'],
-  queryFn: snippetsService.getSnippets,
-  staleTime: 1000 * 60, // Consider data fresh for 1 minute
-})
+// Use the new hybrid composable
+const { snippets, isLoading, isError, error, createSnippet, isCreating, refetch } = useSnippets()
 
-const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
-  mutationFn: (formData: { title: string; content: string; language?: string }) =>
-    snippetsService.createSnippet({
-      title: formData.title,
-      content: formData.content,
-      language: formData.language,
-    }),
-  onSuccess: (newSnippet) => {
-    // Update the cache with the new snippet
-    queryClient.setQueryData(['snippets'], (oldData: Snippet[] | undefined) => {
-      if (!oldData) return [newSnippet]
-      return [newSnippet, ...oldData]
-    })
-
-    showModal.value = false
-    toast.success('Snippet added successfully', {
-      description: `"${newSnippet.title}" has been added successfully!`,
-    })
-  },
-  onError: (error) => {
-    toast.error(
-      error instanceof Error ? error.message : 'Failed to create snippet. Please try again.',
-    )
-  },
-})
+const handleCreateSnippet = (formData: { title: string; content: string; language?: string }) => {
+  createSnippet({
+    title: formData.title,
+    content: formData.content,
+    language: formData.language,
+  })
+  showModal.value = false
+}
 </script>
 
 <template>
   <main class="container mx-auto max-w-7xl px-8">
     <SnippetGrid
-      :snippets="data || []"
-      :is-loading="isPending"
-      :is-empty="!isPending && (!data || data.length === 0)"
+      :snippets="snippets || []"
+      :is-loading="isLoading"
+      :is-empty="!isLoading && (!snippets || snippets.length === 0)"
       :is-error="isError"
-      :error-message="error?.message || 'An unexpected error occurred'"
+      :error-message="
+        (error instanceof Error ? error.message : error) || 'An unexpected error occurred'
+      "
       @retry="refetch"
       @create-snippet="showModal = true"
     />
@@ -64,8 +41,8 @@ const { mutate: submitSnippet, isPending: isSubmitting } = useMutation({
 
   <SnippetFormModal
     :show="showModal"
-    :is-loading="isSubmitting"
+    :is-loading="isCreating"
     @close="showModal = false"
-    @submit="submitSnippet"
+    @submit="handleCreateSnippet"
   />
 </template>
