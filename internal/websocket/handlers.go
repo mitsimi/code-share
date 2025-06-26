@@ -29,7 +29,7 @@ func HandleWebSocket(hub *Hub) http.HandlerFunc {
 
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Error("WebSocket upgrade failed", zap.Error(err))
+			log.Warn("WebSocket upgrade failed", zap.Error(err))
 			return
 		}
 

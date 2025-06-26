@@ -45,21 +45,21 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.RegistrationRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body", zap.Error(err))
+		log.Warn("failed to decode request body", zap.Error(err))
 		api.WriteError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	// Validate email
 	if !isValidEmail(req.Email) {
-		log.Error("invalid email format", zap.String("email", req.Email))
+		log.Warn("invalid email format", zap.String("email", req.Email))
 		api.WriteError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	// Validate password
 	if err := validatePassword(req.Password); err != nil {
-		log.Error("invalid password", zap.Error(err))
+		log.Warn("invalid password", zap.Error(err))
 		api.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -79,7 +79,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if repository.IsAlreadyExists(err) {
-			log.Error("username or email already exists",
+			log.Warn("username or email already exists",
 				zap.String("username", req.Username),
 				zap.String("email", req.Email),
 			)
@@ -106,7 +106,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// Set session cookie
 	h.setCookie(w, r, sessionToken, response.ExpiresAt)
 
-	log.Debug("user signed up successfully",
+	log.Info("user signed up successfully",
 		zap.String("username", response.User.Username),
 		zap.String("email", response.User.Email),
 	)
@@ -121,7 +121,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body", zap.Error(err))
+		log.Warn("failed to decode request body", zap.Error(err))
 		api.WriteError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
@@ -129,7 +129,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Authenticate user
 	userID, err := h.authenticateUser(r.Context(), req.Username, req.Password)
 	if err != nil {
-		log.Error("failed to login",
+		log.Warn("failed to login",
 			zap.Error(err),
 			zap.String("username", req.Username),
 		)
@@ -148,7 +148,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Set session cookie
 	h.setCookie(w, r, sessionToken, response.ExpiresAt)
 
-	log.Debug("user logged in successfully",
+	log.Info("user logged in successfully",
 		zap.String("username", response.User.Username),
 		zap.String("email", response.User.Email),
 	)
@@ -164,7 +164,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	// Get session cookie
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		log.Error("failed to get session cookie",
+		log.Warn("failed to get session cookie",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusUnauthorized, "Not authenticated")
@@ -193,7 +193,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   -1,
 	})
 
-	log.Debug("user logged out successfully")
+	log.Info("user logged out successfully")
 	api.WriteSuccess(w, http.StatusOK, "Logout successful", nil)
 }
 
@@ -208,7 +208,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		RefreshToken string `json:"refreshToken"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body", zap.Error(err))
+		log.Warn("failed to decode request body", zap.Error(err))
 		api.WriteError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
@@ -221,7 +221,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		if session, err := h.sessions.GetByToken(r.Context(), cookie.Value); err == nil && session.ExpiresAt > time.Now().Unix() {
 			// Validate refresh token matches session
 			if req.RefreshToken != session.RefreshToken {
-				log.Error("refresh token mismatch")
+				log.Warn("refresh token mismatch")
 				api.WriteError(w, http.StatusUnauthorized, "Invalid refresh token")
 				return
 			}
@@ -234,7 +234,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if session.UserID != userID {
-				log.Error("session user ID mismatch", zap.String("session_user_id", session.UserID), zap.String("request_user_id", userID))
+				log.Warn("session user ID mismatch", zap.String("session_user_id", session.UserID), zap.String("request_user_id", userID))
 				api.WriteError(w, http.StatusUnauthorized, "Invalid session")
 				return
 			}
@@ -247,19 +247,19 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	if !sessionBasedSuccess {
 		claims, err := auth.ValidateToken(req.RefreshToken, h.secretKey)
 		if err != nil {
-			log.Error("invalid refresh token", zap.Error(err))
+			log.Warn("invalid refresh token", zap.Error(err))
 			api.WriteError(w, http.StatusUnauthorized, "Invalid refresh token")
 			return
 		}
 
 		if !claims.IsRefresh {
-			log.Error("token is not a refresh token")
+			log.Warn("token is not a refresh token")
 			api.WriteError(w, http.StatusUnauthorized, "Invalid token type")
 			return
 		}
 
 		if claims.UserID != userID {
-			log.Error("token user ID mismatch", zap.String("token_user_id", claims.UserID), zap.String("request_user_id", userID))
+			log.Warn("token user ID mismatch", zap.String("token_user_id", claims.UserID), zap.String("request_user_id", userID))
 			api.WriteError(w, http.StatusUnauthorized, "Invalid token")
 			return
 		}

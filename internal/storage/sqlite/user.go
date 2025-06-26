@@ -27,7 +27,7 @@ func NewUserRepository(dbConn *sql.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(ctx context.Context, user *domain.UserCreation) (*domain.User, error) {
-	logger.Log.Debug("Creating new user", zap.String("username", user.Username), zap.String("email", user.Email), zap.String("password_hash", user.PasswordHash))
+	logger.Log.Info("Creating new user", zap.String("username", user.Username), zap.String("email", user.Email), zap.String("password_hash", user.PasswordHash))
 	newUser, err := r.q.CreateUser(ctx, db.CreateUserParams{
 		ID:           user.ID,
 		Username:     user.Username,
