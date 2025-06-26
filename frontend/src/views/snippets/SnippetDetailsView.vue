@@ -150,8 +150,6 @@
                       variant="outline"
                       size="sm"
                       class="flex-1"
-                      :likes="snippet.likes"
-                      :isLiked="snippet.isLiked"
                       :snippetId="snippet.id"
                       :hideCount="true"
                     />

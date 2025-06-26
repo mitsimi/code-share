@@ -37,11 +37,18 @@ export interface SubscriptionRequest {
 }
 
 // User action data structure from backend
-export interface UserActionData {
-  action: string // "like", "unlike", "save", "unsave"
-  snippet_id: string
-  value: boolean // true for like/save, false for unlike/unsave
-}
+export type UserActionData =
+  | {
+      action: 'like' | 'unlike'
+      snippet_id: string
+      value: boolean
+      like_count: number
+    }
+  | {
+      action: 'save' | 'unsave'
+      snippet_id: string
+      value: true
+    }
 
 // Snippet update data structure from backend
 export interface SnippetUpdateData {

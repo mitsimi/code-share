@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { Heart, LoaderCircleIcon } from 'lucide-vue-next'
 import { type Snippet } from '@/types'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useSnippetsStore } from '@/stores/snippets'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
@@ -44,8 +44,6 @@ const queryClient = useQueryClient()
 const props = withDefaults(
   defineProps<{
     snippetId: string
-    likes: number
-    isLiked: boolean
     hideCount?: boolean
     variant?: ButtonProps['variant']
   }>(),
@@ -54,6 +52,11 @@ const props = withDefaults(
     hideCount: false,
   },
 )
+
+// Get reactive snippet data from store
+const snippet = computed(() => snippetsStore.getSnippetById(props.snippetId))
+const likes = computed(() => snippet.value?.likes ?? 0)
+const isLiked = computed(() => snippet.value?.isLiked ?? false)
 
 const isLoading = ref(false)
 
@@ -85,7 +88,12 @@ const { mutate: updateLike } = useMutation<
   },
   onError: (error, { snippetId, action }) => {
     const revertAction = action === 'like' ? 'unlike' : 'like'
-    snippetsStore.handleUserAction(snippetId, revertAction, action === 'unlike')
+    snippetsStore.handleUserAction({
+      action: revertAction,
+      snippet_id: snippetId,
+      value: revertAction === 'like',
+      like_count: likes.value,
+    })
 
     console.error('Like mutation failed:', error)
     toast.error(error.message || 'Please try again')
@@ -102,10 +110,15 @@ const toggleLike = () => {
     return
   }
 
-  const action = props.isLiked ? 'unlike' : 'like'
+  const action = isLiked.value ? 'unlike' : 'like'
 
   // Optimistic update - immediate UI feedback
-  snippetsStore.handleUserAction(props.snippetId, action, action === 'like')
+  snippetsStore.handleUserAction({
+    action,
+    snippet_id: props.snippetId,
+    value: action === 'like',
+    like_count: likes.value,
+  })
 
   // Then make the API call
   updateLike({ snippetId: props.snippetId, action })
