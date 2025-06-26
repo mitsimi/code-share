@@ -9,12 +9,14 @@ import (
 
 // Config holds the application configuration
 type Config struct {
-	Environment string `env:"GO_ENV" env-default:"development"`
-	Port        string `env:"PORT" env-default:"8080"`
-	DBPath      string `env:"DB_PATH" env-default:"data/codeshare.db"`
-	LogLevel    string `env:"LOG_LEVEL" env-default:"info"`
-	Seed        bool   `env:"SEED" env-default:"false"`
-	JWTSecret   string `env:"JWT_SECRET"`
+	Environment        string   `env:"GO_ENV" env-default:"development"`
+	Port               string   `env:"PORT" env-default:"8080"`
+	DBPath             string   `env:"DB_PATH" env-default:"data/codeshare.db"`
+	LogLevel           string   `env:"LOG_LEVEL" env-default:"info"`
+	Seed               bool     `env:"SEED" env-default:"false"`
+	JWTSecret          string   `env:"JWT_SECRET"`
+	ServeStatic        bool     `env:"SERVE_STATIC" env-default:"false"`
+	CORSAllowedOrigins []string `env:"CORS_ALLOWED_ORIGINS" env-default:"http://localhost:3000" env-separator:","`
 }
 
 // New creates a new configuration

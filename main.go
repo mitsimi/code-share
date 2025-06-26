@@ -69,6 +69,8 @@ func main() {
 		sessions,
 		views,
 		cfg.JWTSecret,
+		cfg.ServeStatic,
+		cfg.CORSAllowedOrigins,
 	)
 
 	// Channel to listen for interrupt signals
