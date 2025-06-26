@@ -181,15 +181,16 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       await authService.logout()
-      clearAuth()
-      toast.success('You have been logged out successfully')
-      router.push('/login')
     } catch (error) {
       toast.error('Failed to logout')
-      // Still clear local auth state even if the server request fails
-      clearAuth()
-      router.push('/login')
     }
+
+    clearAuth()
+
+    // Clean up authenticated WebSocket subscriptions
+    const { useWebSocketStore } = await import('./websocket')
+    const wsStore = useWebSocketStore()
+    wsStore.cleanupAuthenticatedSubscriptions()
   }
 
   return {

@@ -72,23 +72,18 @@ const { mutate: updateLike } = useMutation<
     }
   },
   onSuccess: (updatedSnippet) => {
-    // Update the snippet in the details view
     queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
 
-    // The Pinia store is already updated optimistically,
-    // but we sync with the server response to ensure consistency
     snippetsStore.updateSnippet(updatedSnippet.id, {
       isLiked: updatedSnippet.isLiked,
       likes: updatedSnippet.likes,
     })
 
-    // Invalidate related queries
     queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
   },
   onError: (error, { snippetId, action }) => {
-    // Revert optimistic update on error
     const revertAction = action === 'like' ? 'unlike' : 'like'
     snippetsStore.handleUserAction(snippetId, revertAction, action === 'unlike')
 

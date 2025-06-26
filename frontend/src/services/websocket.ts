@@ -8,15 +8,60 @@ export interface WebSocketMessage {
   timestamp: number
 }
 
+// Message type constants to match backend
+export const MessageType = {
+  ERROR: 'error',
+  SUCCESS: 'success',
+  SUBSCRIBE: 'subscribe',
+  UNSUBSCRIBE: 'unsubscribe',
+  USER_ACTIONS: 'user_actions',
+  SNIPPET_UPDATES: 'snippet_updates',
+  LIST_UPDATES: 'list_updates',
+} as const
+
 export enum SubscriptionType {
   USER_ACTIONS = 'user_actions',
   SNIPPET_UPDATES = 'snippet_updates',
-  SNIPPET_STATS = 'snippet_stats',
+  LIST_UPDATES = 'list_updates',
 }
 
 export interface Subscription {
   type: SubscriptionType
-  post_id?: string
+  snippet_id?: string
+}
+
+// Backend-compatible subscription request structure
+export interface SubscriptionRequest {
+  type: SubscriptionType
+  snippet_id?: string
+}
+
+// User action data structure from backend
+export interface UserActionData {
+  action: string // "like", "unlike", "save", "unsave"
+  snippet_id: string
+  value: boolean // true for like/save, false for unlike/unsave
+}
+
+// Snippet update data structure from backend
+export interface SnippetUpdateData {
+  snippet_id: string
+  update_type: string // "content", "stats", "both"
+  // Content changes (optional)
+  title?: string
+  content?: string
+  language?: string
+  // Stats changes (optional)
+  view_count?: number
+  like_count?: number
+}
+
+// List update data structure from backend
+export interface ListUpdateData {
+  snippet_id: string
+  title?: string
+  content?: string
+  language?: string
 }
 
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error'
@@ -105,6 +150,34 @@ export class WebSocketService {
     }
   }
 
+  // Send subscription request in backend-compatible format
+  subscribe(subscription: Subscription): void {
+    const subscriptionRequest: SubscriptionRequest = {
+      type: subscription.type,
+      snippet_id: subscription.snippet_id,
+    }
+
+    this.send({
+      type: MessageType.SUBSCRIBE,
+      data: subscriptionRequest,
+      timestamp: Date.now(),
+    })
+  }
+
+  // Send unsubscription request in backend-compatible format
+  unsubscribe(subscription: Subscription): void {
+    const subscriptionRequest: SubscriptionRequest = {
+      type: subscription.type,
+      snippet_id: subscription.snippet_id,
+    }
+
+    this.send({
+      type: MessageType.UNSUBSCRIBE,
+      data: subscriptionRequest,
+      timestamp: Date.now(),
+    })
+  }
+
   onMessage(type: string, handler: MessageHandler): () => void {
     if (!this.messageHandlers.has(type)) {
       this.messageHandlers.set(type, [])
@@ -173,6 +246,12 @@ export class WebSocketService {
   }
 
   private handleMessage(message: WebSocketMessage): void {
+    // Handle backend response messages
+    if (message.type === MessageType.SUCCESS || message.type === MessageType.ERROR) {
+      return
+    }
+
+    // Forward other messages to registered handlers
     const handlers = this.messageHandlers.get(message.type) || []
     handlers.forEach((handler) => {
       try {

@@ -1,41 +1,85 @@
 import { useWebSocketStore } from '@/stores/websocket'
-import { type WebSocketMessage } from '@/services/websocket'
+import { useSnippetsStore } from '@/stores/snippets'
+import {
+  MessageType,
+  type WebSocketMessage,
+  type UserActionData,
+  type ListUpdateData,
+  type SnippetUpdateData,
+} from '@/services/websocket'
 import { useQueryClient } from '@tanstack/vue-query'
 import { onUnmounted } from 'vue'
 
 export function useWebSocket() {
   const wsStore = useWebSocketStore()
+  const snippetsStore = useSnippetsStore()
   const queryClient = useQueryClient()
 
   // Setup message handlers for TanStack Query integration
-  const unsubscribeLike = wsStore.onMessage('user_post_like', (message: WebSocketMessage) => {
-    // Update user's like status in cache
-    console.log('user_post_like', message)
-  })
 
-  const unsubscribeStats = wsStore.onMessage('post_stats', (message: WebSocketMessage) => {
-    console.log('post_stats', message)
-  })
+  // Update user's like/save status in cache based on action
+  // This will sync the UI when actions happen in other tabs/devices
+  const cleanupUserActionsHandler = wsStore.onMessage(
+    MessageType.USER_ACTIONS,
+    (message: WebSocketMessage) => {
+      // Handle user action data with proper typing
+      const actionData = message.data as UserActionData
 
-  const unsubscribeUpdate = wsStore.onMessage('post_update', (message: WebSocketMessage) => {
-    // Invalidate and refetch post data
-    console.log('post_update', message)
-    queryClient.setQueryData(['snippet', message.data.snippet_id], (old: any) => {
-      if (!old) return old
-      return {
-        ...old,
-        title: message.data.title,
-        content: message.data.content,
-        language: message.data.language,
+      snippetsStore.handleUserAction(actionData.snippet_id, actionData.action, actionData.value)
+
+      // Invalidate related queries to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+    },
+  )
+
+  const cleanupListUpdatesHandler = wsStore.onMessage(
+    MessageType.LIST_UPDATES,
+    (message: WebSocketMessage) => {
+      const updateData = message.data as ListUpdateData
+
+      snippetsStore.handleContentUpdate(updateData.snippet_id, updateData)
+
+      // Invalidate related queries to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+    },
+  )
+
+  const cleanupSnippetUpdatesHandler = wsStore.onMessage(
+    MessageType.SNIPPET_UPDATES,
+    (message: WebSocketMessage) => {
+      const snippetData = message.data as SnippetUpdateData
+
+      if (snippetData.update_type === 'stats') {
+        snippetsStore.handleStatsUpdate(snippetData.snippet_id, {
+          views: snippetData.view_count,
+          likes: snippetData.like_count,
+        })
+      } else if (snippetData.update_type === 'content') {
+        snippetsStore.handleContentUpdate(snippetData.snippet_id, snippetData)
+      } else if (snippetData.update_type === 'both') {
+        snippetsStore.handleContentUpdate(snippetData.snippet_id, snippetData)
+        snippetsStore.handleStatsUpdate(snippetData.snippet_id, {
+          views: snippetData.view_count,
+          likes: snippetData.like_count,
+        })
       }
-    })
-  })
+
+      // Invalidate related queries to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
+      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+    },
+  )
 
   // Cleanup handlers when component unmounts
   onUnmounted(() => {
-    unsubscribeLike()
-    unsubscribeStats()
-    unsubscribeUpdate()
+    cleanupUserActionsHandler()
+    cleanupListUpdatesHandler()
+    cleanupSnippetUpdatesHandler()
   })
 
   return {

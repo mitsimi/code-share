@@ -7,12 +7,11 @@ export function useSnippetList() {
   const { subscribe, unsubscribe } = useWebSocket()
 
   onMounted(() => {
-    // Subscribe to general post updates
-    subscribe({ type: SubscriptionType.SNIPPET_UPDATES })
+    subscribe({ type: SubscriptionType.LIST_UPDATES })
   })
 
   onUnmounted(() => {
-    unsubscribe({ type: SubscriptionType.SNIPPET_UPDATES })
+    unsubscribe({ type: SubscriptionType.LIST_UPDATES })
   })
 }
 
@@ -20,33 +19,25 @@ export function useSnippetDetails(snippetId: string) {
   const { subscribe, unsubscribe } = useWebSocket()
 
   onMounted(() => {
-    // Subscribe to specific post stats
-    subscribe({
-      type: SubscriptionType.SNIPPET_STATS,
-      post_id: snippetId,
-    })
-
-    // Subscribe to post content updates
     subscribe({
       type: SubscriptionType.SNIPPET_UPDATES,
-      post_id: snippetId,
+      snippet_id: snippetId,
     })
   })
 
   onUnmounted(() => {
-    unsubscribe({ type: SubscriptionType.SNIPPET_STATS, post_id: snippetId })
-    unsubscribe({ type: SubscriptionType.SNIPPET_UPDATES, post_id: snippetId })
+    unsubscribe({ type: SubscriptionType.SNIPPET_UPDATES, snippet_id: snippetId })
   })
 }
 
 export function useUserActions() {
   const { subscribe, unsubscribe } = useWebSocket()
-  const { isAuthenticated } = useAuthStore()
+  const authStore = useAuthStore()
 
   watch(
-    isAuthenticated,
-    (authStatus) => {
-      if (authStatus) {
+    () => authStore.isAuthenticated(),
+    (isAuthenticated) => {
+      if (isAuthenticated) {
         subscribe({ type: SubscriptionType.USER_ACTIONS })
       } else {
         unsubscribe({ type: SubscriptionType.USER_ACTIONS })
@@ -54,4 +45,9 @@ export function useUserActions() {
     },
     { immediate: true },
   )
+
+  // Cleanup on unmount
+  onUnmounted(() => {
+    unsubscribe({ type: SubscriptionType.USER_ACTIONS })
+  })
 }

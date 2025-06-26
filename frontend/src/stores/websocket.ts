@@ -6,6 +6,7 @@ import {
   type Subscription,
   type WebSocketMessage,
   type ConnectionState,
+  SubscriptionType,
 } from '@/services/websocket'
 
 // Define which subscription types require authentication
@@ -69,22 +70,17 @@ export const useWebSocketStore = defineStore('websocket', () => {
       return
     }
 
+    // Use the service's subscribe method instead of raw send
+    wsService.subscribe(subscription)
     subscriptions.value.add(subKey)
-
-    wsService.send({
-      type: 'subscribe',
-      data: subscription,
-    })
   }
 
   const unsubscribe = (subscription: Subscription) => {
     const subKey = getSubscriptionKey(subscription)
     subscriptions.value.delete(subKey)
 
-    wsService.send({
-      type: 'unsubscribe',
-      data: subscription,
-    })
+    // Use the service's unsubscribe method instead of raw send
+    wsService.unsubscribe(subscription)
   }
 
   // Clean up authenticated subscriptions when user logs out
@@ -100,16 +96,14 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
     subsToRemove.forEach((subKey) => {
       subscriptions.value.delete(subKey)
-      const [type, postId] = subKey.split(':')
+      const [type, snippetId] = subKey.split(':')
 
-      // Send unsubscribe message to server
-      wsService.send({
-        type: 'unsubscribe',
-        data: {
-          type: type as any,
-          post_id: postId === 'global' ? undefined : postId,
-        },
-      })
+      // Send unsubscribe message to server using the service method
+      const subscription: Subscription = {
+        type: type as SubscriptionType,
+        snippet_id: snippetId === 'global' ? undefined : snippetId,
+      }
+      wsService.unsubscribe(subscription)
     })
   }
 
@@ -120,7 +114,16 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
   // Utility functions
   const getSubscriptionKey = (sub: Subscription): string => {
-    return `${sub.type}:${sub.post_id || 'global'}`
+    switch (sub.type) {
+      case SubscriptionType.SNIPPET_UPDATES:
+        return `${sub.type}:${sub.snippet_id}`
+      case SubscriptionType.LIST_UPDATES:
+        return `${sub.type}`
+      case SubscriptionType.USER_ACTIONS:
+        return `${sub.type}`
+      default:
+        throw new Error(`Unknown subscription type: ${sub.type}`)
+    }
   }
 
   return {
