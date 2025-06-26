@@ -10,7 +10,7 @@
       </div>
 
       <!-- Loading state -->
-      <div v-if="isPending" class="space-y-8 md:grid md:grid-cols-[30%_70%] md:space-x-8">
+      <div v-if="isLoading" class="space-y-8 md:grid md:grid-cols-[30%_70%] md:space-x-8">
         <!-- Left column skeleton -->
         <Card class="p-8">
           <div class="space-y-6">
@@ -175,7 +175,7 @@
                         size="sm"
                         class="flex-1"
                         :disabled="isDeleting"
-                        @click="deleteSnippet()"
+                        @click="handleDeleteSnippet"
                       >
                         <Trash2Icon class="size-4 shrink-0" />
                         <span>Delete</span>
@@ -237,15 +237,13 @@
         :is-loading="isUpdating"
         :snippet="snippet"
         @close="showEditModal = false"
-        @submit="updateSnippet"
+        @submit="handleUpdateSnippet"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { snippetsService } from '@/services/snippets'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -266,60 +264,34 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import CardContent from '@/components/ui/card/CardContent.vue'
 import SnippetFormModal from './_components/SnippetFormModal.vue'
+import { useSnippetDetails } from '@/composables/useSnippetSubscription'
+import { useSnippet } from '@/composables/useSnippet'
 
 dayjs.extend(relativeTime)
 
 const route = useRoute()
 const router = useRouter()
+const showEditModal = ref(false)
 
-const queryClient = useQueryClient()
+// Use WebSocket subscription for real-time updates
+useSnippetDetails(route.params.snippetId as string)
 
-const {
-  data: snippet,
-  isPending,
-  isError,
-  error,
-} = useQuery({
-  queryKey: ['snippet', route.params.snippetId],
-  queryFn: () => snippetsService.getSnippet(route.params.snippetId as string),
-})
+const { snippet, isLoading, isError, error, updateSnippet, deleteSnippet, isUpdating, isDeleting } =
+  useSnippet(route.params.snippetId as string)
 
-// Delete mutation
-const { mutate: deleteSnippet, isPending: isDeleting } = useMutation({
-  mutationFn: () => snippetsService.deleteSnippet(route.params.snippetId as string),
-  onSuccess: () => {
-    toast.success('Snippet deleted successfully')
-    // Invalidate and remove queries
-    queryClient.removeQueries({ queryKey: ['snippet', route.params.snippetId] })
-    queryClient.invalidateQueries({ queryKey: ['snippets'] })
-    queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-    // Navigate back
-    router.go(-1)
-  },
-  onError: (error) => {
-    toast.error(error.message || 'Failed to delete snippet')
-  },
-})
+const handleUpdateSnippet = (formData: { title: string; content: string; language?: string }) => {
+  updateSnippet({
+    title: formData.title,
+    content: formData.content,
+    language: formData.language || snippet.value?.language || '',
+  })
+  showEditModal.value = false
+}
 
-// Update mutation
-const { mutate: updateSnippet, isPending: isUpdating } = useMutation({
-  mutationFn: (formData: { title: string; content: string; language?: string }) =>
-    snippetsService.updateSnippet(route.params.snippetId as string, {
-      title: formData.title,
-      content: formData.content,
-      language: formData.language || snippet.value?.language || '',
-    }),
-  onSuccess: (updatedSnippet) => {
-    toast.success('Snippet updated successfully')
-    // Update queries
-    queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
-    queryClient.invalidateQueries({ queryKey: ['snippets'] })
-    queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-  },
-  onError: (error) => {
-    toast.error(error.message || 'Failed to update snippet')
-  },
-})
+const handleDeleteSnippet = () => {
+  deleteSnippet()
+  router.go(-1)
+}
 
 const copySnippetToClipboard = async () => {
   if (!snippet.value) return
@@ -363,8 +335,6 @@ const shareSnippet = async () => {
     toast.error('Failed to copy link')
   }
 }
-
-const showEditModal = ref(false)
 
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'auto' })
