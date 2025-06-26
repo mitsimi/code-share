@@ -3,7 +3,9 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"mitsimi.dev/codeShare/internal/api"
@@ -198,7 +200,8 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // RefreshToken handles token refresh requests
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
-	log := h.logger.With(zap.String("request_id", requestID))
+	userID := api.GetUserID(r)
+	log := h.logger.With(zap.String("request_id", requestID), zap.String("user_id", userID))
 
 	// Get refresh token from request body
 	var req struct {
@@ -210,10 +213,10 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userID string
 	var logMessage string
 
 	// Try session-based refresh first
+	var sessionBasedSuccess bool
 	if cookie, err := r.Cookie("session"); err == nil {
 		if session, err := h.sessions.GetByToken(r.Context(), cookie.Value); err == nil && session.ExpiresAt > time.Now().Unix() {
 			// Validate refresh token matches session
@@ -230,13 +233,18 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			userID = session.UserID
+			if session.UserID != userID {
+				log.Error("session user ID mismatch", zap.String("session_user_id", session.UserID), zap.String("request_user_id", userID))
+				api.WriteError(w, http.StatusUnauthorized, "Invalid session")
+				return
+			}
+
 			logMessage = "token refreshed successfully via session"
 		}
 	}
 
 	// Fallback to JWT-based refresh
-	if userID == "" {
+	if !sessionBasedSuccess {
 		claims, err := auth.ValidateToken(req.RefreshToken, h.secretKey)
 		if err != nil {
 			log.Error("invalid refresh token", zap.Error(err))
@@ -250,14 +258,27 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		userID = claims.UserID
+		if claims.UserID != userID {
+			log.Error("token user ID mismatch", zap.String("token_user_id", claims.UserID), zap.String("request_user_id", userID))
+			api.WriteError(w, http.StatusUnauthorized, "Invalid token")
+			return
+		}
+
 		logMessage = "token refreshed successfully via JWT"
 	}
 
 	// Create new tokens and session
 	response, sessionToken, err := h.createTokensAndSession(r.Context(), userID)
 	if err != nil {
-		log.Error("failed to create tokens and session", zap.Error(err))
+		log.Error("failed to create tokens and session", zap.String("user_id", userID), zap.Error(err))
+
+		// Check if the error is because the user no longer exists
+		if errors.Is(err, repository.ErrNotFound) || strings.Contains(err.Error(), "resource not found") {
+			log.Warn("user account no longer exists during token refresh", zap.String("user_id", userID))
+			api.WriteError(w, http.StatusUnauthorized, "User account no longer exists")
+			return
+		}
+
 		api.WriteError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}

@@ -10,6 +10,7 @@ import (
 	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/api/dto"
 	"mitsimi.dev/codeShare/internal/services"
+	ws "mitsimi.dev/codeShare/internal/websocket"
 
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/repository"
@@ -26,6 +27,7 @@ type SnippetHandler struct {
 	likes       repository.LikeRepository
 	bookmarks   repository.BookmarkRepository
 	viewTracker *services.ViewTracker
+	wsHub       *ws.Hub
 	logger      *zap.Logger
 }
 
@@ -35,12 +37,14 @@ func NewSnippetHandler(
 	likes repository.LikeRepository,
 	bookmarks repository.BookmarkRepository,
 	viewTracker *services.ViewTracker,
+	wsHub *ws.Hub,
 ) *SnippetHandler {
 	return &SnippetHandler{
 		snippets:    snippets,
 		likes:       likes,
 		bookmarks:   bookmarks,
 		viewTracker: viewTracker,
+		wsHub:       wsHub,
 		logger:      logger.Log,
 	}
 }
@@ -109,6 +113,14 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 				zap.String("snippet_id", id),
 				zap.String("user_id", userID),
 			)
+		} else {
+			// Broadcast view count update after successfully tracking the view
+			if h.wsHub != nil {
+				// Get the updated snippet to get the new view count
+				if updatedSnippet, err := h.snippets.GetByID(ctx, id, userID); err == nil {
+					h.wsHub.BroadcastSnippetStatsUpdate(id, &updatedSnippet.Views, &updatedSnippet.Likes)
+				}
+			}
 		}
 	}()
 
@@ -250,6 +262,16 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 		zap.String("author", response.Author.ID),
 	)
 
+	// Broadcast content update to both snippet detail and list subscribers
+	if h.wsHub != nil {
+		h.wsHub.BroadcastSnippetContentUpdate(
+			snippet.ID,
+			&snippet.Title,
+			&snippet.Content,
+			&snippet.Language,
+		)
+	}
+
 	api.WriteSuccess(w, http.StatusOK, "Snippet updated successfully", response)
 }
 
@@ -337,6 +359,15 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if h.wsHub != nil {
+		h.wsHub.BroadcastUserAction(userID, ws.UserActionData{
+			Action:    action,
+			SnippetID: id,
+			Value:     snippet.IsLiked,
+		})
+		h.wsHub.BroadcastSnippetStatsUpdate(id, &snippet.Views, &snippet.Likes)
+	}
+
 	log.Info("toggled snippet like",
 		zap.String("action", action),
 	)
@@ -385,6 +416,15 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 		)
 		api.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	if h.wsHub != nil {
+		h.wsHub.BroadcastUserAction(userID, ws.UserActionData{
+			Action:    action,
+			SnippetID: id,
+			Value:     snippet.IsSaved,
+		})
+		h.wsHub.BroadcastSnippetStatsUpdate(id, &snippet.Views, &snippet.Likes)
 	}
 
 	log.Debug("toggled snippet save",

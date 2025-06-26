@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"mitsimi.dev/codeShare/internal/api/dto"
 	"mitsimi.dev/codeShare/internal/auth"
 	"mitsimi.dev/codeShare/internal/domain"
@@ -51,6 +52,11 @@ func (h *AuthHandler) createTokensAndSession(ctx context.Context, userID string)
 	// Get user details
 	user, err := h.users.GetByID(ctx, userID)
 	if err != nil {
+		// Clean up the session we just created since user doesn't exist
+		if deleteErr := h.sessions.Delete(ctx, sessionToken); deleteErr != nil {
+			// Log the cleanup failure but don't override the original error
+			h.logger.Warn("failed to clean up session after user lookup failure", zap.Error(deleteErr))
+		}
 		return nil, "", fmt.Errorf("failed to get user: %w", err)
 	}
 

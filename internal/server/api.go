@@ -62,7 +62,7 @@ func (s *Server) setupAPIRoutes(r chi.Router, authMiddleware *api.AuthMiddleware
 
 		// Snippet routes
 		r.Route("/snippets", func(r chi.Router) {
-			handler := handler.NewSnippetHandler(s.snippets, s.likes, s.bookmarks, s.viewTracker)
+			handler := handler.NewSnippetHandler(s.snippets, s.likes, s.bookmarks, s.viewTracker, s.wsHub)
 
 			// Public routes
 			r.Group(func(r chi.Router) {

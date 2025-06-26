@@ -15,6 +15,7 @@ import (
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/repository"
 	"mitsimi.dev/codeShare/internal/services"
+	ws "mitsimi.dev/codeShare/internal/websocket"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,6 +34,7 @@ type Server struct {
 	sessions    repository.SessionRepository
 	views       repository.ViewRepository
 	viewTracker *services.ViewTracker
+	wsHub       *ws.Hub
 	logger      *zap.Logger
 	secretKey   string
 }
@@ -49,6 +51,7 @@ func New(
 ) *Server {
 	// Create view tracker
 	viewTracker := services.NewViewTracker(views)
+	wsHub := ws.NewHub()
 
 	s := &Server{
 		router:      chi.NewRouter(),
@@ -59,6 +62,7 @@ func New(
 		sessions:    sessions,
 		views:       views,
 		viewTracker: viewTracker,
+		wsHub:       wsHub,
 		logger:      logger.Log,
 		secretKey:   secretKey,
 	}
@@ -66,6 +70,11 @@ func New(
 	s.setupRoutes()
 	s.startSessionCleanup()
 	s.startViewCleanup()
+
+	// Start the WebSocket hub
+	go wsHub.Run()
+	s.logger.Info("WebSocket hub started")
+
 	return s
 }
 
@@ -142,7 +151,9 @@ func (s *Server) setupRoutes() {
 	}))
 
 	// Setup WebSocket routes (must be before API routes to avoid middleware conflicts)
-	s.setupWebSocketRoutes()
+	s.router.Route("/ws", func(r chi.Router) {
+		s.setupWebSocketRoutes(r)
+	})
 
 	// Setup API routes
 	s.router.Route("/api", func(r chi.Router) {
