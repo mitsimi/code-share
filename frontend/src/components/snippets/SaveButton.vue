@@ -79,7 +79,11 @@ const { mutate: updateSave } = useMutation<
   },
   onError: (error, { snippetId, action }) => {
     const revertAction = action === 'save' ? 'unsave' : 'save'
-    snippetsStore.handleUserAction(snippetId, revertAction, action === 'unsave')
+    snippetsStore.handleUserAction({
+      action: revertAction,
+      snippet_id: snippetId,
+      value: true,
+    })
 
     console.error('Like mutation failed:', error)
     toast.error(error.message || 'Please try again')
