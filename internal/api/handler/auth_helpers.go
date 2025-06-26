@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 	"mitsimi.dev/codeShare/internal/api/dto"
 	"mitsimi.dev/codeShare/internal/auth"
+	"mitsimi.dev/codeShare/internal/constants"
 	"mitsimi.dev/codeShare/internal/domain"
 )
 
@@ -73,9 +74,9 @@ func (h *AuthHandler) createTokensAndSession(ctx context.Context, userID string)
 // setCookie sets the session cookie with proper security settings
 func (h *AuthHandler) setCookie(w http.ResponseWriter, r *http.Request, sessionToken string, expiresAt int64) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
+		Name:     constants.SessionCookieName,
 		Value:    sessionToken,
-		Path:     "/",
+		Path:     constants.CookiePath,
 		HttpOnly: true,
 		Secure:   r.TLS != nil,
 		SameSite: http.SameSiteStrictMode,

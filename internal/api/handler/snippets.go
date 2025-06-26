@@ -9,6 +9,7 @@ import (
 
 	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/api/dto"
+	"mitsimi.dev/codeShare/internal/constants"
 	"mitsimi.dev/codeShare/internal/services"
 	ws "mitsimi.dev/codeShare/internal/websocket"
 
@@ -160,7 +161,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Language == "" {
-		req.Language = "plaintext" // Default language if not provided
+		req.Language = constants.DefaultLanguage // Default language if not provided
 	}
 
 	if userID == "" {
@@ -327,12 +328,12 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 	)
 
 	// Parse the action from query parameters
-	action := r.URL.Query().Get("action")
+	action := r.URL.Query().Get(constants.ActionQueryParam)
 	if action == "" {
-		action = "like"
+		action = constants.ActionLike
 	}
 
-	if action != "like" && action != "unlike" {
+	if action != constants.ActionLike && action != constants.ActionUnlike {
 		log.Warn("invalid action",
 			zap.String("action", action),
 		)
@@ -340,7 +341,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := h.likes.ToggleLike(r.Context(), userID, id, action == "like"); err != nil {
+	if err := h.likes.ToggleLike(r.Context(), userID, id, action == constants.ActionLike); err != nil {
 		log.Warn("failed to toggle like",
 			zap.Error(err),
 			zap.String("action", action),
@@ -387,12 +388,12 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 	)
 
 	// Parse the action from query parameters
-	action := r.URL.Query().Get("action")
+	action := r.URL.Query().Get(constants.ActionQueryParam)
 	if action == "" {
-		action = "save"
+		action = constants.ActionSave
 	}
 
-	if action != "save" && action != "unsave" {
+	if action != constants.ActionSave && action != constants.ActionUnsave {
 		log.Warn("invalid action",
 			zap.String("action", action),
 		)
@@ -400,7 +401,7 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := h.bookmarks.ToggleSave(r.Context(), userID, id, action == "save"); err != nil {
+	if err := h.bookmarks.ToggleSave(r.Context(), userID, id, action == constants.ActionSave); err != nil {
 		log.Warn("failed to toggle save",
 			zap.Error(err),
 			zap.String("action", action),

@@ -11,6 +11,7 @@ import (
 	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/api/dto"
 	"mitsimi.dev/codeShare/internal/auth"
+	"mitsimi.dev/codeShare/internal/constants"
 	"mitsimi.dev/codeShare/internal/domain"
 	"mitsimi.dev/codeShare/internal/logger"
 	"mitsimi.dev/codeShare/internal/repository"
@@ -162,7 +163,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	log := h.logger.With(zap.String("request_id", requestID))
 
 	// Get session cookie
-	cookie, err := r.Cookie("session")
+	cookie, err := r.Cookie(constants.SessionCookieName)
 	if err != nil {
 		log.Warn("failed to get session cookie",
 			zap.Error(err),
@@ -183,9 +184,9 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	// Clear session cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
+		Name:     constants.SessionCookieName,
 		Value:    "",
-		Path:     "/",
+		Path:     constants.CookiePath,
 		HttpOnly: true,
 		Secure:   r.TLS != nil,
 		SameSite: http.SameSiteStrictMode,
@@ -217,7 +218,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	// Try session-based refresh first
 	var sessionBasedSuccess bool
-	if cookie, err := r.Cookie("session"); err == nil {
+	if cookie, err := r.Cookie(constants.SessionCookieName); err == nil {
 		if session, err := h.sessions.GetByToken(r.Context(), cookie.Value); err == nil && session.ExpiresAt > time.Now().Unix() {
 			// Validate refresh token matches session
 			if req.RefreshToken != session.RefreshToken {
