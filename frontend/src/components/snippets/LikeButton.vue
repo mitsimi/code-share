@@ -30,12 +30,15 @@ import { Heart, LoaderCircleIcon } from 'lucide-vue-next'
 import { type Snippet } from '@/types'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useSnippetsStore } from '@/stores/snippets'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { snippetsService } from '@/services/snippets'
 import { toast } from 'vue-sonner'
-import type { Button, ButtonProps } from '@/components/ui/button'
+import type { ButtonProps } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 
 const authStore = useAuthStore()
+const snippetsStore = useSnippetsStore()
 const queryClient = useQueryClient()
 
 const props = withDefaults(
@@ -72,18 +75,23 @@ const { mutate: updateLike } = useMutation<
     // Update the snippet in the details view
     queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
 
-    // Update the snippet in the list view
-    queryClient.setQueryData(['snippets'], (oldData: Snippet[] | undefined) => {
-      if (!oldData) return [updatedSnippet]
-      return oldData.map((snippet) => (snippet.id === updatedSnippet.id ? updatedSnippet : snippet))
+    // The Pinia store is already updated optimistically,
+    // but we sync with the server response to ensure consistency
+    snippetsStore.updateSnippet(updatedSnippet.id, {
+      isLiked: updatedSnippet.isLiked,
+      likes: updatedSnippet.likes,
     })
 
-    // Invalidate liked snippets query to trigger a refetch
+    // Invalidate related queries
     queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
     queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
   },
-  onError: (error) => {
+  onError: (error, { snippetId, action }) => {
+    // Revert optimistic update on error
+    const revertAction = action === 'like' ? 'unlike' : 'like'
+    snippetsStore.handleUserAction(snippetId, revertAction, action === 'unlike')
+
     console.error('Like mutation failed:', error)
     toast.error(error.message || 'Please try again')
   },
@@ -100,6 +108,11 @@ const toggleLike = () => {
   }
 
   const action = props.isLiked ? 'unlike' : 'like'
+
+  // Optimistic update - immediate UI feedback
+  snippetsStore.handleUserAction(props.snippetId, action, action === 'like')
+
+  // Then make the API call
   updateLike({ snippetId: props.snippetId, action })
 }
 </script>
