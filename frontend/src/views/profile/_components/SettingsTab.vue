@@ -3,12 +3,11 @@
     <form @submit.prevent="updateProfile" class="space-y-6">
       <!-- Avatar Upload -->
       <div class="flex flex-col items-center gap-6 sm:flex-row">
-        <Avatar class="size-24">
-          <AvatarImage :src="avatarUrl" />
-          <AvatarFallback class="text-4xl">{{
-            authStore.user?.username[0].toUpperCase()
-          }}</AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          :user="authStore.user"
+          :avatar-class="'size-32 ring-4'"
+          :username-class="'hidden'"
+        />
         <div class="flex w-full flex-col gap-2">
           <form @submit.prevent="updateAvatar" class="flex gap-2">
             <FormField v-slot="{ componentField, errorMessage }" name="avatarUrl">
@@ -129,7 +128,6 @@ import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { passwordSchema } from '@/lib/password'
 import PasswordInput from '@/components/ui/password-input.vue'
 import { useMutation } from '@tanstack/vue-query'
@@ -239,9 +237,6 @@ const avatarForm = useForm({
       avatarUrl: z.string().url('Please enter a valid URL').optional(),
     }),
   ),
-  initialValues: {
-    avatarUrl: authStore.user?.avatar || '',
-  },
 })
 
 const updateAvatar = avatarForm.handleSubmit((values) => {
