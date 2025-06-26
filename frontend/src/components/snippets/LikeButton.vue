@@ -92,6 +92,7 @@ const { mutate: updateLike } = useMutation<
       action: revertAction,
       snippet_id: snippetId,
       value: revertAction === 'like',
+      like_count: likes.value,
     })
 
     console.error('Like mutation failed:', error)
@@ -116,6 +117,7 @@ const toggleLike = () => {
     action,
     snippet_id: props.snippetId,
     value: action === 'like',
+    like_count: likes.value,
   })
 
   // Then make the API call
