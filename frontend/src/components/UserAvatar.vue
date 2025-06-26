@@ -1,6 +1,6 @@
 <template>
   <div :class="cn('flex items-center gap-4', props.class)">
-    <Avatar :class="cn(avatarClass, 'ring-border ring-2')">
+    <Avatar :class="cn('ring-border ring-2', avatarClass)">
       <AvatarImage :src="user.avatar || ''" :alt="user.username" />
       <AvatarFallback class="bg-primary text-primary-foreground font-semibold">
         {{ user.username[0].toUpperCase() }}
