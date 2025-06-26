@@ -57,13 +57,15 @@
         <!-- Right side - Action buttons -->
         <div class="flex items-center gap-2">
           <!-- Save/Bookmark button -->
-          <div v-if="authStore.isAuthenticated()" @click.stop>
-            <SaveButton :isSaved="snippet.isSaved" :snippetId="snippet.id" />
-          </div>
+          <Authenticated>
+            <div @click.stop>
+              <SaveButton :isSaved="snippet.isSaved" :snippetId="snippet.id" />
+            </div>
+          </Authenticated>
 
           <!-- Like button -->
           <div @click.stop>
-            <LikeButton :likes="snippet.likes" :isLiked="snippet.isLiked" :snippetId="snippet.id" />
+            <LikeButton :snippetId="snippet.id" />
           </div>
         </div>
       </div>
@@ -88,9 +90,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { toast } from 'vue-sonner'
 import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
 import { getLanguageExtension, getLanguageName } from '@/lib/languages'
-import { useAuthStore } from '@/stores/auth'
-
-const authStore = useAuthStore()
+import Authenticated from '../access/Authenticated.vue'
 
 dayjs.extend(relativeTime)
 
