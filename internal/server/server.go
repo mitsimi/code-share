@@ -168,9 +168,37 @@ func (s *Server) setupStaticRoutes() {
 		fs.ServeHTTP(w, r)
 	})
 
-	// Handle favicon
-	s.router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		fs.ServeHTTP(w, r)
+	// Handle public files (favicon.ico, site.webmanifest, etc.)
+	s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[1:] // Remove leading slash
+
+		// Only serve files that are likely to be public files (not paths with slashes)
+		if path != "" && filepath.Dir(path) != "." {
+			return // Skip if it's a nested path, let other handlers deal with it
+		}
+
+		// Try to open the file from the embedded filesystem
+		file, err := frontend.DistDirFS.Open(path)
+		if err != nil {
+			return // File doesn't exist, let the next handler try
+		}
+		defer file.Close()
+
+		// Get file info to check if it's a directory
+		info, err := file.Stat()
+		if err != nil || info.IsDir() {
+			return // Skip directories or files we can't stat
+		}
+
+		// Set appropriate content type
+		ext := filepath.Ext(path)
+		mimeType := mime.TypeByExtension(ext)
+		if mimeType != "" {
+			w.Header().Set("Content-Type", mimeType)
+		}
+
+		// Serve the file
+		http.ServeContent(w, r, path, info.ModTime(), file.(io.ReadSeeker))
 	})
 
 	// Handle all other routes by serving index.html
