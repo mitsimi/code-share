@@ -2,16 +2,26 @@
   <FormItem>
     <FormLabel>{{ label }}</FormLabel>
     <FormControl>
-      <Input
-        v-bind="componentField"
-        type="password"
-        :placeholder="placeholder"
-        class="pr-8"
-        :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
-        @focus="showRequirements = true"
-        @blur="showRequirements = false"
-        v-model="password"
-      />
+      <div class="relative">
+        <Input
+          v-bind="componentField"
+          :type="showPassword ? 'text' : 'password'"
+          :placeholder="placeholder"
+          class="pr-10"
+          :class="{ 'ring-2 ring-red-500 ring-offset-2': errorMessage }"
+          @focus="showRequirements = true"
+          @blur="showRequirements = false"
+          v-model="password"
+        />
+        <button
+          type="button"
+          class="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+          @click="showPassword = !showPassword"
+        >
+          <EyeIcon v-if="!showPassword" class="size-4" />
+          <EyeOffIcon v-else class="size-4" />
+        </button>
+      </div>
     </FormControl>
     <template v-if="showRequirements">
       <div class="mt-2 text-sm">
@@ -46,7 +56,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CheckCircle2Icon, CircleIcon } from 'lucide-vue-next'
+import { CheckCircle2Icon, CircleIcon, EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { passwordRequirements } from '@/lib/password'
@@ -60,4 +70,5 @@ defineProps<{
 
 const password = ref('')
 const showRequirements = ref(false)
+const showPassword = ref(false)
 </script>
