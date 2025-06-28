@@ -9,6 +9,7 @@ import (
 
 	"mitsimi.dev/codeShare/internal/api"
 	"mitsimi.dev/codeShare/internal/api/dto"
+	"mitsimi.dev/codeShare/internal/constants"
 	"mitsimi.dev/codeShare/internal/services"
 	ws "mitsimi.dev/codeShare/internal/websocket"
 
@@ -73,7 +74,7 @@ func (h *SnippetHandler) GetSnippets(w http.ResponseWriter, r *http.Request) {
 		return b.CreatedAt.Compare(a.CreatedAt)
 	})
 
-	log.Debug("retrieved snippets",
+	log.Info("retrieved snippets",
 		zap.Int("count", len(responses)),
 	)
 
@@ -93,7 +94,7 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 
 	snippet, err := h.snippets.GetByID(r.Context(), id, userID)
 	if err != nil {
-		log.Error("failed to get snippet",
+		log.Warn("failed to get snippet",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusNotFound, err.Error())
@@ -126,7 +127,7 @@ func (h *SnippetHandler) GetSnippet(w http.ResponseWriter, r *http.Request) {
 
 	response := dto.ToSnippetResponse(snippet)
 
-	log.Debug("retrieved snippet",
+	log.Info("retrieved snippet",
 		zap.String("id", response.ID),
 		zap.String("title", response.Title),
 		zap.String("author", response.Author.ID),
@@ -143,7 +144,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.CreateSnippetRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body",
+		log.Warn("failed to decode request body",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusBadRequest, err.Error())
@@ -151,7 +152,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Title == "" || req.Content == "" {
-		log.Error("invalid snippet data",
+		log.Warn("invalid snippet data",
 			zap.String("title", req.Title),
 			zap.String("content", req.Content),
 		)
@@ -160,11 +161,11 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Language == "" {
-		req.Language = "plaintext" // Default language if not provided
+		req.Language = constants.DefaultLanguage // Default language if not provided
 	}
 
 	if userID == "" {
-		log.Error("no user ID in context")
+		log.Warn("no user ID in context")
 		api.WriteError(w, http.StatusUnauthorized, "Not authenticated")
 		return
 	}
@@ -194,7 +195,7 @@ func (h *SnippetHandler) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	s, _ := h.snippets.GetByID(r.Context(), domainSnippet.ID, userID)
 	response := dto.ToSnippetResponse(s)
 
-	log.Debug("created new snippet",
+	log.Info("created new snippet",
 		zap.String("id", s.ID),
 		zap.String("title", response.Title),
 		zap.String("author", response.Author.ID),
@@ -217,7 +218,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.UpdateSnippetRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error("failed to decode request body",
+		log.Warn("failed to decode request body",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusBadRequest, err.Error())
@@ -226,7 +227,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 
 	snippet, err := h.snippets.GetByID(r.Context(), id, userID)
 	if err != nil {
-		log.Error("failed to get snippet for update",
+		log.Warn("failed to get snippet for update",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusNotFound, err.Error())
@@ -234,7 +235,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if snippet.Author.ID != userID {
-		log.Error("unauthorized update attempt",
+		log.Warn("unauthorized update attempt",
 			zap.String("snippet_author", snippet.Author.ID),
 			zap.String("user_id", userID),
 		)
@@ -257,7 +258,7 @@ func (h *SnippetHandler) UpdateSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// Convert to response DTO
 	response := dto.ToSnippetResponse(snippet)
-	log.Debug("updated snippet",
+	log.Info("updated snippet",
 		zap.String("title", response.Title),
 		zap.String("author", response.Author.ID),
 	)
@@ -288,14 +289,14 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 
 	snippet, err := h.snippets.GetByID(r.Context(), snippetID, userID)
 	if err != nil {
-		log.Error("failed to get snippet",
+		log.Warn("failed to get snippet",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusNotFound, err.Error())
 		return
 	}
 	if snippet.Author.ID != userID {
-		log.Error("unauthorized deletion attempt",
+		log.Warn("unauthorized deletion attempt",
 			zap.String("snippet_author", snippet.Author.ID),
 			zap.String("user_id", userID),
 		)
@@ -311,7 +312,7 @@ func (h *SnippetHandler) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Debug("deleted snippet")
+	log.Info("deleted snippet")
 	api.WriteSuccess(w, http.StatusOK, "Snippet deleted successfully", nil)
 }
 
@@ -327,21 +328,21 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 	)
 
 	// Parse the action from query parameters
-	action := r.URL.Query().Get("action")
+	action := r.URL.Query().Get(constants.ActionQueryParam)
 	if action == "" {
-		action = "like"
+		action = constants.ActionLike
 	}
 
-	if action != "like" && action != "unlike" {
-		log.Error("invalid action",
+	if action != constants.ActionLike && action != constants.ActionUnlike {
+		log.Warn("invalid action",
 			zap.String("action", action),
 		)
 		api.WriteError(w, http.StatusBadRequest, "Invalid action")
 		return
 	}
 
-	if err := h.likes.ToggleLike(r.Context(), userID, id, action == "like"); err != nil {
-		log.Error("failed to toggle like",
+	if err := h.likes.ToggleLike(r.Context(), userID, id, action == constants.ActionLike); err != nil {
+		log.Warn("failed to toggle like",
 			zap.Error(err),
 			zap.String("action", action),
 		)
@@ -352,7 +353,7 @@ func (h *SnippetHandler) ToggleLikeSnippet(w http.ResponseWriter, r *http.Reques
 	// Get the updated snippet
 	snippet, err := h.snippets.GetByID(r.Context(), id, userID)
 	if err != nil {
-		log.Error("failed to get updated snippet",
+		log.Warn("failed to get updated snippet",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusInternalServerError, err.Error())
@@ -387,21 +388,21 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 	)
 
 	// Parse the action from query parameters
-	action := r.URL.Query().Get("action")
+	action := r.URL.Query().Get(constants.ActionQueryParam)
 	if action == "" {
-		action = "save"
+		action = constants.ActionSave
 	}
 
-	if action != "save" && action != "unsave" {
-		log.Error("invalid action",
+	if action != constants.ActionSave && action != constants.ActionUnsave {
+		log.Warn("invalid action",
 			zap.String("action", action),
 		)
 		api.WriteError(w, http.StatusBadRequest, "Invalid action")
 		return
 	}
 
-	if err := h.bookmarks.ToggleSave(r.Context(), userID, id, action == "save"); err != nil {
-		log.Error("failed to toggle save",
+	if err := h.bookmarks.ToggleSave(r.Context(), userID, id, action == constants.ActionSave); err != nil {
+		log.Warn("failed to toggle save",
 			zap.Error(err),
 			zap.String("action", action),
 		)
@@ -412,7 +413,7 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 	// Get the updated snippet
 	snippet, err := h.snippets.GetByID(r.Context(), id, userID)
 	if err != nil {
-		log.Error("failed to get updated snippet",
+		log.Warn("failed to get updated snippet",
 			zap.Error(err),
 		)
 		api.WriteError(w, http.StatusInternalServerError, err.Error())
@@ -428,7 +429,7 @@ func (h *SnippetHandler) ToggleSaveSnippet(w http.ResponseWriter, r *http.Reques
 		h.wsHub.BroadcastSnippetStatsUpdate(id, &snippet.Views, &snippet.Likes)
 	}
 
-	log.Debug("toggled snippet save",
+	log.Info("toggled snippet save",
 		zap.String("action", action),
 	)
 	api.WriteSuccess(w, http.StatusOK, "Snippet save toggled successfully", dto.ToSnippetResponse(snippet))

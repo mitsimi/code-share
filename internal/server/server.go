@@ -5,9 +5,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
-	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"mitsimi.dev/codeShare/frontend"
@@ -25,46 +23,37 @@ import (
 
 // Server represents the application server
 type Server struct {
-	router      *chi.Mux
-	httpServer  *http.Server
-	snippets    repository.SnippetRepository
-	likes       repository.LikeRepository
-	bookmarks   repository.BookmarkRepository
-	users       repository.UserRepository
-	sessions    repository.SessionRepository
-	views       repository.ViewRepository
-	viewTracker *services.ViewTracker
-	wsHub       *ws.Hub
-	logger      *zap.Logger
-	secretKey   string
+	router             *chi.Mux
+	httpServer         *http.Server
+	repos              *repository.Container
+	viewTracker        *services.ViewTracker
+	wsHub              *ws.Hub
+	logger             *zap.Logger
+	secretKey          string
+	serveStatic        bool
+	corsAllowedOrigins []string
 }
 
 // New creates a new server instance
 func New(
-	snippets repository.SnippetRepository,
-	likes repository.LikeRepository,
-	bookmarks repository.BookmarkRepository,
-	users repository.UserRepository,
-	sessions repository.SessionRepository,
-	views repository.ViewRepository,
+	repos *repository.Container,
 	secretKey string,
+	serveStatic bool,
+	corsAllowedOrigins []string,
 ) *Server {
 	// Create view tracker
-	viewTracker := services.NewViewTracker(views)
+	viewTracker := services.NewViewTracker(repos.Views)
 	wsHub := ws.NewHub()
 
 	s := &Server{
-		router:      chi.NewRouter(),
-		snippets:    snippets,
-		likes:       likes,
-		bookmarks:   bookmarks,
-		users:       users,
-		sessions:    sessions,
-		views:       views,
-		viewTracker: viewTracker,
-		wsHub:       wsHub,
-		logger:      logger.Log,
-		secretKey:   secretKey,
+		router:             chi.NewRouter(),
+		repos:              repos,
+		viewTracker:        viewTracker,
+		wsHub:              wsHub,
+		logger:             logger.Log,
+		secretKey:          secretKey,
+		serveStatic:        serveStatic,
+		corsAllowedOrigins: corsAllowedOrigins,
 	}
 	s.setupMiddleware()
 	s.setupRoutes()
@@ -93,7 +82,7 @@ func (s *Server) Start(port, env string) error {
 	s.logger.Info("server starting",
 		zap.String("port", port),
 		zap.String("environment", env),
-		zap.String("serve_static", os.Getenv("SERVE_STATIC")),
+		zap.Bool("serve_static", s.serveStatic),
 	)
 
 	return s.httpServer.ListenAndServe()
@@ -135,14 +124,11 @@ func (s *Server) setupMiddleware() {
 // setupRoutes configures the server routes
 func (s *Server) setupRoutes() {
 	// Create auth middleware
-	authMiddleware := api.NewAuthMiddleware(s.users, s.sessions, s.secretKey)
+	authMiddleware := api.NewAuthMiddleware(s.repos.Users, s.repos.Sessions, s.secretKey)
 
 	s.router.Use(authMiddleware.TryAttachUserID) // Attach user ID to context
 	s.router.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:3000",         // Development
-			"https://codeshare.mitsimi.dev", // Production
-		},
+		AllowedOrigins:   s.corsAllowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -161,7 +147,7 @@ func (s *Server) setupRoutes() {
 	})
 
 	// Only serve static files if SERVE_STATIC is set to "true"
-	if !(strings.ToLower(os.Getenv("SERVE_STATIC")) == "false") {
+	if s.serveStatic {
 		s.setupStaticRoutes()
 	}
 }

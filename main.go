@@ -10,6 +10,7 @@ import (
 
 	"mitsimi.dev/codeShare/internal/config"
 	"mitsimi.dev/codeShare/internal/logger"
+	"mitsimi.dev/codeShare/internal/repository"
 	"mitsimi.dev/codeShare/internal/server"
 	"mitsimi.dev/codeShare/internal/storage"
 	sqlite "mitsimi.dev/codeShare/internal/storage/sqlite"
@@ -48,6 +49,9 @@ func main() {
 	sessions := sqlite.NewSessionRepository(sqliteStorage.DB())
 	views := sqlite.NewViewRepository(sqliteStorage.DB())
 
+	// Create repository container
+	repos := repository.NewContainer(snippets, likes, bookmarks, users, sessions, views)
+
 	// Create storage instance
 	storage := storage.NewStorage(snippets, likes, bookmarks, users, sessions)
 
@@ -60,15 +64,12 @@ func main() {
 		}
 	}
 
-	// Create server with repositories
+	// Create server with repository container
 	srv := server.New(
-		snippets,
-		likes,
-		bookmarks,
-		users,
-		sessions,
-		views,
+		repos,
 		cfg.JWTSecret,
+		cfg.ServeStatic,
+		cfg.CORSAllowedOrigins,
 	)
 
 	// Channel to listen for interrupt signals

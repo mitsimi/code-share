@@ -66,7 +66,7 @@ func (m *AuthMiddleware) TryAttachUserID(next http.Handler) http.Handler {
 
 		// Add user ID to context (even if empty)
 		ctx := context.WithValue(r.Context(), userIDKey, userID)
-		log.Debug("TryAuth completed", zap.String("user_id", userID))
+		log.Info("TryAuth completed", zap.String("user_id", userID))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -78,7 +78,7 @@ func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 		if userID == "" {
 			requestID := middleware.GetReqID(r.Context())
 			log := m.logger.With(zap.String("request_id", requestID))
-			log.Error("authentication required but not provided", zap.String("path", r.URL.Path))
+			log.Warn("authentication required but not provided", zap.String("path", r.URL.Path))
 			http.Error(w, "Not authenticated", http.StatusUnauthorized)
 			return
 		}
@@ -92,7 +92,7 @@ func (m *AuthMiddleware) RequireSelfOrAdmin(next http.Handler) http.Handler {
 		if userID == "" {
 			requestID := middleware.GetReqID(r.Context())
 			log := m.logger.With(zap.String("request_id", requestID))
-			log.Error("authentication required but not provided")
+			log.Warn("authentication required but not provided")
 			http.Error(w, "Not authenticated", http.StatusUnauthorized)
 			return
 		}

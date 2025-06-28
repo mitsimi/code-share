@@ -48,14 +48,14 @@ func (h *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request, userID
 
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil {
-		log.Error("failed to get user",
+		log.Warn("failed to get user",
 			zap.Error(err),
 			zap.String("user_id", userID),
 		)
 		api.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
-	log.Debug("retrieved user",
+	log.Info("retrieved user",
 		zap.String("username", user.Username),
 		zap.String("email", user.Email),
 	)
@@ -74,7 +74,7 @@ func (h *UserHandler) getUserSnippetsByID(w http.ResponseWriter, r *http.Request
 
 	snippets, err := h.snippets.GetAllByAuthor(r.Context(), authorID, userID)
 	if err != nil {
-		log.Error("failed to get user snippets",
+		log.Warn("failed to get user snippets",
 			zap.Error(err),
 			zap.String("author_id", authorID),
 			zap.String("user_id", userID),
@@ -83,7 +83,7 @@ func (h *UserHandler) getUserSnippetsByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	log.Debug("retrieved user snippets",
+	log.Info("retrieved user snippets",
 		zap.Int("count", len(snippets)),
 	)
 
@@ -105,7 +105,7 @@ func (h *UserHandler) getUserLikedSnippetsByID(w http.ResponseWriter, r *http.Re
 
 	snippets, err := h.likes.GetLikedSnippets(r.Context(), userID)
 	if err != nil {
-		log.Error("failed to get user liked snippets",
+		log.Warn("failed to get user liked snippets",
 			zap.Error(err),
 			zap.String("user_id", userID),
 		)
@@ -118,7 +118,7 @@ func (h *UserHandler) getUserLikedSnippetsByID(w http.ResponseWriter, r *http.Re
 		responses[i] = dto.ToSnippetResponse(snippet)
 	}
 
-	log.Debug("retrieved user liked snippets",
+	log.Info("retrieved user liked snippets",
 		zap.Int("count", len(snippets)),
 	)
 
@@ -135,7 +135,7 @@ func (h *UserHandler) getUserSavedSnippetsByID(w http.ResponseWriter, r *http.Re
 
 	snippets, err := h.bookmarks.GetSavedSnippets(r.Context(), userID)
 	if err != nil {
-		log.Error("failed to get user saved snippets",
+		log.Warn("failed to get user saved snippets",
 			zap.Error(err),
 			zap.String("user_id", userID),
 		)
@@ -148,7 +148,7 @@ func (h *UserHandler) getUserSavedSnippetsByID(w http.ResponseWriter, r *http.Re
 		responses[i] = dto.ToSnippetResponse(snippet)
 	}
 
-	log.Debug("retrieved user saved snippets",
+	log.Info("retrieved user saved snippets",
 		zap.Int("count", len(snippets)),
 	)
 
