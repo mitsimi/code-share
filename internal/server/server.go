@@ -32,6 +32,7 @@ type Server struct {
 	secretKey          string
 	serveStatic        bool
 	corsAllowedOrigins []string
+	devProxy           *DevProxy
 }
 
 // New creates a new server instance
@@ -55,6 +56,14 @@ func New(
 		serveStatic:        serveStatic,
 		corsAllowedOrigins: corsAllowedOrigins,
 	}
+
+	// Setup Vite dev server proxy if not serving static files
+	if !serveStatic {
+		if err := s.setupDevProxy(); err != nil {
+			s.logger.Fatal("Failed to setup development proxy", zap.Error(err))
+		}
+	}
+
 	s.setupMiddleware()
 	s.setupRoutes()
 	s.startSessionCleanup()
@@ -65,6 +74,16 @@ func New(
 	s.logger.Info("WebSocket hub started")
 
 	return s
+}
+
+// setupDevProxy configures the development proxy
+func (s *Server) setupDevProxy() error {
+	devProxy, err := NewDevProxy("http://localhost:3000", s.logger)
+	if err != nil {
+		return err
+	}
+	s.devProxy = devProxy
+	return nil
 }
 
 // Start starts the server
@@ -146,10 +165,32 @@ func (s *Server) setupRoutes() {
 		s.setupAPIRoutes(r, authMiddleware)
 	})
 
-	// Only serve static files if SERVE_STATIC is set to "true"
+	// Serve static files in production or proxy to Vite in development
 	if s.serveStatic {
 		s.setupStaticRoutes()
+	} else {
+		s.setupDevProxyRoutes()
 	}
+}
+
+// setupDevProxyRoutes sets up routes that proxy to Vite dev server during development
+func (s *Server) setupDevProxyRoutes() {
+	if s.devProxy == nil {
+		s.logger.Warn("Development proxy not configured, but serve_static is false")
+		return
+	}
+
+	// Proxy all non-API, non-WebSocket requests to Vite dev server
+	s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+		if !s.devProxy.ShouldProxy(r.URL.Path) {
+			http.NotFound(w, r)
+			return
+		}
+
+		s.devProxy.ServeHTTP(w, r)
+	})
+
+	s.logger.Info("Development proxy routes configured - non-API requests will be forwarded to Vite dev server")
 }
 
 func (s *Server) setupStaticRoutes() {
