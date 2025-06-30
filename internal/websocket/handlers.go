@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -49,12 +50,23 @@ func HandleStats(hub *Hub) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		stats := hub.GetStats()
 
-		// Simple JSON response (you might want to use a proper JSON encoder)
-		w.Write([]byte(`{
-            "total_clients": ` + string(rune(stats["total_clients"].(int))) + `,
-            "user_subscriptions": ` + string(rune(stats["user_subscriptions"].(int))) + `,
-            "snippet_subscriptions": ` + string(rune(stats["snippet_subscriptions"].(int))) + `,
-            "list_subscriptions": ` + string(rune(stats["list_subscriptions"].(int))) + `
-        }`))
+		type StatsResponse struct {
+			TotalClients         int `json:"total_clients"`
+			UserSubscriptions    int `json:"user_subscriptions"`
+			SnippetSubscriptions int `json:"snippet_subscriptions"`
+			ListSubscriptions    int `json:"list_subscriptions"`
+		}
+
+		response := StatsResponse{
+			TotalClients:         stats["total_clients"].(int),
+			UserSubscriptions:    stats["user_subscriptions"].(int),
+			SnippetSubscriptions: stats["snippet_subscriptions"].(int),
+			ListSubscriptions:    stats["list_subscriptions"].(int),
+		}
+
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			http.Error(w, "Failed to encode stats", http.StatusInternalServerError)
+			return
+		}
 	}
 }
