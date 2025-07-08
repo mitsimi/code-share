@@ -2,31 +2,7 @@
 
 A modern web application for sharing and managing code snippets, built with Go and Vue.js.
 
-## Project Structure
-
-```
-.
-├── frontend/          # Vue.js frontend application
-│   ├── src/          # Source files
-│   │   ├── components/  # Vue components
-│   │   ├── stores/     # Pinia stores
-│   │   ├── views/      # Page components
-│   │   └── ...
-│   ├── dist/         # Built frontend files
-│   └── ...
-├── internal/         # Backend application
-│   ├── api/         # HTTP handlers
-│   ├── domain/      # Data models
-│   ├── server/      # Server setup and routing
-│   └── storage/     # Storage interfaces and implementations
-├── data/            # Database migrations and seeds
-├── yaak/           # Yaak configuration files
-└── main.go         # Application entry point
-```
-
 ## Features
-
-### ✅ Implemented
 
 - **User Authentication & Authorization**
 
@@ -67,11 +43,6 @@ A modern web application for sharing and managing code snippets, built with Go a
   - Type-safe database queries with SQLC
   - Comprehensive error handling and logging
   - RESTful API with proper HTTP status codes
-
-### 🚧 Planned Features
-
-- Code syntax highlighting for better readability
-- Comments on snippets
 
 ## API Endpoints
 
@@ -158,10 +129,10 @@ The frontend is built with modern Vue.js practices:
 - **Go 1.24+**: High-performance server language
 - **SQLite**: Lightweight database with SQLC
 - **Chi Router**: Lightweight HTTP router
+- **Gorilla/WebSocket**: WebSocket implementation
 - **JWT**: JSON Web Tokens for authentication
 - **bcrypt**: Password hashing
 - **Zap**: Structured logging
-- **Air**: Live reload for development
 - **Docker**: Containerization
 
 ### Frontend
@@ -179,6 +150,7 @@ The frontend is built with modern Vue.js practices:
 ### Development Tools
 
 - **SQLC**: Type-safe SQL code generation
+- **Air**: Live reload backend for development
 - **ESLint**: Code linting
 - **Prettier**: Code formatting
 - **pnpm**: Fast package manager
@@ -210,12 +182,18 @@ The application uses SQLite with the following main tables:
    go mod download
    ```
 
-2. Run the server:
+2. Prepare database
+```bash
+  mkdir data
+  SEED=true go run .
+```
+
+3. Run the server:
    ```bash
    # Using Air for hot reload
    air
    # Or directly
-   go run main.go
+   go run .
    ```
 
 ### Frontend Setup
@@ -237,6 +215,43 @@ The application uses SQLite with the following main tables:
    ```bash
    pnpm build
    ```
+
+### Accessing the Application
+
+In development, the backend server proxies requests to the Vite development server. You can access the application at:
+
+- **Frontend**: http://localhost:8080
+- **Backend API**: http://localhost:8080/api
+
+The backend automatically forwards frontend requests to the Vite dev server running on port 5173, so you only need to access the application through the backend port (8080).
+
+
+### Database Development Tips
+
+When working on database schema changes or migrations, it's recommended to use an in-memory database instead of a file-based database for faster development iterations. You can set this up by:
+
+1. Using SQLite in-memory mode:
+   ```bash
+   DB_PATH=":memory:" go run .
+   ```
+   ```bash
+   DB_PATH=":memory:" air
+   ```
+
+2. Or modify the environment variable:
+   ```bash
+   export DB_PATH=":memory:"
+   ```
+
+This approach provides:
+- Faster database operations
+- No file I/O overhead
+- Automatic cleanup between runs
+- Easier testing and development
+
+### Production Deployment
+
+For production deployment, you can serve the built frontend files directly from the backend by setting the `SERVE_STATIC=true` environment variable. This eliminates the need for a separate frontend server and proxy configuration.
 
 ## Contributing
 
