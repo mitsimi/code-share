@@ -133,6 +133,7 @@ const handleRegister = async () => {
 const handleLogout = async () => {
   await authStore.logout()
   isMobileMenuOpen.value = false
+  router.push('/login')
 }
 
 // Mobile menu handling
