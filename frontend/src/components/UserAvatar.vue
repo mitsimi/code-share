@@ -2,7 +2,9 @@
   <div :class="cn('flex items-center gap-4', props.class)">
     <Avatar :class="cn('ring-border ring-2', avatarClass)">
       <AvatarImage :src="user.avatar || ''" :alt="user.username" />
-      <AvatarFallback class="bg-primary text-primary-foreground font-semibold">
+      <AvatarFallback
+        :class="cn('bg-primary text-primary-foreground font-semibold', fallbackClass)"
+      >
         {{ user.username[0].toUpperCase() }}
       </AvatarFallback>
     </Avatar>
@@ -29,6 +31,7 @@ interface Props {
   subtitle?: string
   class?: string
   avatarClass?: string
+  fallbackClass?: string
   usernameClass?: string
   subtitleClass?: string
 }
@@ -36,6 +39,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   class: '',
   avatarClass: '',
+  fallbackClass: '',
   usernameClass: '',
   subtitleClass: '',
 })
