@@ -6,6 +6,7 @@
         <UserAvatar
           :user="authStore.user"
           :avatar-class="'size-32 ring-4'"
+          :fallback-class="'text-4xl'"
           :username-class="'hidden'"
         />
         <div class="flex w-full flex-col gap-2">
