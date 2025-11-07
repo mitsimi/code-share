@@ -12,10 +12,12 @@ export const hasLowerCase = (str: string) => lowercaseRegex.test(str)
 export const hasNumber = (str: string) => numberRegex.test(str)
 export const hasSpecialChar = (str: string) => specialCharRegex.test(str)
 
+const PASSWORD_MIN_LENGTH = 15
+
 // Password validation schema
 export const passwordSchema = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
+  .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
   .regex(uppercaseRegex, 'Password must contain at least one uppercase letter')
   .regex(lowercaseRegex, 'Password must contain at least one lowercase letter')
   .regex(numberRegex, 'Password must contain at least one number')
@@ -25,8 +27,8 @@ export const passwordSchema = z
 export const passwordRequirements = [
   {
     id: 'length',
-    label: 'At least 8 characters',
-    validator: (password: string) => password.length >= 8,
+    label: `At least ${PASSWORD_MIN_LENGTH} characters`,
+    validator: (password: string) => password.length >= PASSWORD_MIN_LENGTH,
   },
   {
     id: 'uppercase',

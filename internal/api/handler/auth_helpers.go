@@ -92,9 +92,12 @@ func isValidEmail(email string) bool {
 	return match
 }
 
+// PasswordMinLength is the minimum length for a valid password
+const PasswordMinLength = 15
+
 // validatePassword checks if the password meets the requirements
 func validatePassword(password string) error {
-	if len(password) < 8 {
+	if len(password) < PasswordMinLength {
 		return errors.New("password must be at least 8 characters long")
 	}
 
