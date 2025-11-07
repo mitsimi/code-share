@@ -1,5 +1,5 @@
 # Build frontend
-FROM node:slim AS frontend-builder
+FROM node:20-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Install pnpm
