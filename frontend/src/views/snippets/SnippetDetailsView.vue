@@ -314,10 +314,10 @@ const shareSnippet = async () => {
         url: url,
       })
       return // Successfully shared, don't fall back
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Only fall back to clipboard if sharing is not supported
       // Don't fall back if user just cancelled (AbortError)
-      if (err.name === 'AbortError') {
+      if (err instanceof DOMException && err.name === 'AbortError') {
         return // User cancelled, do nothing
       }
       console.log('Native share failed, falling back to clipboard')
