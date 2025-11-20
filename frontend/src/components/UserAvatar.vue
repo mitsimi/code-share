@@ -1,7 +1,7 @@
 <template>
   <div :class="cn('flex items-center gap-4', props.class)">
     <Avatar :class="cn('ring-border ring-2', avatarClass)">
-      <AvatarImage :src="user.avatar || ''" :alt="user.username" />
+      <AvatarImage :src="user.avatar || ''" />
       <AvatarFallback
         :class="cn('bg-primary text-primary-foreground font-semibold', fallbackClass)"
       >

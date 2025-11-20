@@ -2,7 +2,7 @@
 
 export interface WebSocketMessage {
   type: string
-  data: any
+  data: unknown
   snippet_id?: string
   user_id?: string
   timestamp: number
@@ -87,7 +87,7 @@ export class WebSocketService {
   private config: Required<WebSocketConfig>
   private messageHandlers = new Map<string, MessageHandler[]>()
   private connectionStateHandlers: ConnectionStateHandler[] = []
-  private messageQueue: any[] = []
+  private messageQueue: unknown[] = []
   private reconnectAttempts = 0
   private reconnectTimer: number | null = null
   private _connectionState: ConnectionState = 'disconnected'
@@ -144,7 +144,7 @@ export class WebSocketService {
   }
 
   // Message handling
-  send(data: any): void {
+  send(data: unknown): void {
     if (this.isConnected && this.ws) {
       this.ws.send(JSON.stringify(data))
     } else {

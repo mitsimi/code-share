@@ -13,10 +13,7 @@
 import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { usersService } from '@/services/users'
-import { useAuthStore } from '@/stores/auth'
 import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
-
-const authStore = useAuthStore()
 
 // Fetch saved snippets
 const { data: savedSnippets, isLoading: isLoadingSaved } = useQuery({

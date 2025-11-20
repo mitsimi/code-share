@@ -28,7 +28,6 @@ export async function copyToClipboard(text: string): Promise<void> {
   textArea.select()
   textArea.setSelectionRange(0, textArea.value.length)
 
-  // @ts-ignore - document.execCommand is deprecated but needed for Safari iOS
   const successful = document.execCommand('copy')
   document.body.removeChild(textArea)
 

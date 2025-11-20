@@ -46,7 +46,7 @@ export interface ApiResponse<T> {
 }
 
 // Backend API Response structure matching the Go struct
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   statusCode: number
   message: string
   data?: T
