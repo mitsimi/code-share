@@ -60,7 +60,7 @@
                 >
                   <div class="flex items-center gap-2">
                     {{ language.label }}
-                    <span class="text-muted-foreground text-xs">.{{ language.extension }}</span>
+                    <span class="text-muted-foreground text-xs">{{ language.extension }}</span>
                   </div>
 
                   <ComboboxItemIndicator>
@@ -146,7 +146,7 @@ const formData = ref({
 // Transform languages to label/value format
 const languageOptions = computed(() => {
   return allLanguages.map((lang) => ({
-    label: lang.name,
+    label: lang.displayName,
     value: lang.name.toLowerCase(),
     extension: lang.extensions[0],
   }))
