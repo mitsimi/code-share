@@ -8,6 +8,7 @@ import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 
 import tailwindcss from '@tailwindcss/vite'
+import prismjs from 'vite-plugin-prismjs'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,6 +17,11 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     tailwindcss(),
+    prismjs({
+      languages: 'all',
+      theme: 'tomorrow',
+      css: false,
+    }),
     Components({
       dts: true,
     }),

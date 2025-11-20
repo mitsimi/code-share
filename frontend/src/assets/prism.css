@@ -1,0 +1,137 @@
+@layer base {
+
+  /* 1. Define Semantic Token Colors based on your theme */
+  :root {
+    /* Background: Use 'muted' for a subtle contrast against the main page */
+    --code-bg: var(--muted);
+    --code-border: var(--border);
+
+    /* Base text color */
+    --code-text: var(--foreground);
+
+    /* Tokens Mappings */
+    --token-comment: var(--muted-foreground);
+
+    /* Keywords (const, return): Your Primary Brand Color */
+    --token-keyword: var(--primary);
+
+    /* Functions/Classes: Your 'Ring' color is a nice distinct Blue/Purple (Hue 253) */
+    --token-function: var(--ring);
+
+    /* Strings: Use Chart-1 or Chart-2 if they have good contrast,
+       otherwise Destructive is a safe high-contrast option in your theme */
+    --token-string: var(--chart-1);
+
+    /* Numbers/Booleans */
+    --token-constant: var(--chart-2);
+
+    /* Punctuation (brackets, semicolons) */
+    --token-punctuation: var(--muted-foreground);
+  }
+
+  /* 2. Apply styles to PrismJS elements */
+  code[class*="language-"],
+  pre[class*="language-"] {
+    color: var(--code-text);
+    background-color: var(--code-bg);
+    font-family: var(--font-mono);
+    /* JetBrains Mono */
+    font-size: 0.875rem;
+    /* Text-sm looks cleaner for code */
+    line-height: 1.7;
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    tab-size: 2;
+    hyphens: none;
+
+    /* Claude-like Container Styling */
+    border: 1px solid var(--code-border);
+    border-radius: var(--radius);
+  }
+
+  /* Inline code snippets (e.g., inside paragraphs) */
+  :not(pre)>code[class*="language-"] {
+    background-color: var(--code-bg);
+    color: var(--token-function);
+    /* Highlight inline code slightly */
+    padding: 0.2em 0.4em;
+    border-radius: var(--radius-sm);
+    white-space: normal;
+    border: 1px solid var(--border);
+  }
+
+  /* 3. Token Coloring */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: var(--token-comment);
+    font-style: italic;
+  }
+
+  .token.punctuation {
+    color: var(--token-punctuation);
+  }
+
+  .token.namespace {
+    opacity: 0.7;
+  }
+
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number,
+  .token.constant,
+  .token.symbol,
+  .token.deleted {
+    color: var(--token-constant);
+  }
+
+  .token.selector,
+  .token.attr-name,
+  .token.string,
+  .token.char,
+  .token.builtin,
+  .token.inserted {
+    color: var(--token-string);
+  }
+
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string {
+    color: var(--code-text);
+    /* Keep operators simple/clean */
+  }
+
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: var(--token-keyword);
+    font-weight: 500;
+    /* Slight bold for keywords */
+  }
+
+  .token.function,
+  .token.class-name {
+    color: var(--token-function);
+  }
+
+  .token.regex,
+  .token.important,
+  .token.variable {
+    color: var(--token-keyword);
+  }
+
+  .token.bold {
+    font-weight: bold;
+  }
+
+  .token.italic {
+    font-style: italic;
+  }
+}

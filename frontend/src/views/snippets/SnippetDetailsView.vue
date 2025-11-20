@@ -220,9 +220,11 @@
 
             <!-- Code content -->
             <CardContent class="min-w-0 overflow-y-auto p-6">
-              <pre
-                class="text-foreground/90 overflow-x-auto font-mono text-sm leading-relaxed"
-              ><code>{{ snippet.content }}</code></pre>
+              <HighlightedCode
+                :code="snippet.content"
+                :language="snippet.language"
+                class="text-foreground/90"
+              />
             </CardContent>
           </Card>
         </div>
@@ -264,6 +266,7 @@ import CardContent from '@/components/ui/card/CardContent.vue'
 import SnippetFormModal from './_components/SnippetFormModal.vue'
 import { useSnippetDetails } from '@/composables/useSnippetSubscription'
 import { useSnippet } from '@/composables/useSnippet'
+import HighlightedCode from '@/components/snippets/HighlightedCode.vue'
 
 dayjs.extend(relativeTime)
 

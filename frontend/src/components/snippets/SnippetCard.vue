@@ -35,10 +35,12 @@
         </div>
 
         <!-- Code content -->
-        <div class="relative max-h-32 overflow-x-clip overflow-y-auto p-3">
-          <pre
-            class="text-foreground/90 font-mono text-xs leading-relaxed"
-          ><code>{{ truncatedContent }}</code></pre>
+        <div class="relative overflow-hidden p-3">
+          <HighlightedCode
+            :code="snippet.content"
+            :language="snippet.language"
+            class="max-h-32 overflow-auto text-xs"
+          />
         </div>
       </div>
     </CardContent>
@@ -83,7 +85,6 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import type { Snippet } from '@/types'
 import { CopyIcon } from 'lucide-vue-next'
-import { computed } from 'vue'
 import LikeButton from './LikeButton.vue'
 import SaveButton from './SaveButton.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -91,6 +92,7 @@ import { toast } from 'vue-sonner'
 import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
 import { getLanguageExtension, getLanguageName } from '@/lib/languages'
 import Authenticated from '../access/Authenticated.vue'
+import HighlightedCode from './HighlightedCode.vue'
 
 dayjs.extend(relativeTime)
 
@@ -101,15 +103,6 @@ defineEmits<{
 const props = defineProps<{
   snippet: Snippet
 }>()
-
-// Computed properties
-const truncatedContent = computed(() => {
-  const maxLength = 200
-  if (props.snippet.content.length <= maxLength) {
-    return props.snippet.content
-  }
-  return props.snippet.content.substring(0, maxLength) + '...'
-})
 
 const copyToClipboard = async () => {
   try {
