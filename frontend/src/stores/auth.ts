@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
       refreshTimer.value = window.setTimeout(async () => {
         try {
           await refreshAccessToken()
-        } catch (error) {
+        } catch {
           clearAuth()
           router.push({
             name: 'login',
@@ -158,7 +158,7 @@ export const useAuthStore = defineStore('auth', () => {
         if (expiresAt.value) {
           scheduleTokenRefresh(expiresAt.value)
         }
-      } catch (error) {
+      } catch {
         // Session is invalid, try to refresh the token
         try {
           await refreshAccessToken()
@@ -172,7 +172,7 @@ export const useAuthStore = defineStore('auth', () => {
       // If stored auth exists but is expired, try to refresh
       try {
         await refreshAccessToken()
-      } catch (error) {
+      } catch {
         clearAuth()
       }
     }
@@ -183,6 +183,7 @@ export const useAuthStore = defineStore('auth', () => {
       await authService.logout()
     } catch (error) {
       toast.error('Failed to logout')
+      console.error(error)
     }
 
     clearAuth()

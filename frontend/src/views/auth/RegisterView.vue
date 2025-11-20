@@ -118,7 +118,7 @@ const { handleSubmit } = useForm({
 const onSubmit = handleSubmit(async (values) => {
   try {
     isLoading.value = true
-    const { confirmPassword, ...registerData } = values
+    const { ...registerData } = values
     const response = await authService.register(registerData)
     authStore.setAuth({
       user: response.user,

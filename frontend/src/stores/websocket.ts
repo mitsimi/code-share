@@ -57,7 +57,11 @@ export const useWebSocketStore = defineStore('websocket', () => {
   // Subscription management
   const subscribe = (subscription: Subscription) => {
     // Check if this subscription type requires authentication
-    if (AUTHENTICATED_SUBSCRIPTION_TYPES.includes(subscription.type as any)) {
+    if (
+      AUTHENTICATED_SUBSCRIPTION_TYPES.includes(
+        subscription.type as (typeof AUTHENTICATED_SUBSCRIPTION_TYPES)[number],
+      )
+    ) {
       if (!authStore.isAuthenticated()) {
         console.warn(`Cannot subscribe to ${subscription.type}: authentication required`)
         return
@@ -89,7 +93,11 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
     subscriptions.value.forEach((subKey) => {
       const [type] = subKey.split(':')
-      if (AUTHENTICATED_SUBSCRIPTION_TYPES.includes(type as any)) {
+      if (
+        AUTHENTICATED_SUBSCRIPTION_TYPES.includes(
+          type as (typeof AUTHENTICATED_SUBSCRIPTION_TYPES)[number],
+        )
+      ) {
         subsToRemove.push(subKey)
       }
     })

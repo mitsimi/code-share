@@ -34,7 +34,7 @@ export function useSnippets() {
       snippetsStore.addSnippet(newSnippet)
 
       // Also update TanStack Query cache for consistency
-      queryClient.setQueryData(['snippets'], (old: any) => {
+      queryClient.setQueryData(['snippets'], (old: Array<typeof newSnippet> | undefined) => {
         if (!old) return [newSnippet]
         return [newSnippet, ...old]
       })

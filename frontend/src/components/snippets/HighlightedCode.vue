@@ -1,83 +1,45 @@
 <template>
-  <pre class="highlighted-code" :class="{ 'highlighted-code--wrap': wrap }" v-bind="$attrs">
-    <code ref="codeRef" :class="languageClass" class="px-2 py-1"></code>
-  </pre>
+  <div class="shiki-wrapper" v-html="highlightedCode"></div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import Prism from 'prismjs';
-import { languages } from '@/lib/languages';
+import { onMounted, ref, watch } from 'vue'
+import { highlightCode } from '@/composables/useShiki'
+import { escapeHtml } from '@/lib/utils'
 
 const props = defineProps<{
   code: string
   language?: string | null
-  wrap?: boolean
 }>()
 
-const codeRef = ref<HTMLElement | null>(null)
+// Initial render: Plain text wrapped in pre/code to prevent CLS (Layout Shift)
+// while Shiki loads lazily
+const highlightedCode = ref<string>(
+  `<pre class="shiki"><code>${escapeHtml(props.code ?? '')}</code></pre>`,
+)
 
-const aliasToLanguageId = languages.reduce<Record<string, string>>((map, lang) => {
-  const canonical = lang.id
-  const addAlias = (alias?: string) => {
-    if (!alias) return
-    map[alias.toLowerCase()] = canonical
-  }
-
-  addAlias(lang.id)
-  addAlias(lang.extension)
-  lang.aliases?.forEach(addAlias)
-
-  return map
-}, {})
-
-const resolvedLanguage = computed(() => {
-  if (!props.language) return 'plaintext'
-  const normalized = props.language.toLowerCase()
-  return aliasToLanguageId[normalized] || normalized
-})
-
-const languageClass = computed(() => `language-${resolvedLanguage.value}`)
-
-const highlight = async () => {
-  await nextTick()
-  if (!codeRef.value) return
-  codeRef.value.textContent = props.code ?? ''
-  Prism.highlightElement(codeRef.value)
+const performHighlight = async () => {
+  highlightedCode.value = await highlightCode(props.code ?? '', props.language)
 }
 
-onMounted(() => {
-  highlight()
-})
+onMounted(performHighlight)
 
-watch(
-  () => [props.code, resolvedLanguage.value],
-  () => {
-    highlight()
-  },
-)
+watch(() => [props.code, props.language], performHighlight)
 </script>
 
-<style scoped>
-.highlighted-code {
-  margin: 0;
-  padding: 0;
+<style>
+.shiki-wrapper pre.shiki {
   font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
   font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--foreground, #f5f5f4);
-  background: transparent;
-  white-space: nowrap;
-  overflow: auto;
+  line-height: 1.7;
+  background-color: transparent !important;
 }
 
-.highlighted-code code {
-  display: block;
-}
-
-.highlighted-code--wrap {
-  white-space: pre-wrap;
-  word-break: break-word;
+html.dark .shiki,
+html.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 </style>
-

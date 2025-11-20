@@ -51,7 +51,7 @@ export const authService = {
 
   async logout(): Promise<void> {
     const useFetch = useCustomFetch()
-    const { data, error } = await useFetch<void>('/auth/logout', {
+    const { error } = await useFetch<void>('/auth/logout', {
       method: 'POST',
     }).json()
 

@@ -11,13 +11,9 @@ export function useSnippet(snippetId: string) {
   const { isPending, isError, error, refetch } = useQuery({
     queryKey: ['snippet', snippetId],
     queryFn: async () => {
-      try {
-        const data = await snippetsService.getSnippet(snippetId)
-        snippetsStore.addSnippet(data)
-        return data
-      } catch (err) {
-        throw err
-      }
+      const data = await snippetsService.getSnippet(snippetId)
+      snippetsStore.addSnippet(data)
+      return data
     },
   })
 

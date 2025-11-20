@@ -1,4 +1,4 @@
-import { createFetch } from '@vueuse/core'
+import { createFetch, type UseFetchOptions } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import type { Ref } from 'vue'
@@ -83,7 +83,7 @@ export function useCustomFetch() {
         return { data, error: apiError }
       },
       async afterFetch(ctx) {
-        const { data, response } = ctx
+        const { response } = ctx
 
         if (response.status === 401) {
           // Clear auth and redirect to login
@@ -101,8 +101,8 @@ export function useCustomFetch() {
   })
 
   // Return a typed version of the fetch function
-  return function typedFetch<T = any>(url: string, options?: any) {
-    const response = createTypedFetch(url, options)
+  return function typedFetch<T = unknown>(url: string, options?: unknown) {
+    const response = createTypedFetch(url, options as UseFetchOptions)
 
     // Return with proper typing
     return {
