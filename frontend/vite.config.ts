@@ -19,8 +19,6 @@ export default defineConfig({
     tailwindcss(),
     prismjs({
       languages: 'all',
-      theme: 'tomorrow',
-      css: false,
     }),
     Components({
       dts: true,
