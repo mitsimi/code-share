@@ -77,7 +77,7 @@ var sampleSnippetsData = []domain.Snippet{
 	{
 		ID:       "1",
 		Title:    "Vue 3 Composition API Example",
-		Content:  "import { ref, computed } from 'vue'\nexport default {\n    setup() {\n        const count = ref(0)\n        const double = computed(() => count.value * 2)\n\n        function increment() {\n            count.value++\n        }\n\n        return {\n            count,\n            double,\n            increment\n        }\n    }\n}",
+		Content:  "<template>\n\t<div>\n\t\t<p>Count: {{ count }}</p>\n\t\t<p>Double: {{ double }}</p>\n\t\t<button @click=\"increment\">Increment</button>\n\t</div>\n</template>\n\n<script setup>\nimport { ref, computed } from 'vue'\n\nconst count = ref(0)\nconst double = computed(() => count.value * 2)\n\nfunction increment() {\n\tcount.value++\n}\n</script>\n",
 		Language: "vue",
 	},
 	{
