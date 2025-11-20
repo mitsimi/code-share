@@ -120,7 +120,8 @@ import {
   ComboboxEmpty,
   ComboboxGroup,
 } from '@/components/ui/combobox'
-import { getAvailableLanguages, getLanguageName } from '@/lib/languages'
+import { allLanguages } from '@/lib/languages'
+import type { ListboxItemSelectEvent, AcceptableValue } from 'reka-ui'
 
 const props = defineProps<{
   show: boolean
@@ -144,11 +145,10 @@ const formData = ref({
 
 // Transform languages to label/value format
 const languageOptions = computed(() => {
-  return getAvailableLanguages().map((lang) => ({
+  return allLanguages.map((lang) => ({
     label: lang.name,
     value: lang.name.toLowerCase(),
-    extension: lang.extension,
-    aliases: lang.aliases,
+    extension: lang.extensions[0],
   }))
 })
 
@@ -158,10 +158,14 @@ const filteredLanguages = computed(() => {
   return languageOptions.value
 })
 
-const handleLanguageSelect = (event: any) => {
-  const language = event.detail.value
-  selectedLanguage.value = language
-  formData.value.language = language.value
+type LanguageOption = { label: string; value: string; extension: string }
+
+const handleLanguageSelect = (event: ListboxItemSelectEvent<AcceptableValue>) => {
+  const language = event.detail?.value as LanguageOption | undefined
+  if (language) {
+    selectedLanguage.value = language
+    formData.value.language = language.value
+  }
 }
 
 // Reset form data when modal closes
@@ -209,7 +213,7 @@ const handleSubmit = () => {
 
   // Only include language if it's set or we're in edit mode
   if (formData.value.language || isEditMode.value) {
-    submitData.language = getLanguageName(formData.value.language) || formData.value.language
+    submitData.language = formData.value.language
   }
 
   emit('submit', submitData)

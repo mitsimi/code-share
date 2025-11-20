@@ -36,3 +36,15 @@ export async function copyToClipboard(text: string): Promise<void> {
     throw new Error('Copy command failed')
   }
 }
+
+/**
+ * Simple HTML escaper for the fallback
+ */
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}

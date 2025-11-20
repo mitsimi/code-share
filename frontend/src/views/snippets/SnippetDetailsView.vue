@@ -106,7 +106,7 @@
                 <!-- Language -->
                 <div v-if="snippet.language" class="text-muted-foreground text-sm">
                   <span class="text-foreground font-medium">Language:</span>
-                  {{ getLanguageName(snippet.language) || 'Plain Text' }}
+                  {{ getLanguage(snippet.language)?.displayName || 'Text' }}
                 </div>
 
                 <!-- Creation date -->
@@ -201,9 +201,6 @@
                   <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
                   <div class="h-3 w-3 rounded-full bg-green-500"></div>
                 </div>
-                <span class="text-muted-foreground font-mono text-sm">
-                  snippet.{{ getLanguageExtension(snippet.language) || 'txt' }}
-                </span>
               </div>
 
               <!-- Copy button -->
@@ -219,12 +216,8 @@
             </div>
 
             <!-- Code content -->
-            <CardContent class="min-w-0 overflow-y-auto p-6">
-              <HighlightedCode
-                :code="snippet.content"
-                :language="snippet.language"
-                class="text-foreground/90"
-              />
+            <CardContent class="text-foreground/90 min-w-0 overflow-y-auto p-6">
+              <HighlightedCode :code="snippet.content" :language="snippet.language" />
             </CardContent>
           </Card>
         </div>
@@ -257,7 +250,6 @@ import {
   EditIcon,
 } from 'lucide-vue-next'
 import UserAvatar from '@/components/UserAvatar.vue'
-import { getLanguageName, getLanguageExtension } from '@/lib/languages'
 import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
 import { toast } from 'vue-sonner'
 import dayjs from 'dayjs'
@@ -267,6 +259,7 @@ import SnippetFormModal from './_components/SnippetFormModal.vue'
 import { useSnippetDetails } from '@/composables/useSnippetSubscription'
 import { useSnippet } from '@/composables/useSnippet'
 import HighlightedCode from '@/components/snippets/HighlightedCode.vue'
+import { getLanguage } from '@/lib/languages'
 
 dayjs.extend(relativeTime)
 

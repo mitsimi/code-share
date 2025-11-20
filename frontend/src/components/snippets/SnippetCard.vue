@@ -8,9 +8,6 @@
         >
           {{ snippet.title }}
         </CardTitle>
-        <Badge v-if="snippet.language" variant="secondary" class="shrink-0 text-xs">
-          {{ getLanguageName(snippet.language) || 'Text' }}
-        </Badge>
       </div>
     </CardHeader>
 
@@ -21,7 +18,7 @@
         <div class="bg-muted/50 flex items-center justify-between border-b px-3 py-2">
           <div class="flex items-center gap-2">
             <span class="text-muted-foreground font-mono text-xs">
-              snippet.{{ getLanguageExtension(snippet.language) || 'txt' }}
+              {{ getLanguage(snippet.language)?.displayName || 'Text' }}
             </span>
           </div>
           <Button
@@ -36,11 +33,9 @@
 
         <!-- Code content -->
         <div class="relative overflow-hidden p-3">
-          <HighlightedCode
-            :code="snippet.content"
-            :language="snippet.language"
-            class="max-h-32 overflow-auto text-xs"
-          />
+          <div class="max-h-32 overflow-auto text-xs">
+            <HighlightedCode :code="snippet.content" :language="snippet.language" />
+          </div>
         </div>
       </div>
     </CardContent>
@@ -90,9 +85,9 @@ import SaveButton from './SaveButton.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { toast } from 'vue-sonner'
 import { copyToClipboard as copyTextToClipboard } from '@/lib/utils'
-import { getLanguageExtension, getLanguageName } from '@/lib/languages'
 import Authenticated from '../access/Authenticated.vue'
 import HighlightedCode from './HighlightedCode.vue'
+import { getLanguage } from '@/lib/languages'
 
 dayjs.extend(relativeTime)
 
