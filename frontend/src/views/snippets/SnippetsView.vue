@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth'
 import { ref } from 'vue'
 import SnippetFormModal from './_components/SnippetFormModal.vue'
 import { useSnippets } from '@/composables/useSnippets'
 
-const authStore = useAuthStore()
 const showModal = ref(false)
 
-// Use the new hybrid composable
 const { snippets, isLoading, isError, error, createSnippet, isCreating, refetch } = useSnippets()
 
 const handleCreateSnippet = (formData: { title: string; content: string; language?: string }) => {

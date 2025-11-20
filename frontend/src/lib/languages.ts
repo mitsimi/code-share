@@ -1,39 +1,49 @@
+import prismComponents from 'prismjs/components.json'
+
 export interface Language {
+  id: string
   name: string
   extension: string
   aliases?: string[]
 }
 
-export const languages: Language[] = [
-  { name: 'JavaScript', extension: 'js', aliases: ['javascript', 'js'] },
-  { name: 'TypeScript', extension: 'ts', aliases: ['typescript', 'ts'] },
-  { name: 'JSX', extension: 'jsx', aliases: ['jsx', 'react'] },
-  { name: 'TSX', extension: 'tsx', aliases: ['tsx', 'react-ts'] },
-  { name: 'Vue', extension: 'vue', aliases: ['vue', 'vuejs'] },
-  { name: 'Python', extension: 'py', aliases: ['python', 'py'] },
-  { name: 'Java', extension: 'java', aliases: ['java'] },
-  { name: 'Kotlin', extension: 'kt', aliases: ['kotlin', 'kt'] },
-  { name: 'C', extension: 'c', aliases: ['c'] },
-  { name: 'C++', extension: 'cpp', aliases: ['cpp', 'c++', 'cplusplus'] },
-  { name: 'C#', extension: 'cs', aliases: ['csharp', 'cs', 'c#'] },
-  { name: 'Go', extension: 'go', aliases: ['go', 'golang'] },
-  { name: 'Rust', extension: 'rs', aliases: ['rust', 'rs'] },
-  { name: 'Ruby', extension: 'rb', aliases: ['ruby', 'rb'] },
-  { name: 'PHP', extension: 'php', aliases: ['php'] },
-  { name: 'Swift', extension: 'swift', aliases: ['swift'] },
-  { name: 'HTML', extension: 'html', aliases: ['html', 'htm'] },
-  { name: 'CSS', extension: 'css', aliases: ['css'] },
-  { name: 'SQL', extension: 'sql', aliases: ['sql'] },
-  { name: 'Shell', extension: 'sh', aliases: ['shell', 'bash', 'sh'] },
-  { name: 'YAML', extension: 'yml', aliases: ['yaml', 'yml'] },
-  { name: 'TOML', extension: 'toml', aliases: ['toml'] },
-  { name: 'JSON', extension: 'json', aliases: ['json'] },
-  { name: 'Markdown', extension: 'md', aliases: ['markdown', 'md'] },
-  { name: 'GraphQL', extension: 'graphql', aliases: ['graphql', 'gql'] },
-  { name: 'Elixir', extension: 'ex', aliases: ['elixir', 'ex'] },
-  { name: 'Haskell', extension: 'hs', aliases: ['haskell', 'hs'] },
-  { name: 'Scala', extension: 'scala', aliases: ['scala'] },
-]
+interface PrismLanguageConfig {
+  alias?: string | string[]
+  title?: string
+}
+
+// Helper to normalize aliases to a string array
+const getAliases = (langConfig: PrismLanguageConfig): string[] => {
+  if (!langConfig.alias) return []
+  return Array.isArray(langConfig.alias) ? langConfig.alias : [langConfig.alias]
+}
+
+// Generate the list automatically from Prism metadata
+const prismLanguages = prismComponents.languages as Record<string, PrismLanguageConfig>
+
+const autoLoadedLanguages: Language[] = Object.entries(prismLanguages)
+  .filter(([id]) => id !== 'meta') // Remove metadata entry
+  .map(([id, config]) => {
+    const aliases = getAliases(config)
+
+    // Heuristic: Use the shortest alias as the "extension", or fallback to the ID
+    // e.g. id: 'javascript', aliases: ['js'] -> extension: 'js'
+    const extension = aliases.sort((a, b) => a.length - b.length)[0] || id
+
+    return {
+      id,
+      name: config.title || id, // Use the display title (e.g., "C#") or ID
+      extension: extension,
+      aliases: [id, ...aliases], // Include the ID in aliases for searchability
+    }
+  })
+
+// Sort alphabetically for the dropdown
+export const languages: Language[] = autoLoadedLanguages.sort((a, b) =>
+  a.name.localeCompare(b.name),
+)
+
+// ... keep your existing helper functions (getLanguageExtension, etc.) ...
 
 /**
  * Get the file extension for a given programming language
