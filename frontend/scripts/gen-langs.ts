@@ -62,7 +62,7 @@ async function generate() {
     name: 'text',
     shikiId: 'text',
     color: '#888888',
-    extensions: '.txt',
+    extensions: ['.txt'],
   })
 
   languages.sort((a, b) => a.name.localeCompare(b.name))
