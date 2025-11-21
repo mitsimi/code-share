@@ -57,6 +57,14 @@ async function generate() {
     languages.push(entry)
   }
 
+  languages.push({
+    displayName: 'Plain Text',
+    name: 'text',
+    shikiId: 'text',
+    color: '#888888',
+    extensions: '.txt',
+  })
+
   languages.sort((a, b) => a.name.localeCompare(b.name))
 
   await fs.mkdir(path.dirname(OUT_PATH), { recursive: true })
