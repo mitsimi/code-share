@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import { highlightCode } from '@/composables/useShiki'
-import { escapeHtml } from '@/lib/utils'
+import { onMounted, ref, watch } from 'vue';
+import { highlightCode } from '@/composables/useShiki';
+import { escapeHtml } from '@/lib/utils';
 
 const props = defineProps<{
   code: string
@@ -30,6 +30,7 @@ watch(() => [props.code, props.language], performHighlight)
 <style>
 .shiki-wrapper pre.shiki {
   font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+  font-variant-ligatures: none;
   font-size: 0.875rem;
   line-height: 1.7;
   background-color: transparent !important;
