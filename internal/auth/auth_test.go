@@ -1,27 +1,76 @@
 package auth
 
-import "testing"
+import (
+	"testing"
+	"time"
 
-// Add this test to verify token generation works correctly
-func TestTokenGeneration(t *testing.T) {
+	"github.com/stretchr/testify/assert"
+)
+
+func TestPasswordHashing(t *testing.T) {
+	password := "my-secret-password"
+
+	hashedPassword, err := HashPassword(password)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, hashedPassword)
+
+	t.Run("correct password", func(t *testing.T) {
+		assert.True(t, CheckPasswordHash(password, hashedPassword))
+	})
+
+	t.Run("incorrect password", func(t *testing.T) {
+		assert.False(t, CheckPasswordHash("wrong-password", hashedPassword))
+	})
+}
+
+func TestTokenGenerationAndValidation(t *testing.T) {
 	secretKey := "test-secret-key"
 	userID := "test-user-id"
 
-	// Generate two access tokens
-	token1, err := GenerateToken(userID, secretKey, false)
-	if err != nil {
-		t.Fatalf("Failed to generate token 1: %v", err)
-	}
+	t.Run("valid token", func(t *testing.T) {
+		tokenResponse, err := GenerateToken(userID, secretKey, false)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, tokenResponse.Token)
 
-	token2, err := GenerateToken(userID, secretKey, false)
-	if err != nil {
-		t.Fatalf("Failed to generate token 2: %v", err)
-	}
+		claims, err := ValidateToken(tokenResponse.Token, secretKey)
+		assert.NoError(t, err)
+		assert.Equal(t, userID, claims.UserID)
+		assert.False(t, claims.IsRefresh)
+	})
 
-	if token1.Token == token2.Token {
-		t.Error("Generated tokens should be different")
-	}
+	t.Run("invalid secret", func(t *testing.T) {
+		tokenResponse, err := GenerateToken(userID, secretKey, false)
+		assert.NoError(t, err)
 
-	t.Logf("Token 1: %s", token1.Token)
-	t.Logf("Token 2: %s", token2.Token)
+		_, err = ValidateToken(tokenResponse.Token, "wrong-secret")
+		assert.ErrorIs(t, err, ErrInvalidToken)
+	})
+
+	t.Run("expired token", func(t *testing.T) {
+		// Override expiration for testing
+		originalAccessTokenExpiration := AccessTokenExpiration
+		AccessTokenExpiration = 1 * time.Second
+		defer func() { AccessTokenExpiration = originalAccessTokenExpiration }()
+
+		tokenResponse, err := GenerateToken(userID, secretKey, false)
+		assert.NoError(t, err)
+
+		// Wait for the token to expire
+		time.Sleep(2 * time.Second)
+
+		_, err = ValidateToken(tokenResponse.Token, secretKey)
+		assert.ErrorIs(t, err, ErrExpiredToken)
+	})
+}
+
+func TestGenerateRandomToken(t *testing.T) {
+	token1, err := GenerateRandomToken()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, token1)
+
+	token2, err := GenerateRandomToken()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, token2)
+
+	assert.NotEqual(t, token1, token2)
 }

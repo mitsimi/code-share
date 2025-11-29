@@ -17,7 +17,7 @@ var (
 	ErrExpiredToken       = errors.New("token has expired")
 )
 
-const (
+var (
 	AccessTokenExpiration  = 1 * time.Hour
 	RefreshTokenExpiration = 7 * 24 * time.Hour
 )
