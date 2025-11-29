@@ -19,7 +19,7 @@ jobs:
 
       - name: Get changed Go and JavaScript files
         id: changed_files_specific
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@v47
         with:
           files: |
             **.go
