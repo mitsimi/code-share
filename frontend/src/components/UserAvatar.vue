@@ -5,7 +5,7 @@
       <AvatarFallback
         :class="cn('bg-primary text-primary-foreground font-semibold', fallbackClass)"
       >
-        {{ user.username[0].toUpperCase() }}
+        {{ user.username.charAt(0).toUpperCase() }}
       </AvatarFallback>
     </Avatar>
     <div class="flex flex-col">

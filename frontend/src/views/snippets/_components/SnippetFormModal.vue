@@ -148,7 +148,7 @@ const languageOptions = computed(() => {
   return allLanguages.map((lang) => ({
     label: lang.displayName,
     value: lang.name.toLowerCase(),
-    extension: lang.extensions[0],
+    extension: lang.extensions[0] ?? '',
   }))
 })
 
