@@ -3,10 +3,10 @@ package dto
 import "mitsimi.dev/codeShare/internal/domain"
 
 type UserResponse struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Avatar   string `json:"avatar"`
+	ID       string  `json:"id"`
+	Username string  `json:"username"`
+	Email    string  `json:"email"`
+	Avatar   *string `json:"avatar"`
 }
 
 func ToUserResponse(user *domain.User) UserResponse {

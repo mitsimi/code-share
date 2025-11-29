@@ -66,6 +66,11 @@ func (r *BookmarkRepository) GetSavedSnippets(ctx context.Context, userID string
 
 	result := make([]*domain.Snippet, len(snippets))
 	for i, snippet := range snippets {
+		var avatar *string
+		if snippet.AuthorAvatar.Valid {
+			avatar = &snippet.AuthorAvatar.String
+		}
+
 		result[i] = &domain.Snippet{
 			ID:       snippet.ID,
 			Title:    snippet.Title,
@@ -75,7 +80,7 @@ func (r *BookmarkRepository) GetSavedSnippets(ctx context.Context, userID string
 				ID:       snippet.AuthorID.String,
 				Username: snippet.AuthorUsername.String,
 				Email:    snippet.AuthorEmail.String,
-				Avatar:   snippet.AuthorAvatar.String,
+				Avatar:   avatar,
 			},
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,

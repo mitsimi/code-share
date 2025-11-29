@@ -10,7 +10,7 @@ type User struct {
 	ID           string
 	Username     string
 	Email        string
-	Avatar       string
+	Avatar       *string
 	PasswordHash string // This should be kept private and not exposed in the User struct
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
@@ -24,11 +24,16 @@ type UserCreation struct {
 }
 
 func ToDomainUser(user db.User) *User {
+	var avatar *string
+	if user.Avatar.Valid {
+		avatar = &user.Avatar.String
+	}
+
 	return &User{
 		ID:           user.ID,
 		Username:     user.Username,
 		Email:        user.Email,
-		Avatar:       user.Avatar.String,
+		Avatar:       avatar,
 		PasswordHash: user.PasswordHash,
 		CreatedAt:    user.CreatedAt,
 		UpdatedAt:    user.UpdatedAt,

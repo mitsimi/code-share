@@ -46,6 +46,11 @@ func (r *SnippetRepository) GetByID(ctx context.Context, snippetID, userID strin
 		return nil, repository.WrapError(err, "failed to get snippet")
 	}
 
+	var avatar *string
+	if snippet.AuthorAvatar.Valid {
+		avatar = &snippet.AuthorAvatar.String
+	}
+
 	return &domain.Snippet{
 		ID:       snippet.ID,
 		Title:    snippet.Title,
@@ -55,7 +60,7 @@ func (r *SnippetRepository) GetByID(ctx context.Context, snippetID, userID strin
 			ID:       snippet.AuthorID.String,
 			Username: snippet.AuthorUsername.String,
 			Email:    snippet.AuthorEmail.String,
-			Avatar:   snippet.AuthorAvatar.String,
+			Avatar:   avatar,
 		},
 		CreatedAt: snippet.CreatedAt,
 		UpdatedAt: snippet.UpdatedAt,
@@ -80,6 +85,11 @@ func (r *SnippetRepository) GetAllByAuthor(ctx context.Context, authorID, userID
 
 	result := make([]*domain.Snippet, len(snippets))
 	for i, snippet := range snippets {
+		var avatar *string
+		if snippet.AuthorAvatar.Valid {
+			avatar = &snippet.AuthorAvatar.String
+		}
+
 		result[i] = &domain.Snippet{
 			ID:       snippet.ID,
 			Title:    snippet.Title,
@@ -89,7 +99,7 @@ func (r *SnippetRepository) GetAllByAuthor(ctx context.Context, authorID, userID
 				ID:       snippet.AuthorID.String,
 				Username: snippet.AuthorUsername.String,
 				Email:    snippet.AuthorEmail.String,
-				Avatar:   snippet.AuthorAvatar.String,
+				Avatar:   avatar,
 			},
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,
@@ -114,6 +124,11 @@ func (r *SnippetRepository) GetAll(ctx context.Context, userID string) ([]*domai
 
 	result := make([]*domain.Snippet, len(snippets))
 	for i, snippet := range snippets {
+		var avatar *string
+		if snippet.AuthorAvatar.Valid {
+			avatar = &snippet.AuthorAvatar.String
+		}
+
 		result[i] = &domain.Snippet{
 			ID:       snippet.ID,
 			Title:    snippet.Title,
@@ -123,7 +138,7 @@ func (r *SnippetRepository) GetAll(ctx context.Context, userID string) ([]*domai
 				ID:       snippet.AuthorID.String,
 				Username: snippet.AuthorUsername.String,
 				Email:    snippet.AuthorEmail.String,
-				Avatar:   snippet.AuthorAvatar.String,
+				Avatar:   avatar,
 			},
 			CreatedAt: snippet.CreatedAt,
 			UpdatedAt: snippet.UpdatedAt,
