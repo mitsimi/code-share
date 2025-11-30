@@ -3,7 +3,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import { useAuthStore } from './auth'
 import { authService } from '@/services/auth'
 import { usersService } from '@/services/users'
-import { useRouter } from 'vue-router'
+import { useRouter, type Router } from 'vue-router'
 
 // Mock dependencies
 vi.mock('@/services/auth', () => ({
@@ -46,12 +46,13 @@ describe('Auth Store', () => {
     setActivePinia(createPinia())
     localStorage.clear()
     vi.clearAllMocks()
-    vi.mocked(useRouter).mockReturnValue(mockRouter as any)
+    vi.mocked(useRouter).mockReturnValue(mockRouter as unknown as Router)
   })
 
   const mockUser = {
     id: '1',
     username: 'testuser',
+    avatar: '',
     email: 'test@example.com',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -89,7 +90,7 @@ describe('Auth Store', () => {
     expect(store.user).toEqual(mockUser)
     expect(store.token).toBe(mockAuthData.token)
     expect(store.isAuthenticated()).toBe(true)
-    
+
     // Verify persistence
     expect(localStorage.getItem('token')).toBe(mockAuthData.token)
   })

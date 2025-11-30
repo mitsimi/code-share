@@ -61,8 +61,16 @@ describe('useSnippet', () => {
     language: 'typescript',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    userId: 'user1',
+    author: {
+      id: 'user1',
+      username: '',
+      avatar: '',
+      email: '',
+      createdAt: '',
+      updatedAt: ''
+    },
     likes: 0,
+    views: 0,
     isLiked: false,
     isSaved: false,
   }
@@ -81,10 +89,10 @@ describe('useSnippet', () => {
 
     // Wait for query to resolve
     await new Promise((resolve) => setTimeout(resolve, 0))
-    // In a real scenario we might wait for isLoading to be false, 
+    // In a real scenario we might wait for isLoading to be false,
     // but with mocked immediate resolution, a tick is usually enough.
     // Better: use `flushPromises` if available, or wait for the query state.
-    
+
     // Check if service was called
     expect(snippetsService.getSnippet).toHaveBeenCalledWith('123')
 
@@ -119,7 +127,7 @@ describe('useSnippet', () => {
       content: '...',
     })
     expect(toast.success).toHaveBeenCalledWith('Snippet updated successfully')
-    
+
     // Check if store was updated
     expect(wrapper.vm.snippet).toEqual(updatedSnippet)
   })
@@ -146,7 +154,7 @@ describe('useSnippet', () => {
 
     expect(snippetsService.deleteSnippet).toHaveBeenCalledWith('123')
     expect(toast.success).toHaveBeenCalledWith('Snippet deleted successfully')
-    
+
     // Check if removed from store (snippet should be undefined)
     expect(wrapper.vm.snippet).toBeUndefined()
   })
