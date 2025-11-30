@@ -168,7 +168,7 @@ var sampleSnippetsData = []domain.Snippet{
 		ID:       "16",
 		Title:    "C# LINQ Example",
 		Content:  "var result = numbers\n    .Where(n => n % 2 == 0)\n    .Select(n => n * n)\n    .OrderByDescending(n => n)\n    .Take(5)\n    .ToList();",
-		Language: "csharp",
+		Language: "c#",
 	},
 	{
 		ID:       "17",
