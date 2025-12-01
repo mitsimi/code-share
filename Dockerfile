@@ -3,7 +3,7 @@ FROM node:25-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@latest
 
 # Copy frontend files
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
@@ -56,4 +56,4 @@ ENV GO_ENV=production
 ENV SERVE_STATIC=true
 
 # Command to run the application
-CMD ["./main"] 
+CMD ["./main"]
