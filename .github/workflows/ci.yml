@@ -50,6 +50,26 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.7.1
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "pnpm"
+                  cache-dependency-path: frontend/pnpm-lock.yaml
+
+            - name: Install frontend dependencies
+              working-directory: frontend
+              run: pnpm install --frozen-lockfile
+
+            - name: Build frontend for embedding
+              working-directory: frontend
+              run: pnpm build
+
             - name: Setup Go
               uses: actions/setup-go@v5
               with:
