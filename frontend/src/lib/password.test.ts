@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import {
-    hasUpperCase,
-    hasLowerCase,
-    hasNumber,
-    hasSpecialChar,
-    passwordSchema,
+  hasUpperCase,
+  hasLowerCase,
+  hasNumber,
+  hasSpecialChar,
+  passwordSchema,
 } from './password'
 
 describe('Password Validation', () => {
@@ -43,7 +43,7 @@ describe('Password Validation', () => {
       const result = passwordSchema.safeParse(shortPassword)
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain('at least 15 characters')
+        expect(result.error.issues[0]?.message).toContain('at least 15 characters')
       }
     })
 
@@ -52,7 +52,7 @@ describe('Password Validation', () => {
       const result = passwordSchema.safeParse(noUpper)
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain('uppercase')
+        expect(result.error.issues[0]?.message).toContain('uppercase')
       }
     })
 
@@ -61,7 +61,7 @@ describe('Password Validation', () => {
       const result = passwordSchema.safeParse(noLower)
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain('lowercase')
+        expect(result.error.issues[0]?.message).toContain('lowercase')
       }
     })
 
@@ -70,7 +70,7 @@ describe('Password Validation', () => {
       const result = passwordSchema.safeParse(noNumber)
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain('number')
+        expect(result.error.issues[0]?.message).toContain('number')
       }
     })
 
@@ -79,7 +79,7 @@ describe('Password Validation', () => {
       const result = passwordSchema.safeParse(noSpecial)
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain('special character')
+        expect(result.error.issues[0]?.message).toContain('special character')
       }
     })
   })
