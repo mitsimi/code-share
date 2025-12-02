@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import 'vue-sonner/style.css'
 import { Toaster } from 'vue-sonner'
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
 import AppFooter from './components/layout/AppFooter.vue'
