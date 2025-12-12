@@ -1,266 +1,122 @@
 # Code Share
 
-A modern web application for sharing and managing code snippets, built with Go and Vue.js.
+A full‑stack code snippet platform built as an **engineering‑focused project** to explore
+backend architecture, authentication, and frontend state management beyond typical course
+requirements.
 
-## Features
+This project was originally developed for a university course and later expanded and refined
+to experiment with **clean architecture, type‑safe database access, and modern frontend
+patterns**.
 
-- **User Authentication & Authorization**
+## Why this project exists
 
-  - JWT-based authentication with refresh tokens
-  - Secure password hashing with bcrypt
-  - Session management with automatic cleanup
-  - Protected routes and middleware
+Instead of building a minimal app to satisfy the course, I intentionally **overshot the scope**
+to treat it as a realistic system:
 
-- **Code Snippet Management**
+- non‑trivial authentication and session handling
+- clear separation between domain logic and transport
+- type safety across the database, backend, and frontend
+- real client‑side state management and caching
 
-  - Create, read, update, and delete snippets
-  - Rich snippet metadata (title, content, language, author)
+The goal was not to “ship a product”, but to **practice designing and reasoning about a system**
+that stays understandable as it grows.
 
-- **Social Features**
+## High‑level overview
 
-  - Like and unlike snippets with real-time updates
-  - Save/bookmark snippets for later reference
-  - View liked and saved snippets in user profiles
+- **Backend**: Go REST API following a clean architecture approach
+- **Frontend**: Vue 3 + TypeScript SPA with modern state and data‑fetching patterns
+- **Database**: SQLite with SQLC for compile‑time checked queries
+- **Auth**: JWT access tokens with refresh tokens and server‑side session tracking
 
-- **User Profiles**
+## Backend architecture
 
-  - Complete user profile management
-  - Update username, email, and avatar
-  - Change password with current password verification
-  - View personal snippets, liked snippets, and saved snippets
+The backend is structured into explicit layers:
 
-- **Modern UI/UX**
+- **Domain**  
+  Core business entities and rules, independent of HTTP or storage.
 
-  - Responsive design with mobile support
-  - Dark/light theme switching
-  - Loading states and error handling
-  - Toast notifications with Vue Sonner
-  - Form validation with Zod and VeeValidate
-  - Client-side caching with TanStack Query
+- **Repositories**  
+  Interfaces and implementations for persistence, isolating database concerns.
 
-- **Backend Architecture**
-  - Clean architecture
-  - Type-safe database queries with SQLC
-  - Comprehensive error handling and logging
-  - RESTful API with proper HTTP status codes
+- **API / Handlers**  
+  Thin HTTP layer responsible for request validation, authentication, and response mapping.
 
-## API Endpoints
+- **Infrastructure**  
+  Routing, middleware, logging, and database connections.
 
-### Authentication
+Key design decisions:
 
-- `POST /api/auth/login` - User login
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/logout` - User logout
-- `POST /api/auth/refresh` - Refresh access token
+- Used **SQLC** to eliminate an entire class of runtime SQL errors.
+- Kept handlers small to prevent business logic from leaking into HTTP code.
+- Explicit error types mapped consistently to HTTP responses.
 
-### Snippets
+## Frontend architecture
 
-- `GET /api/snippets` - Get all snippets
-- `GET /api/snippets/{id}` - Get a specific snippet
-- `POST /api/snippets` - Create a new snippet
-- `PUT /api/snippets/{id}` - Update a snippet
-- `DELETE /api/snippets/{id}` - Delete a snippet
-- `PATCH /api/snippets/{id}/like?action=like|unlike` - Like or unlike a snippet
-- `PATCH /api/snippets/{id}/save?action=save|unsave` - Save or unsave a snippet
+- **Vue 3** Composition API with strict TypeScript usage
+- **TanStack Query** for server state and caching
+- **Pinia** only for true client‑side state
+- Form validation via **Zod** schemas, integrated with VeeValidate
 
-### Users
+The focus was on **predictable data flow** and minimizing implicit or duplicated state.
 
-- `GET /api/users/{id}` - Get user by ID
-- `GET /api/users/{id}/snippets` - Get user's snippets
-- `GET /api/users/{id}/liked` - Get user's liked snippets
-- `GET /api/users/{id}/saved` - Get user's saved snippets
-- `PATCH /api/users/{id}` - Update user profile
-- `PATCH /api/users/{id}/password` - Update user password
-- `PATCH /api/users/{id}/avatar` - Update user avatar
+## Technical challenges explored
 
-### User Profile (Authenticated)
+Some problems I deliberately spent time on:
 
-- `GET /api/users/me` - Get current user's profile
-- `GET /api/users/me/snippets` - Get current user's snippets
-- `GET /api/users/me/liked` - Get current user's liked snippets
-- `GET /api/users/me/saved` - Get current user's saved snippets
-- `PATCH /api/users/me` - Update current user's profile
-- `PATCH /api/users/me/password` - Update current user's password
-- `PATCH /api/users/me/avatar` - Update current user's avatar
+- Designing authentication flows with refresh tokens and session invalidation
+- Maintaining type safety from database queries to frontend components
+- Avoiding tight coupling between API responses and UI state
+- Structuring the project so new features do not require touching unrelated code
 
-## Project Architecture
+## What I would improve next
 
-### Backend
+If I were to continue working on this project:
 
-The backend follows a clean architecture pattern:
+- Add integration and property‑based tests for critical backend paths
+- Introduce explicit database migrations instead of schema initialization
+- Implement rate‑limiting and more granular authorization rules
+- Expand real‑time features beyond simple like/save interactions
 
-- **Domain Layer**: Core business logic and entities
-- **Repository Layer**: Data access interfaces and implementations
-- **API Layer**: HTTP handlers, DTOs, and request/response handling
-- **Server Layer**: Routing, middleware, and server configuration
-- **Storage Layer**: Database operations with SQLC for type-safe queries
+## Tech stack
 
-**Key Design Patterns:**
+**Backend**
+- Go
+- Chi router
+- SQLite + SQLC
+- JWT, bcrypt
+- Zap logging
 
-- Repository pattern for data access
-- Dependency injection for loose coupling
-- Middleware pattern for cross-cutting concerns
-- Clean separation of concerns between layers
+**Frontend**
+- Vue 3 + TypeScript
+- Vite
+- Tailwind CSS
+- TanStack Query
+- Pinia
 
-### Frontend
+## Running the project locally
 
-The frontend is built with modern Vue.js practices:
-
-- **Vue 3 Composition API**: Modern reactive programming
-- **TypeScript**: Type safety throughout the application
-- **Vite**: Fast build tooling and development server
-- **Tailwind CSS**: Utility-first styling with custom design system
-- **Pinia**: State management with TypeScript support
-- **TanStack Query**: Server state management and caching
-- **VeeValidate + Zod**: Form validation with schema validation
-- **Vue Router**: Client-side routing with navigation guards
-
-**Component Architecture:**
-
-- Atomic design principles
-- Reusable UI components with shadcn/ui
-- Composition-based component logic
-- Proper TypeScript interfaces and types
-
-## Technologies Used
-
-### Backend
-
-- **Go 1.24+**: High-performance server language
-- **SQLite**: Lightweight database with SQLC
-- **Chi Router**: Lightweight HTTP router
-- **Gorilla/WebSocket**: WebSocket implementation
-- **JWT**: JSON Web Tokens for authentication
-- **bcrypt**: Password hashing
-- **Zap**: Structured logging
-- **Docker**: Containerization
-
-### Frontend
-
-- **Vue 3**: Progressive JavaScript framework
-- **TypeScript**: Type-safe JavaScript
-- **Vite**: Build tool and dev server
-- **Tailwind CSS**: Utility-first CSS framework
-- **Pinia**: State management
-- **TanStack Query**: Data fetching and caching
-- **VeeValidate**: Form validation
-- **Zod**: Schema validation
-- **Lucide Vue**: Icon library
-
-### Development Tools
-
-- **SQLC**: Type-safe SQL code generation
-- **Air**: Live reload backend for development
-- **ESLint**: Code linting
-- **Prettier**: Code formatting
-- **pnpm**: Fast package manager
-
-## Database Schema
-
-The application uses SQLite with the following main tables:
-
-- **users**: User accounts and profiles
-- **snippets**: Code snippets with metadata
-- **user_likes**: Many-to-many relationship for snippet likes
-- **user_saves**: Many-to-many relationship for saved snippets
-- **sessions**: User session management
-
-## Development
-
-### Prerequisites
-
-- Go 1.24 or later
-- Node.js 22.x or later
-- pnpm (recommended) or npm
-- Docker and Docker Compose (optional)
-
-### Backend Setup
-
-1. Install Go dependencies:
-
-   ```bash
-   go mod download
-   ```
-
-2. Prepare database
 ```bash
-  mkdir data
-  SEED=true go run .
+# backend
+go mod download
+go run .
+
+# frontend
+cd frontend
+pnpm install
+pnpm dev
 ```
 
-3. Run the server:
-   ```bash
-   # Using Air for hot reload
-   air
-   # Or directly
-   go run .
-   ```
+During development, the backend proxies requests to the frontend, so the application is
+accessible via:
 
-### Frontend Setup
+http://localhost:8080
 
-1. Install dependencies:
+## Project status
 
-   ```bash
-   cd frontend
-   pnpm install
-   ```
+The project fully meets and exceeds the original course requirements and serves as a
+long‑term playground for experimenting with architectural ideas and incremental
+improvements.
 
-2. Start development server:
-
-   ```bash
-   pnpm dev
-   ```
-
-3. Build for production:
-   ```bash
-   pnpm build
-   ```
-
-### Accessing the Application
-
-In development, the backend server proxies requests to the Vite development server. You can access the application at:
-
-- **Frontend**: http://localhost:8080
-- **Backend API**: http://localhost:8080/api
-
-The backend automatically forwards frontend requests to the Vite dev server running on port 5173, so you only need to access the application through the backend port (8080).
-
-
-### Database Development Tips
-
-When working on database schema changes or migrations, it's recommended to use an in-memory database instead of a file-based database for faster development iterations. You can set this up by:
-
-1. Using SQLite in-memory mode:
-   ```bash
-   DB_PATH=":memory:" go run .
-   ```
-   ```bash
-   DB_PATH=":memory:" air
-   ```
-
-2. Or modify the environment variable:
-   ```bash
-   export DB_PATH=":memory:"
-   ```
-
-This approach provides:
-- Faster database operations
-- No file I/O overhead
-- Automatic cleanup between runs
-- Easier testing and development
-
-### Production Deployment
-
-For production deployment, you can serve the built frontend files directly from the backend by setting the `SERVE_STATIC=true` environment variable. This eliminates the need for a separate frontend server and proxy configuration.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+While it is not developed against a fixed roadmap, I occasionally extend and refine it
+(e.g. improving language support and syntax highlighting) when exploring new ideas or
+techniques.
