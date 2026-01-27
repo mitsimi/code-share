@@ -38,7 +38,6 @@ export interface Props {
   as?: string
 }
 
- 
 withDefaults(defineProps<Props>(), {
   as: 'button',
 })

@@ -1,7 +1,7 @@
 <template>
   <footer class="relative">
     <div
-      class="via-border absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent to-transparent"
+      class="via-border absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-transparent to-transparent"
     ></div>
     <div class="mx-auto p-8">
       <!-- Bottom Section -->

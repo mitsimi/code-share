@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="show" @update:open="$emit('close')">
-    <DialogContent class="sm:max-w-[600px]">
+    <DialogContent class="sm:max-w-150">
       <DialogHeader>
         <DialogTitle>{{ isEditMode ? 'Edit Snippet' : 'Create New Snippet' }}</DialogTitle>
         <DialogDescription>

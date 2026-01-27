@@ -86,7 +86,7 @@
       <div v-else-if="snippet" class="space-y-8">
         <!-- Title - Full width -->
         <div class="text-start">
-          <h1 class="text-foreground text-4xl font-bold tracking-tight break-words">
+          <h1 class="text-foreground text-4xl font-bold tracking-tight wrap-break-word">
             {{ snippet.title }}
           </h1>
         </div>

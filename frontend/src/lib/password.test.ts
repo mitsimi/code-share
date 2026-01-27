@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  hasUpperCase,
-  hasLowerCase,
-  hasNumber,
-  hasSpecialChar,
-  passwordSchema,
-} from './password'
+import { hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar, passwordSchema } from './password'
 
 describe('Password Validation', () => {
   describe('Helper Functions', () => {

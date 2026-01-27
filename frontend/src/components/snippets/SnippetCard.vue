@@ -12,7 +12,7 @@
     </CardHeader>
 
     <!-- Code content with syntax highlighting preview -->
-    <CardContent class="flex-grow px-6 pb-4">
+    <CardContent class="grow px-6 pb-4">
       <div class="bg-muted/30 relative overflow-hidden rounded-md border">
         <!-- Code header bar -->
         <div class="bg-muted/50 flex items-center justify-between border-b px-3 py-2">

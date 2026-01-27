@@ -17,7 +17,7 @@
             class="text-foreground mb-6 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl"
           >
             Share code snippets
-            <span class="from-primary to-primary/60 bg-gradient-to-r bg-clip-text text-transparent">
+            <span class="from-primary to-primary/60 bg-linear-to-r bg-clip-text text-transparent">
               effortlessly
             </span>
           </h1>

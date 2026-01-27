@@ -67,7 +67,7 @@ describe('useSnippet', () => {
       avatar: '',
       email: '',
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     },
     likes: 0,
     views: 0,

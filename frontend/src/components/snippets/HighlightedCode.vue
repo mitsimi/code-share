@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
-import { highlightCode } from '@/composables/useShiki';
-import { escapeHtml } from '@/lib/utils';
+import { onMounted, ref, watch } from 'vue'
+import { highlightCode } from '@/composables/useShiki'
+import { escapeHtml } from '@/lib/utils'
 
 const props = defineProps<{
   code: string

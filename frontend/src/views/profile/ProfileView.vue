@@ -7,10 +7,10 @@
 
     <Tabs v-model="activeTab" class="w-full">
       <TabsList class="flex w-full justify-start overflow-x-auto sm:grid sm:grid-cols-4">
-        <TabsTrigger value="settings" class="flex-shrink-0">Settings</TabsTrigger>
-        <TabsTrigger value="mine" class="flex-shrink-0">My Snippets</TabsTrigger>
-        <TabsTrigger value="liked" class="flex-shrink-0">Liked Snippets</TabsTrigger>
-        <TabsTrigger value="saved" class="flex-shrink-0">Saved Snippets</TabsTrigger>
+        <TabsTrigger value="settings" class="shrink-0">Settings</TabsTrigger>
+        <TabsTrigger value="mine" class="shrink-0">My Snippets</TabsTrigger>
+        <TabsTrigger value="liked" class="shrink-0">Liked Snippets</TabsTrigger>
+        <TabsTrigger value="saved" class="shrink-0">Saved Snippets</TabsTrigger>
       </TabsList>
 
       <!-- Settings Tab -->
