@@ -117,7 +117,6 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
   // Message handling (delegates to service)
   const onMessage = (type: string, handler: (message: WebSocketMessage) => void) => {
-    console.log('Registering WebSocket message handler for type:', type)
     return wsService.onMessage(type, handler)
   }
 

@@ -3,147 +3,217 @@
     "displayName": "1C Enterprise",
     "name": "1c enterprise",
     "color": "#814CCC",
-    "extensions": [".bsl", ".os"],
+    "extensions": [
+      ".bsl",
+      ".os"
+    ],
     "shikiId": "bsl"
   },
   {
     "displayName": "ABAP",
     "name": "abap",
     "color": "#E8274B",
-    "extensions": [".abap"],
+    "extensions": [
+      ".abap"
+    ],
     "shikiId": "abap"
   },
   {
     "displayName": "Ada",
     "name": "ada",
     "color": "#02f88c",
-    "extensions": [".adb", ".ada", ".ads"],
+    "extensions": [
+      ".adb",
+      ".ada",
+      ".ads"
+    ],
     "shikiId": "ada"
   },
   {
     "displayName": "AGS Script",
     "name": "ags script",
     "color": "#B9D9FF",
-    "extensions": [".asc", ".ash"],
+    "extensions": [
+      ".asc",
+      ".ash"
+    ],
     "shikiId": "c++"
   },
   {
     "displayName": "Altium Designer",
     "name": "altium designer",
     "color": "#A89663",
-    "extensions": [".OutJob", ".PcbDoc", ".PrjPCB", ".SchDoc"],
+    "extensions": [
+      ".OutJob",
+      ".PcbDoc",
+      ".PrjPCB",
+      ".SchDoc"
+    ],
     "shikiId": "ini"
   },
   {
     "displayName": "Apex",
     "name": "apex",
     "color": "#1797c0",
-    "extensions": [".cls", ".apex", ".trigger"],
+    "extensions": [
+      ".cls",
+      ".apex",
+      ".trigger"
+    ],
     "shikiId": "apex"
   },
   {
     "displayName": "APL",
     "name": "apl",
     "color": "#5A8164",
-    "extensions": [".apl", ".dyalog"],
+    "extensions": [
+      ".apl",
+      ".dyalog"
+    ],
     "shikiId": "apl"
   },
   {
     "displayName": "AppleScript",
     "name": "applescript",
     "color": "#101F1F",
-    "extensions": [".applescript", ".scpt"],
+    "extensions": [
+      ".applescript",
+      ".scpt"
+    ],
     "shikiId": "applescript"
   },
   {
     "displayName": "AsciiDoc",
     "name": "asciidoc",
     "color": "#73a0c5",
-    "extensions": [".asciidoc", ".adoc", ".asc"],
+    "extensions": [
+      ".asciidoc",
+      ".adoc",
+      ".asc"
+    ],
     "shikiId": "asciidoc"
   },
   {
     "displayName": "Astro",
     "name": "astro",
     "color": "#ff5a03",
-    "extensions": [".astro"],
+    "extensions": [
+      ".astro"
+    ],
     "shikiId": "astro"
   },
   {
     "displayName": "Asymptote",
     "name": "asymptote",
     "color": "#ff0000",
-    "extensions": [".asy"],
+    "extensions": [
+      ".asy"
+    ],
     "shikiId": "c++"
   },
   {
     "displayName": "Awk",
     "name": "awk",
     "color": "#c30e9b",
-    "extensions": [".awk", ".auk", ".gawk", ".mawk", ".nawk"],
+    "extensions": [
+      ".awk",
+      ".auk",
+      ".gawk",
+      ".mawk",
+      ".nawk"
+    ],
     "shikiId": "awk"
   },
   {
     "displayName": "Ballerina",
     "name": "ballerina",
     "color": "#FF5000",
-    "extensions": [".bal"],
+    "extensions": [
+      ".bal"
+    ],
     "shikiId": "ballerina"
   },
   {
     "displayName": "Beef",
     "name": "beef",
     "color": "#a52f4e",
-    "extensions": [".bf"],
+    "extensions": [
+      ".bf"
+    ],
     "shikiId": "cs"
   },
   {
     "displayName": "Berry",
     "name": "berry",
     "color": "#15A13C",
-    "extensions": [".be"],
+    "extensions": [
+      ".be"
+    ],
     "shikiId": "berry"
   },
   {
     "displayName": "BibTeX",
     "name": "bibtex",
     "color": "#778899",
-    "extensions": [".bib", ".bibtex"],
+    "extensions": [
+      ".bib",
+      ".bibtex"
+    ],
     "shikiId": "bibtex"
   },
   {
     "displayName": "Bicep",
     "name": "bicep",
     "color": "#519aba",
-    "extensions": [".bicep", ".bicepparam"],
+    "extensions": [
+      ".bicep",
+      ".bicepparam"
+    ],
     "shikiId": "bicep"
   },
   {
     "displayName": "Blade",
     "name": "blade",
     "color": "#f7523f",
-    "extensions": [".blade", ".blade.php"],
+    "extensions": [
+      ".blade",
+      ".blade.php"
+    ],
     "shikiId": "blade"
   },
   {
     "displayName": "BuildStream",
     "name": "buildstream",
     "color": "#006bff",
-    "extensions": [".bst"],
+    "extensions": [
+      ".bst"
+    ],
     "shikiId": "yaml"
   },
   {
     "displayName": "C",
     "name": "c",
     "color": "#555555",
-    "extensions": [".c", ".cats", ".h", ".h.in", ".idc"],
+    "extensions": [
+      ".c",
+      ".cats",
+      ".h",
+      ".h.in",
+      ".idc"
+    ],
     "shikiId": "c"
   },
   {
     "displayName": "C#",
     "name": "c#",
     "color": "#178600",
-    "extensions": [".cs", ".cake", ".cs.pp", ".csx", ".linq"],
+    "extensions": [
+      ".cs",
+      ".cake",
+      ".cs.pp",
+      ".csx",
+      ".linq"
+    ],
     "shikiId": "c#"
   },
   {
@@ -178,42 +248,63 @@
     "displayName": "C2hs Haskell",
     "name": "c2hs haskell",
     "color": "#888888",
-    "extensions": [".chs"],
+    "extensions": [
+      ".chs"
+    ],
     "shikiId": "haskell"
+  },
+  {
+    "displayName": "C3",
+    "name": "c3",
+    "color": "#2563eb",
+    "extensions": [
+      ".c3"
+    ],
+    "shikiId": "c3"
   },
   {
     "displayName": "Cadence",
     "name": "cadence",
     "color": "#00ef8b",
-    "extensions": [".cdc"],
+    "extensions": [
+      ".cdc"
+    ],
     "shikiId": "cadence"
   },
   {
     "displayName": "Cairo",
     "name": "cairo",
     "color": "#ff4a48",
-    "extensions": [".cairo"],
+    "extensions": [
+      ".cairo"
+    ],
     "shikiId": "cairo"
   },
   {
     "displayName": "Carbon",
     "name": "carbon",
     "color": "#222222",
-    "extensions": [".carbon"],
+    "extensions": [
+      ".carbon"
+    ],
     "shikiId": "v"
   },
   {
     "displayName": "ChucK",
     "name": "chuck",
     "color": "#3f8000",
-    "extensions": [".ck"],
+    "extensions": [
+      ".ck"
+    ],
     "shikiId": "java"
   },
   {
     "displayName": "Clarity",
     "name": "clarity",
     "color": "#5546ff",
-    "extensions": [".clar"],
+    "extensions": [
+      ".clar"
+    ],
     "shikiId": "clarity"
   },
   {
@@ -238,357 +329,515 @@
     "displayName": "Closure Templates",
     "name": "closure templates",
     "color": "#0d948f",
-    "extensions": [".soy"],
+    "extensions": [
+      ".soy"
+    ],
     "shikiId": "soy"
   },
   {
     "displayName": "CMake",
     "name": "cmake",
     "color": "#DA3434",
-    "extensions": [".cmake", ".cmake.in"],
+    "extensions": [
+      ".cmake",
+      ".cmake.in"
+    ],
     "shikiId": "cmake"
   },
   {
     "displayName": "COBOL",
     "name": "cobol",
     "color": "#888888",
-    "extensions": [".cob", ".cbl", ".ccp", ".cobol", ".cpy"],
+    "extensions": [
+      ".cob",
+      ".cbl",
+      ".ccp",
+      ".cobol",
+      ".cpy"
+    ],
     "shikiId": "cobol"
   },
   {
     "displayName": "CodeQL",
     "name": "codeql",
     "color": "#140f46",
-    "extensions": [".ql", ".qll"],
+    "extensions": [
+      ".ql",
+      ".qll"
+    ],
     "shikiId": "codeql"
   },
   {
     "displayName": "CoffeeScript",
     "name": "coffeescript",
     "color": "#244776",
-    "extensions": [".coffee", "._coffee", ".cake", ".cjsx", ".iced"],
+    "extensions": [
+      ".coffee",
+      "._coffee",
+      ".cake",
+      ".cjsx",
+      ".iced"
+    ],
     "shikiId": "coffeescript"
   },
   {
     "displayName": "COLLADA",
     "name": "collada",
     "color": "#F1A42B",
-    "extensions": [".dae"],
+    "extensions": [
+      ".dae"
+    ],
     "shikiId": "xml"
   },
   {
     "displayName": "Component Pascal",
     "name": "component pascal",
     "color": "#B0CE4E",
-    "extensions": [".cp", ".cps"],
+    "extensions": [
+      ".cp",
+      ".cps"
+    ],
     "shikiId": "pascal"
+  },
+  {
+    "displayName": "CQL",
+    "name": "cql",
+    "color": "#006091",
+    "extensions": [
+      ".cql"
+    ],
+    "shikiId": "cql"
   },
   {
     "displayName": "Crystal",
     "name": "crystal",
     "color": "#000100",
-    "extensions": [".cr"],
+    "extensions": [
+      ".cr"
+    ],
     "shikiId": "crystal"
   },
   {
     "displayName": "CSON",
     "name": "cson",
     "color": "#244776",
-    "extensions": [".cson"],
+    "extensions": [
+      ".cson"
+    ],
     "shikiId": "coffee"
   },
   {
     "displayName": "CSS",
     "name": "css",
     "color": "#663399",
-    "extensions": [".css"],
+    "extensions": [
+      ".css"
+    ],
     "shikiId": "css"
+  },
+  {
+    "displayName": "CSV",
+    "name": "csv",
+    "color": "#237346",
+    "extensions": [
+      ".csv"
+    ],
+    "shikiId": "csv"
   },
   {
     "displayName": "CUE",
     "name": "cue",
     "color": "#5886E1",
-    "extensions": [".cue"],
+    "extensions": [
+      ".cue"
+    ],
     "shikiId": "cue"
   },
   {
     "displayName": "Cycript",
     "name": "cycript",
     "color": "#888888",
-    "extensions": [".cy"],
+    "extensions": [
+      ".cy"
+    ],
     "shikiId": "js"
   },
   {
     "displayName": "Cypher",
     "name": "cypher",
     "color": "#34c0eb",
-    "extensions": [".cyp", ".cypher"],
+    "extensions": [
+      ".cyp",
+      ".cypher"
+    ],
     "shikiId": "cypher"
   },
   {
     "displayName": "D",
     "name": "d",
     "color": "#ba595e",
-    "extensions": [".d", ".di"],
+    "extensions": [
+      ".d",
+      ".di"
+    ],
     "shikiId": "d"
   },
   {
     "displayName": "Dart",
     "name": "dart",
     "color": "#00B4AB",
-    "extensions": [".dart"],
+    "extensions": [
+      ".dart"
+    ],
     "shikiId": "dart"
   },
   {
     "displayName": "desktop",
     "name": "desktop",
     "color": "#888888",
-    "extensions": [".desktop", ".desktop.in", ".service"],
+    "extensions": [
+      ".desktop",
+      ".desktop.in",
+      ".service"
+    ],
     "shikiId": "desktop"
   },
   {
     "displayName": "Dhall",
     "name": "dhall",
     "color": "#dfafff",
-    "extensions": [".dhall"],
+    "extensions": [
+      ".dhall"
+    ],
     "shikiId": "haskell"
   },
   {
     "displayName": "Diff",
     "name": "diff",
     "color": "#888888",
-    "extensions": [".diff", ".patch"],
+    "extensions": [
+      ".diff",
+      ".patch"
+    ],
     "shikiId": "diff"
   },
   {
     "displayName": "Dockerfile",
     "name": "dockerfile",
     "color": "#384d54",
-    "extensions": [".dockerfile", ".containerfile"],
+    "extensions": [
+      ".dockerfile",
+      ".containerfile"
+    ],
     "shikiId": "dockerfile"
   },
   {
     "displayName": "Dotenv",
     "name": "dotenv",
     "color": "#e5d559",
-    "extensions": [".env"],
+    "extensions": [
+      ".env"
+    ],
     "shikiId": "dotenv"
   },
   {
     "displayName": "DTrace",
     "name": "dtrace",
     "color": "#888888",
-    "extensions": [".d"],
+    "extensions": [
+      ".d"
+    ],
     "shikiId": "c"
   },
   {
     "displayName": "Eagle",
     "name": "eagle",
     "color": "#888888",
-    "extensions": [".sch", ".brd"],
+    "extensions": [
+      ".sch",
+      ".brd"
+    ],
     "shikiId": "xml"
   },
   {
     "displayName": "Easybuild",
     "name": "easybuild",
     "color": "#069406",
-    "extensions": [".eb"],
+    "extensions": [
+      ".eb"
+    ],
     "shikiId": "python"
   },
   {
     "displayName": "Ecere Projects",
     "name": "ecere projects",
     "color": "#913960",
-    "extensions": [".epj"],
+    "extensions": [
+      ".epj"
+    ],
     "shikiId": "json"
   },
   {
     "displayName": "Edge",
     "name": "edge",
     "color": "#0dffe0",
-    "extensions": [".edge"],
+    "extensions": [
+      ".edge"
+    ],
     "shikiId": "edge"
   },
   {
     "displayName": "Edje Data Collection",
     "name": "edje data collection",
     "color": "#888888",
-    "extensions": [".edc"],
+    "extensions": [
+      ".edc"
+    ],
     "shikiId": "c++"
   },
   {
     "displayName": "edn",
     "name": "edn",
     "color": "#888888",
-    "extensions": [".edn"],
+    "extensions": [
+      ".edn"
+    ],
     "shikiId": "clojure"
   },
   {
     "displayName": "EJS",
     "name": "ejs",
     "color": "#a91e50",
-    "extensions": [".ejs", ".ect", ".ejs.t", ".jst"],
+    "extensions": [
+      ".ejs",
+      ".ect",
+      ".ejs.t",
+      ".jst"
+    ],
     "shikiId": "js"
   },
   {
     "displayName": "Elixir",
     "name": "elixir",
     "color": "#6e4a7e",
-    "extensions": [".ex", ".exs"],
+    "extensions": [
+      ".ex",
+      ".exs"
+    ],
     "shikiId": "elixir"
   },
   {
     "displayName": "Elm",
     "name": "elm",
     "color": "#60B5CC",
-    "extensions": [".elm"],
+    "extensions": [
+      ".elm"
+    ],
     "shikiId": "elm"
   },
   {
     "displayName": "Emacs Lisp",
     "name": "emacs lisp",
     "color": "#c065db",
-    "extensions": [".el", ".emacs", ".emacs.desktop"],
+    "extensions": [
+      ".el",
+      ".emacs",
+      ".emacs.desktop"
+    ],
     "shikiId": "lisp"
   },
   {
     "displayName": "EmberScript",
     "name": "emberscript",
     "color": "#FFF4F3",
-    "extensions": [".em", ".emberscript"],
+    "extensions": [
+      ".em",
+      ".emberscript"
+    ],
     "shikiId": "coffee"
   },
   {
     "displayName": "EQ",
     "name": "eq",
     "color": "#a78649",
-    "extensions": [".eq"],
+    "extensions": [
+      ".eq"
+    ],
     "shikiId": "cs"
   },
   {
     "displayName": "Erlang",
     "name": "erlang",
     "color": "#B83998",
-    "extensions": [".erl", ".app", ".app.src", ".es", ".escript", ".hrl", ".xrl", ".yrl"],
+    "extensions": [
+      ".erl",
+      ".app",
+      ".app.src",
+      ".es",
+      ".escript",
+      ".hrl",
+      ".xrl",
+      ".yrl"
+    ],
     "shikiId": "erlang"
   },
   {
     "displayName": "F#",
     "name": "f#",
     "color": "#b845fc",
-    "extensions": [".fs", ".fsi", ".fsx"],
+    "extensions": [
+      ".fs",
+      ".fsi",
+      ".fsx"
+    ],
     "shikiId": "f#"
   },
   {
     "displayName": "Fennel",
     "name": "fennel",
     "color": "#fff3d7",
-    "extensions": [".fnl"],
+    "extensions": [
+      ".fnl"
+    ],
     "shikiId": "fennel"
   },
   {
     "displayName": "fish",
     "name": "fish",
     "color": "#4aae47",
-    "extensions": [".fish"],
+    "extensions": [
+      ".fish"
+    ],
     "shikiId": "fish"
   },
   {
     "displayName": "Fluent",
     "name": "fluent",
     "color": "#ffcc33",
-    "extensions": [".ftl"],
+    "extensions": [
+      ".ftl"
+    ],
     "shikiId": "fluent"
   },
   {
     "displayName": "FreeMarker",
     "name": "freemarker",
     "color": "#0050b2",
-    "extensions": [".ftl", ".ftlh"],
+    "extensions": [
+      ".ftl",
+      ".ftlh"
+    ],
     "shikiId": "ftl"
   },
   {
     "displayName": "Frege",
     "name": "frege",
     "color": "#00cafe",
-    "extensions": [".fr"],
+    "extensions": [
+      ".fr"
+    ],
     "shikiId": "haskell"
   },
   {
     "displayName": "Game Maker Language",
     "name": "game maker language",
     "color": "#71b417",
-    "extensions": [".gml"],
+    "extensions": [
+      ".gml"
+    ],
     "shikiId": "c++"
   },
   {
     "displayName": "GCC Machine Description",
     "name": "gcc machine description",
     "color": "#FFCFAB",
-    "extensions": [".md"],
+    "extensions": [
+      ".md"
+    ],
     "shikiId": "lisp"
   },
   {
     "displayName": "GDScript",
     "name": "gdscript",
     "color": "#355570",
-    "extensions": [".gd"],
+    "extensions": [
+      ".gd"
+    ],
     "shikiId": "gdscript"
   },
   {
     "displayName": "GDShader",
     "name": "gdshader",
     "color": "#478CBF",
-    "extensions": [".gdshader", ".gdshaderinc"],
+    "extensions": [
+      ".gdshader",
+      ".gdshaderinc"
+    ],
     "shikiId": "gdshader"
   },
   {
     "displayName": "Gentoo Ebuild",
     "name": "gentoo ebuild",
     "color": "#9400ff",
-    "extensions": [".ebuild"],
+    "extensions": [
+      ".ebuild"
+    ],
     "shikiId": "shell"
   },
   {
     "displayName": "Gentoo Eclass",
     "name": "gentoo eclass",
     "color": "#9400ff",
-    "extensions": [".eclass"],
+    "extensions": [
+      ".eclass"
+    ],
     "shikiId": "shell"
   },
   {
     "displayName": "Gettext Catalog",
     "name": "gettext catalog",
     "color": "#888888",
-    "extensions": [".po", ".pot"],
+    "extensions": [
+      ".po",
+      ".pot"
+    ],
     "shikiId": "po"
   },
   {
     "displayName": "Gherkin",
     "name": "gherkin",
     "color": "#5B2063",
-    "extensions": [".feature", ".story"],
+    "extensions": [
+      ".feature",
+      ".story"
+    ],
     "shikiId": "gherkin"
   },
   {
     "displayName": "Gleam",
     "name": "gleam",
     "color": "#ffaff3",
-    "extensions": [".gleam"],
+    "extensions": [
+      ".gleam"
+    ],
     "shikiId": "gleam"
   },
   {
     "displayName": "Glimmer JS",
     "name": "glimmer js",
     "color": "#F5835F",
-    "extensions": [".gjs"],
+    "extensions": [
+      ".gjs"
+    ],
     "shikiId": "gjs"
   },
   {
     "displayName": "Glimmer TS",
     "name": "glimmer ts",
     "color": "#3178c6",
-    "extensions": [".gts"],
+    "extensions": [
+      ".gts"
+    ],
     "shikiId": "gts"
   },
   {
@@ -626,168 +875,266 @@
     "displayName": "Glyph",
     "name": "glyph",
     "color": "#c1ac7f",
-    "extensions": [".glf"],
+    "extensions": [
+      ".glf"
+    ],
     "shikiId": "tcl"
+  },
+  {
+    "displayName": "GN",
+    "name": "gn",
+    "color": "#888888",
+    "extensions": [
+      ".gn",
+      ".gni"
+    ],
+    "shikiId": "gn"
   },
   {
     "displayName": "Gnuplot",
     "name": "gnuplot",
     "color": "#f0a9f0",
-    "extensions": [".gp", ".gnu", ".gnuplot", ".p", ".plot", ".plt"],
+    "extensions": [
+      ".gp",
+      ".gnu",
+      ".gnuplot",
+      ".p",
+      ".plot",
+      ".plt"
+    ],
     "shikiId": "gnuplot"
   },
   {
     "displayName": "Go",
     "name": "go",
     "color": "#00ADD8",
-    "extensions": [".go"],
+    "extensions": [
+      ".go"
+    ],
     "shikiId": "go"
   },
   {
     "displayName": "Godot Resource",
     "name": "godot resource",
     "color": "#355570",
-    "extensions": [".gdnlib", ".gdns", ".tres", ".tscn"],
+    "extensions": [
+      ".gdnlib",
+      ".gdns",
+      ".tres",
+      ".tscn"
+    ],
     "shikiId": "gdresource"
   },
   {
     "displayName": "Gradle Kotlin DSL",
     "name": "gradle kotlin dsl",
     "color": "#02303a",
-    "extensions": [".gradle.kts"],
+    "extensions": [
+      ".gradle.kts"
+    ],
     "shikiId": "kotlin"
   },
   {
     "displayName": "GraphQL",
     "name": "graphql",
     "color": "#e10098",
-    "extensions": [".graphql", ".gql", ".graphqls"],
+    "extensions": [
+      ".graphql",
+      ".gql",
+      ".graphqls"
+    ],
     "shikiId": "graphql"
   },
   {
     "displayName": "Groovy",
     "name": "groovy",
     "color": "#4298b8",
-    "extensions": [".groovy", ".grt", ".gtpl", ".gvy"],
+    "extensions": [
+      ".groovy",
+      ".grt",
+      ".gtpl",
+      ".gvy"
+    ],
     "shikiId": "groovy"
   },
   {
     "displayName": "Hack",
     "name": "hack",
     "color": "#878787",
-    "extensions": [".hack", ".hh", ".hhi", ".php"],
+    "extensions": [
+      ".hack",
+      ".hh",
+      ".hhi",
+      ".php"
+    ],
     "shikiId": "hack"
   },
   {
     "displayName": "Haml",
     "name": "haml",
     "color": "#ece2a9",
-    "extensions": [".haml", ".haml.deface"],
+    "extensions": [
+      ".haml",
+      ".haml.deface"
+    ],
     "shikiId": "haml"
   },
   {
     "displayName": "Handlebars",
     "name": "handlebars",
     "color": "#f7931e",
-    "extensions": [".handlebars", ".hbs"],
+    "extensions": [
+      ".handlebars",
+      ".hbs"
+    ],
     "shikiId": "handlebars"
   },
   {
     "displayName": "Haskell",
     "name": "haskell",
     "color": "#5e5086",
-    "extensions": [".hs", ".hs-boot", ".hsc"],
+    "extensions": [
+      ".hs",
+      ".hs-boot",
+      ".hsc"
+    ],
     "shikiId": "haskell"
   },
   {
     "displayName": "Haxe",
     "name": "haxe",
     "color": "#df7900",
-    "extensions": [".hx", ".hxsl"],
+    "extensions": [
+      ".hx",
+      ".hxsl"
+    ],
     "shikiId": "haxe"
   },
   {
     "displayName": "HCL",
     "name": "hcl",
     "color": "#844FBA",
-    "extensions": [".hcl", ".nomad", ".tf", ".tfvars", ".workflow"],
+    "extensions": [
+      ".hcl",
+      ".nomad",
+      ".tf",
+      ".tfvars",
+      ".tofu",
+      ".workflow"
+    ],
     "shikiId": "hcl"
   },
   {
     "displayName": "HIP",
     "name": "hip",
     "color": "#4F3A4F",
-    "extensions": [".hip"],
+    "extensions": [
+      ".hip"
+    ],
     "shikiId": "c++"
   },
   {
     "displayName": "HLSL",
     "name": "hlsl",
     "color": "#aace60",
-    "extensions": [".hlsl", ".cginc", ".fx", ".fxh", ".hlsli"],
+    "extensions": [
+      ".hlsl",
+      ".cginc",
+      ".fx",
+      ".fxh",
+      ".hlsli"
+    ],
     "shikiId": "hlsl"
   },
   {
     "displayName": "HTML",
     "name": "html",
     "color": "#e34c26",
-    "extensions": [".html", ".hta", ".htm", ".html.hl", ".inc", ".xht", ".xhtml"],
+    "extensions": [
+      ".html",
+      ".hta",
+      ".htm",
+      ".html.hl",
+      ".inc",
+      ".xht",
+      ".xhtml"
+    ],
     "shikiId": "html"
   },
   {
     "displayName": "HTML+EEX",
     "name": "html+eex",
     "color": "#6e4a7e",
-    "extensions": [".html.eex", ".heex", ".leex"],
+    "extensions": [
+      ".html.eex",
+      ".heex",
+      ".leex"
+    ],
     "shikiId": "elixir"
   },
   {
     "displayName": "HTML+ERB",
     "name": "html+erb",
     "color": "#701516",
-    "extensions": [".erb", ".erb.deface", ".rhtml"],
+    "extensions": [
+      ".erb",
+      ".erb.deface",
+      ".rhtml"
+    ],
     "shikiId": "erb"
   },
   {
     "displayName": "HTML+PHP",
     "name": "html+php",
     "color": "#4f5d95",
-    "extensions": [".phtml"],
+    "extensions": [
+      ".phtml"
+    ],
     "shikiId": "php"
   },
   {
     "displayName": "HTTP",
     "name": "http",
     "color": "#005C9C",
-    "extensions": [".http"],
+    "extensions": [
+      ".http"
+    ],
     "shikiId": "http"
   },
   {
     "displayName": "Hurl",
     "name": "hurl",
     "color": "#FF0288",
-    "extensions": [".hurl"],
+    "extensions": [
+      ".hurl"
+    ],
     "shikiId": "hurl"
   },
   {
     "displayName": "HXML",
     "name": "hxml",
     "color": "#f68712",
-    "extensions": [".hxml"],
+    "extensions": [
+      ".hxml"
+    ],
     "shikiId": "hxml"
   },
   {
     "displayName": "Hy",
     "name": "hy",
     "color": "#7790B2",
-    "extensions": [".hy"],
+    "extensions": [
+      ".hy"
+    ],
     "shikiId": "hy"
   },
   {
     "displayName": "Imba",
     "name": "imba",
     "color": "#16cec6",
-    "extensions": [".imba"],
+    "extensions": [
+      ".imba"
+    ],
     "shikiId": "imba"
   },
   {
@@ -812,7 +1159,11 @@
     "displayName": "Java",
     "name": "java",
     "color": "#b07219",
-    "extensions": [".java", ".jav", ".jsh"],
+    "extensions": [
+      ".java",
+      ".jav",
+      ".jsh"
+    ],
     "shikiId": "java"
   },
   {
@@ -852,21 +1203,29 @@
     "displayName": "JavaScript+ERB",
     "name": "javascript+erb",
     "color": "#f1e05a",
-    "extensions": [".js.erb"],
+    "extensions": [
+      ".js.erb"
+    ],
     "shikiId": "js"
   },
   {
     "displayName": "Jinja",
     "name": "jinja",
     "color": "#a52a22",
-    "extensions": [".jinja", ".j2", ".jinja2"],
+    "extensions": [
+      ".jinja",
+      ".j2",
+      ".jinja2"
+    ],
     "shikiId": "jinja"
   },
   {
     "displayName": "Jison",
     "name": "jison",
     "color": "#56b3cb",
-    "extensions": [".jison"],
+    "extensions": [
+      ".jison"
+    ],
     "shikiId": "jison"
   },
   {
@@ -902,147 +1261,209 @@
     "displayName": "JSON5",
     "name": "json5",
     "color": "#267CB9",
-    "extensions": [".json5"],
+    "extensions": [
+      ".json5"
+    ],
     "shikiId": "json5"
   },
   {
     "displayName": "JSONLD",
     "name": "jsonld",
     "color": "#0c479c",
-    "extensions": [".jsonld"],
+    "extensions": [
+      ".jsonld"
+    ],
     "shikiId": "js"
   },
   {
     "displayName": "Jsonnet",
     "name": "jsonnet",
     "color": "#0064bd",
-    "extensions": [".jsonnet", ".libsonnet"],
+    "extensions": [
+      ".jsonnet",
+      ".libsonnet"
+    ],
     "shikiId": "jsonnet"
   },
   {
     "displayName": "Julia",
     "name": "julia",
     "color": "#a270ba",
-    "extensions": [".jl"],
+    "extensions": [
+      ".jl"
+    ],
     "shikiId": "julia"
   },
   {
     "displayName": "Jupyter Notebook",
     "name": "jupyter notebook",
     "color": "#DA5B0B",
-    "extensions": [".ipynb"],
+    "extensions": [
+      ".ipynb"
+    ],
     "shikiId": "json"
   },
   {
     "displayName": "Kaitai Struct",
     "name": "kaitai struct",
     "color": "#773b37",
-    "extensions": [".ksy"],
+    "extensions": [
+      ".ksy"
+    ],
     "shikiId": "yaml"
   },
   {
     "displayName": "KDL",
     "name": "kdl",
     "color": "#ffb3b3",
-    "extensions": [".kdl"],
+    "extensions": [
+      ".kdl"
+    ],
     "shikiId": "kdl"
   },
   {
     "displayName": "Kotlin",
     "name": "kotlin",
     "color": "#A97BFF",
-    "extensions": [".kt", ".ktm", ".kts"],
+    "extensions": [
+      ".kt",
+      ".ktm",
+      ".kts"
+    ],
     "shikiId": "kotlin"
   },
   {
     "displayName": "Kusto",
     "name": "kusto",
     "color": "#888888",
-    "extensions": [".csl", ".kql"],
+    "extensions": [
+      ".csl",
+      ".kql"
+    ],
     "shikiId": "kusto"
   },
   {
     "displayName": "LabVIEW",
     "name": "labview",
     "color": "#fede06",
-    "extensions": [".lvproj", ".lvclass", ".lvlib"],
+    "extensions": [
+      ".lvproj",
+      ".lvclass",
+      ".lvlib"
+    ],
     "shikiId": "xml"
   },
   {
     "displayName": "Lean",
     "name": "lean",
     "color": "#888888",
-    "extensions": [".lean", ".hlean"],
+    "extensions": [
+      ".lean",
+      ".hlean"
+    ],
     "shikiId": "lean"
   },
   {
     "displayName": "Lean 4",
     "name": "lean 4",
     "color": "#888888",
-    "extensions": [".lean"],
+    "extensions": [
+      ".lean"
+    ],
     "shikiId": "lean4"
   },
   {
     "displayName": "Less",
     "name": "less",
     "color": "#1d365d",
-    "extensions": [".less"],
+    "extensions": [
+      ".less"
+    ],
     "shikiId": "less"
   },
   {
     "displayName": "LFE",
     "name": "lfe",
     "color": "#4C3023",
-    "extensions": [".lfe"],
+    "extensions": [
+      ".lfe"
+    ],
     "shikiId": "lisp"
   },
   {
     "displayName": "Liquid",
     "name": "liquid",
     "color": "#67b8de",
-    "extensions": [".liquid"],
+    "extensions": [
+      ".liquid"
+    ],
     "shikiId": "liquid"
   },
   {
     "displayName": "Literate Haskell",
     "name": "literate haskell",
     "color": "#5e5086",
-    "extensions": [".lhs"],
+    "extensions": [
+      ".lhs"
+    ],
     "shikiId": "haskell"
   },
   {
     "displayName": "LLVM",
     "name": "llvm",
     "color": "#185619",
-    "extensions": [".ll"],
+    "extensions": [
+      ".ll"
+    ],
     "shikiId": "llvm"
   },
   {
     "displayName": "LookML",
     "name": "lookml",
     "color": "#652B81",
-    "extensions": [".lkml", ".lookml"],
+    "extensions": [
+      ".lkml",
+      ".lookml"
+    ],
     "shikiId": "yaml"
   },
   {
     "displayName": "Lua",
     "name": "lua",
     "color": "#000080",
-    "extensions": [".lua", ".fcgi", ".nse", ".p8", ".pd_lua", ".rbxs", ".rockspec", ".wlua"],
+    "extensions": [
+      ".lua",
+      ".fcgi",
+      ".nse",
+      ".p8",
+      ".pd_lua",
+      ".rbxs",
+      ".rockspec",
+      ".wlua"
+    ],
     "shikiId": "lua"
   },
   {
     "displayName": "Luau",
     "name": "luau",
     "color": "#00A2FF",
-    "extensions": [".luau"],
+    "extensions": [
+      ".luau"
+    ],
     "shikiId": "luau"
   },
   {
     "displayName": "Makefile",
     "name": "makefile",
     "color": "#427819",
-    "extensions": [".mak", ".d", ".make", ".makefile", ".mk", ".mkfile"],
+    "extensions": [
+      ".mak",
+      ".d",
+      ".make",
+      ".makefile",
+      ".mk",
+      ".mkfile"
+    ],
     "shikiId": "makefile"
   },
   {
@@ -1068,189 +1489,303 @@
     "displayName": "Marko",
     "name": "marko",
     "color": "#42bff2",
-    "extensions": [".marko"],
+    "extensions": [
+      ".marko"
+    ],
     "shikiId": "marko"
   },
   {
     "displayName": "MATLAB",
     "name": "matlab",
     "color": "#e16737",
-    "extensions": [".matlab", ".m"],
+    "extensions": [
+      ".matlab",
+      ".m"
+    ],
     "shikiId": "matlab"
   },
   {
     "displayName": "Max",
     "name": "max",
     "color": "#c4a79c",
-    "extensions": [".maxpat", ".maxhelp", ".maxproj", ".mxt", ".pat"],
+    "extensions": [
+      ".maxpat",
+      ".maxhelp",
+      ".maxproj",
+      ".mxt",
+      ".pat"
+    ],
     "shikiId": "json"
   },
   {
     "displayName": "MDX",
     "name": "mdx",
     "color": "#fcb32c",
-    "extensions": [".mdx"],
+    "extensions": [
+      ".mdx"
+    ],
     "shikiId": "mdx"
   },
   {
     "displayName": "Mermaid",
     "name": "mermaid",
     "color": "#ff3670",
-    "extensions": [".mmd", ".mermaid"],
+    "extensions": [
+      ".mmd",
+      ".mermaid"
+    ],
     "shikiId": "mermaid"
   },
   {
     "displayName": "Metal",
     "name": "metal",
     "color": "#8f14e9",
-    "extensions": [".metal"],
+    "extensions": [
+      ".metal"
+    ],
     "shikiId": "c++"
   },
   {
     "displayName": "Mirah",
     "name": "mirah",
     "color": "#c7a938",
-    "extensions": [".druby", ".duby", ".mirah"],
+    "extensions": [
+      ".druby",
+      ".duby",
+      ".mirah"
+    ],
     "shikiId": "ruby"
   },
   {
     "displayName": "Mojo",
     "name": "mojo",
     "color": "#ff4c1f",
-    "extensions": [".mojo"],
+    "extensions": [
+      ".mojo"
+    ],
     "shikiId": "mojo"
+  },
+  {
+    "displayName": "MoonBit",
+    "name": "moonbit",
+    "color": "#b92381",
+    "extensions": [
+      ".mbt"
+    ],
+    "shikiId": "moonbit"
   },
   {
     "displayName": "Move",
     "name": "move",
     "color": "#4a137a",
-    "extensions": [".move"],
+    "extensions": [
+      ".move"
+    ],
     "shikiId": "move"
   },
   {
     "displayName": "NetLinx+ERB",
     "name": "netlinx+erb",
     "color": "#747faa",
-    "extensions": [".axs.erb", ".axi.erb"],
+    "extensions": [
+      ".axs.erb",
+      ".axi.erb"
+    ],
     "shikiId": "erb"
   },
   {
     "displayName": "NetLogo",
     "name": "netlogo",
     "color": "#ff6375",
-    "extensions": [".nlogo"],
+    "extensions": [
+      ".nlogo"
+    ],
     "shikiId": "lisp"
   },
   {
     "displayName": "NewLisp",
     "name": "newlisp",
     "color": "#87AED7",
-    "extensions": [".nl", ".lisp", ".lsp"],
+    "extensions": [
+      ".nl",
+      ".lisp",
+      ".lsp"
+    ],
     "shikiId": "lisp"
   },
   {
     "displayName": "Nextflow",
     "name": "nextflow",
     "color": "#3ac486",
-    "extensions": [".nf"],
+    "extensions": [
+      ".nf"
+    ],
     "shikiId": "nextflow"
   },
   {
     "displayName": "Nginx",
     "name": "nginx",
     "color": "#009639",
-    "extensions": [".nginx", ".nginxconf", ".vhost"],
+    "extensions": [
+      ".nginx",
+      ".nginxconf",
+      ".vhost"
+    ],
     "shikiId": "nginx"
   },
   {
     "displayName": "Nim",
     "name": "nim",
     "color": "#ffc200",
-    "extensions": [".nim", ".nim.cfg", ".nimble", ".nimrod", ".nims"],
+    "extensions": [
+      ".nim",
+      ".nim.cfg",
+      ".nimble",
+      ".nimrod",
+      ".nims"
+    ],
     "shikiId": "nim"
   },
   {
     "displayName": "Nix",
     "name": "nix",
     "color": "#7e7eff",
-    "extensions": [".nix"],
+    "extensions": [
+      ".nix"
+    ],
     "shikiId": "nix"
   },
   {
     "displayName": "Nu",
     "name": "nu",
     "color": "#c9df40",
-    "extensions": [".nu"],
+    "extensions": [
+      ".nu"
+    ],
     "shikiId": "nu"
   },
   {
     "displayName": "Nushell",
     "name": "nushell",
     "color": "#4E9906",
-    "extensions": [".nu"],
+    "extensions": [
+      ".nu"
+    ],
     "shikiId": "nushell"
   },
   {
     "displayName": "OASv2-json",
     "name": "oasv2-json",
     "color": "#85ea2d",
-    "extensions": [".json"],
+    "extensions": [
+      ".json"
+    ],
     "shikiId": "json"
   },
   {
     "displayName": "OASv2-yaml",
     "name": "oasv2-yaml",
     "color": "#85ea2d",
-    "extensions": [".yaml", ".yml"],
+    "extensions": [
+      ".yaml",
+      ".yml"
+    ],
     "shikiId": "yaml"
   },
   {
     "displayName": "OASv3-json",
     "name": "oasv3-json",
     "color": "#85ea2d",
-    "extensions": [".json"],
+    "extensions": [
+      ".json"
+    ],
     "shikiId": "json"
   },
   {
     "displayName": "OASv3-yaml",
     "name": "oasv3-yaml",
     "color": "#85ea2d",
-    "extensions": [".yaml", ".yml"],
+    "extensions": [
+      ".yaml",
+      ".yml"
+    ],
     "shikiId": "yaml"
   },
   {
     "displayName": "Objective-C",
     "name": "objective-c",
     "color": "#438eff",
-    "extensions": [".m", ".h"],
+    "extensions": [
+      ".m",
+      ".h"
+    ],
     "shikiId": "objective-c"
   },
   {
     "displayName": "OCaml",
     "name": "ocaml",
     "color": "#ef7a08",
-    "extensions": [".ml", ".eliom", ".eliomi", ".ml4", ".mli", ".mll", ".mly"],
+    "extensions": [
+      ".ml",
+      ".eliom",
+      ".eliomi",
+      ".ml4",
+      ".mli",
+      ".mll",
+      ".mly"
+    ],
     "shikiId": "ocaml"
   },
   {
     "displayName": "OpenCL",
     "name": "opencl",
     "color": "#ed2e2d",
-    "extensions": [".cl", ".opencl"],
+    "extensions": [
+      ".cl",
+      ".opencl"
+    ],
     "shikiId": "c"
+  },
+  {
+    "displayName": "OpenSCAD",
+    "name": "openscad",
+    "color": "#e5cd45",
+    "extensions": [
+      ".scad"
+    ],
+    "shikiId": "openscad"
   },
   {
     "displayName": "Pascal",
     "name": "pascal",
     "color": "#E3F171",
-    "extensions": [".pas", ".dfm", ".dpr", ".inc", ".lpr", ".pascal", ".pp"],
+    "extensions": [
+      ".pas",
+      ".dfm",
+      ".dpr",
+      ".inc",
+      ".lpr",
+      ".pascal",
+      ".pp"
+    ],
     "shikiId": "pascal"
   },
   {
     "displayName": "Perl",
     "name": "perl",
     "color": "#0298c3",
-    "extensions": [".pl", ".al", ".cgi", ".fcgi", ".perl", ".ph", ".plx", ".pm", ".psgi", ".t"],
+    "extensions": [
+      ".pl",
+      ".al",
+      ".cgi",
+      ".fcgi",
+      ".perl",
+      ".ph",
+      ".plx",
+      ".pm",
+      ".psgi",
+      ".t"
+    ],
     "shikiId": "perl"
   },
   {
@@ -1275,91 +1810,127 @@
     "displayName": "PicoLisp",
     "name": "picolisp",
     "color": "#6067af",
-    "extensions": [".l"],
+    "extensions": [
+      ".l"
+    ],
     "shikiId": "lisp"
   },
   {
     "displayName": "Pkl",
     "name": "pkl",
     "color": "#6b9543",
-    "extensions": [".pkl"],
+    "extensions": [
+      ".pkl"
+    ],
     "shikiId": "pkl"
   },
   {
     "displayName": "PLpgSQL",
     "name": "plpgsql",
     "color": "#336790",
-    "extensions": [".pgsql", ".sql"],
+    "extensions": [
+      ".pgsql",
+      ".sql"
+    ],
     "shikiId": "sql"
   },
   {
     "displayName": "Pod 6",
     "name": "pod 6",
     "color": "#888888",
-    "extensions": [".pod", ".pod6"],
+    "extensions": [
+      ".pod",
+      ".pod6"
+    ],
     "shikiId": "raku"
   },
   {
     "displayName": "Polar",
     "name": "polar",
     "color": "#ae81ff",
-    "extensions": [".polar"],
+    "extensions": [
+      ".polar"
+    ],
     "shikiId": "polar"
   },
   {
     "displayName": "PostCSS",
     "name": "postcss",
     "color": "#dc3a0c",
-    "extensions": [".pcss", ".postcss"],
+    "extensions": [
+      ".pcss",
+      ".postcss"
+    ],
     "shikiId": "postcss"
   },
   {
     "displayName": "PowerShell",
     "name": "powershell",
     "color": "#012456",
-    "extensions": [".ps1", ".psd1", ".psm1"],
+    "extensions": [
+      ".ps1",
+      ".psd1",
+      ".psm1"
+    ],
     "shikiId": "powershell"
   },
   {
     "displayName": "Prisma",
     "name": "prisma",
     "color": "#0c344b",
-    "extensions": [".prisma"],
+    "extensions": [
+      ".prisma"
+    ],
     "shikiId": "prisma"
   },
   {
     "displayName": "Prolog",
     "name": "prolog",
     "color": "#74283c",
-    "extensions": [".pl", ".plt", ".pro", ".prolog", ".yap"],
+    "extensions": [
+      ".pl",
+      ".plt",
+      ".pro",
+      ".prolog",
+      ".yap"
+    ],
     "shikiId": "prolog"
   },
   {
     "displayName": "Protocol Buffer",
     "name": "protocol buffer",
     "color": "#888888",
-    "extensions": [".proto"],
+    "extensions": [
+      ".proto"
+    ],
     "shikiId": "proto"
   },
   {
     "displayName": "Pug",
     "name": "pug",
     "color": "#a86454",
-    "extensions": [".jade", ".pug"],
+    "extensions": [
+      ".jade",
+      ".pug"
+    ],
     "shikiId": "pug"
   },
   {
     "displayName": "Puppet",
     "name": "puppet",
     "color": "#302B6D",
-    "extensions": [".pp"],
+    "extensions": [
+      ".pp"
+    ],
     "shikiId": "puppet"
   },
   {
     "displayName": "PureScript",
     "name": "purescript",
     "color": "#1D222D",
-    "extensions": [".purs"],
+    "extensions": [
+      ".purs"
+    ],
     "shikiId": "purescript"
   },
   {
@@ -1391,28 +1962,42 @@
     "displayName": "QML",
     "name": "qml",
     "color": "#44a51c",
-    "extensions": [".qml", ".qbs"],
+    "extensions": [
+      ".qml",
+      ".qbs"
+    ],
     "shikiId": "qml"
   },
   {
     "displayName": "Qt Script",
     "name": "qt script",
     "color": "#00b841",
-    "extensions": [".qs"],
+    "extensions": [
+      ".qs"
+    ],
     "shikiId": "js"
   },
   {
     "displayName": "R",
     "name": "r",
     "color": "#198CE7",
-    "extensions": [".r", ".rd", ".rsx"],
+    "extensions": [
+      ".r",
+      ".rd",
+      ".rsx"
+    ],
     "shikiId": "r"
   },
   {
     "displayName": "Racket",
     "name": "racket",
     "color": "#3c5caa",
-    "extensions": [".rkt", ".rktd", ".rktl", ".scrbl"],
+    "extensions": [
+      ".rkt",
+      ".rktd",
+      ".rktl",
+      ".scrbl"
+    ],
     "shikiId": "racket"
   },
   {
@@ -1440,49 +2025,68 @@
     "displayName": "RAML",
     "name": "raml",
     "color": "#77d9fb",
-    "extensions": [".raml"],
+    "extensions": [
+      ".raml"
+    ],
     "shikiId": "yaml"
   },
   {
     "displayName": "Regular Expression",
     "name": "regular expression",
     "color": "#009a00",
-    "extensions": [".regexp", ".regex"],
+    "extensions": [
+      ".regexp",
+      ".regex"
+    ],
     "shikiId": "regexp"
   },
   {
     "displayName": "RMarkdown",
     "name": "rmarkdown",
     "color": "#198ce7",
-    "extensions": [".qmd", ".rmd"],
+    "extensions": [
+      ".qmd",
+      ".rmd"
+    ],
     "shikiId": "md"
   },
   {
     "displayName": "Rocq Prover",
     "name": "rocq prover",
     "color": "#d0b68c",
-    "extensions": [".v", ".coq"],
+    "extensions": [
+      ".v",
+      ".coq"
+    ],
     "shikiId": "coq"
   },
   {
     "displayName": "ROS Interface",
     "name": "ros interface",
     "color": "#22314e",
-    "extensions": [".msg", ".action", ".srv"],
+    "extensions": [
+      ".msg",
+      ".action",
+      ".srv"
+    ],
     "shikiId": "rosmsg"
   },
   {
     "displayName": "Rouge",
     "name": "rouge",
     "color": "#cc0088",
-    "extensions": [".rg"],
+    "extensions": [
+      ".rg"
+    ],
     "shikiId": "clojure"
   },
   {
     "displayName": "RPC",
     "name": "rpc",
     "color": "#888888",
-    "extensions": [".x"],
+    "extensions": [
+      ".x"
+    ],
     "shikiId": "c"
   },
   {
@@ -1519,56 +2123,82 @@
     "displayName": "Rust",
     "name": "rust",
     "color": "#dea584",
-    "extensions": [".rs", ".rs.in"],
+    "extensions": [
+      ".rs",
+      ".rs.in"
+    ],
     "shikiId": "rust"
   },
   {
     "displayName": "Sage",
     "name": "sage",
     "color": "#888888",
-    "extensions": [".sage", ".sagews"],
+    "extensions": [
+      ".sage",
+      ".sagews"
+    ],
     "shikiId": "python"
   },
   {
     "displayName": "SAS",
     "name": "sas",
     "color": "#B34936",
-    "extensions": [".sas"],
+    "extensions": [
+      ".sas"
+    ],
     "shikiId": "sas"
   },
   {
     "displayName": "Sass",
     "name": "sass",
     "color": "#a53b70",
-    "extensions": [".sass"],
+    "extensions": [
+      ".sass"
+    ],
     "shikiId": "sass"
   },
   {
     "displayName": "Scala",
     "name": "scala",
     "color": "#c22d40",
-    "extensions": [".scala", ".kojo", ".sbt", ".sc"],
+    "extensions": [
+      ".scala",
+      ".kojo",
+      ".sbt",
+      ".sc"
+    ],
     "shikiId": "scala"
   },
   {
     "displayName": "Scheme",
     "name": "scheme",
     "color": "#1e4aec",
-    "extensions": [".scm", ".sch", ".sld", ".sls", ".sps", ".ss"],
+    "extensions": [
+      ".scm",
+      ".sch",
+      ".sld",
+      ".sls",
+      ".sps",
+      ".ss"
+    ],
     "shikiId": "scheme"
   },
   {
     "displayName": "SCSS",
     "name": "scss",
     "color": "#c6538c",
-    "extensions": [".scss"],
+    "extensions": [
+      ".scss"
+    ],
     "shikiId": "scss"
   },
   {
     "displayName": "ShaderLab",
     "name": "shaderlab",
     "color": "#222c37",
-    "extensions": [".shader"],
+    "extensions": [
+      ".shader"
+    ],
     "shikiId": "shaderlab"
   },
   {
@@ -1583,7 +2213,9 @@
       ".command",
       ".fcgi",
       ".ksh",
+      ".sbatch",
       ".sh.in",
+      ".slurm",
       ".tmux",
       ".tool",
       ".trigger",
@@ -1596,140 +2228,206 @@
     "displayName": "ShellSession",
     "name": "shellsession",
     "color": "#888888",
-    "extensions": [".sh-session"],
+    "extensions": [
+      ".sh-session"
+    ],
     "shikiId": "shellsession"
   },
   {
     "displayName": "Smalltalk",
     "name": "smalltalk",
     "color": "#596706",
-    "extensions": [".st", ".cs"],
+    "extensions": [
+      ".st",
+      ".cs"
+    ],
     "shikiId": "smalltalk"
   },
   {
     "displayName": "Snakemake",
     "name": "snakemake",
     "color": "#419179",
-    "extensions": [".smk", ".snakefile"],
+    "extensions": [
+      ".smk",
+      ".snakefile"
+    ],
     "shikiId": "python"
   },
   {
     "displayName": "Solidity",
     "name": "solidity",
     "color": "#AA6746",
-    "extensions": [".sol"],
+    "extensions": [
+      ".sol"
+    ],
     "shikiId": "solidity"
   },
   {
     "displayName": "SPARQL",
     "name": "sparql",
     "color": "#0C4597",
-    "extensions": [".sparql", ".rq"],
+    "extensions": [
+      ".sparql",
+      ".rq"
+    ],
     "shikiId": "sparql"
   },
   {
     "displayName": "SQL",
     "name": "sql",
     "color": "#e38c00",
-    "extensions": [".sql", ".cql", ".ddl", ".inc", ".mysql", ".prc", ".tab", ".udf", ".viw"],
+    "extensions": [
+      ".sql",
+      ".ddl",
+      ".inc",
+      ".mysql",
+      ".prc",
+      ".tab",
+      ".udf",
+      ".viw"
+    ],
     "shikiId": "sql"
   },
   {
     "displayName": "SQLPL",
     "name": "sqlpl",
     "color": "#e38c00",
-    "extensions": [".sql", ".db2"],
+    "extensions": [
+      ".sql",
+      ".db2"
+    ],
     "shikiId": "sql"
   },
   {
     "displayName": "SRecode Template",
     "name": "srecode template",
     "color": "#348a34",
-    "extensions": [".srt"],
+    "extensions": [
+      ".srt"
+    ],
     "shikiId": "lisp"
   },
   {
     "displayName": "Starlark",
     "name": "starlark",
     "color": "#76d275",
-    "extensions": [".bzl", ".star"],
+    "extensions": [
+      ".bzl",
+      ".star"
+    ],
     "shikiId": "python"
   },
   {
     "displayName": "Stata",
     "name": "stata",
     "color": "#1a5f91",
-    "extensions": [".do", ".ado", ".doh", ".ihlp", ".mata", ".matah", ".sthlp"],
+    "extensions": [
+      ".do",
+      ".ado",
+      ".doh",
+      ".ihlp",
+      ".mata",
+      ".matah",
+      ".sthlp"
+    ],
     "shikiId": "stata"
   },
   {
     "displayName": "STON",
     "name": "ston",
     "color": "#888888",
-    "extensions": [".ston"],
+    "extensions": [
+      ".ston"
+    ],
     "shikiId": "smalltalk"
   },
   {
     "displayName": "Stylus",
     "name": "stylus",
     "color": "#ff6347",
-    "extensions": [".styl"],
+    "extensions": [
+      ".styl"
+    ],
     "shikiId": "stylus"
   },
   {
     "displayName": "Svelte",
     "name": "svelte",
     "color": "#ff3e00",
-    "extensions": [".svelte"],
+    "extensions": [
+      ".svelte"
+    ],
     "shikiId": "svelte"
   },
   {
     "displayName": "Swift",
     "name": "swift",
     "color": "#F05138",
-    "extensions": [".swift"],
+    "extensions": [
+      ".swift"
+    ],
     "shikiId": "swift"
   },
   {
     "displayName": "SWIG",
     "name": "swig",
     "color": "#888888",
-    "extensions": [".i", ".swg", ".swig"],
+    "extensions": [
+      ".i",
+      ".swg",
+      ".swig"
+    ],
     "shikiId": "c++"
   },
   {
     "displayName": "Talon",
     "name": "talon",
     "color": "#333333",
-    "extensions": [".talon"],
+    "extensions": [
+      ".talon"
+    ],
     "shikiId": "talon"
   },
   {
     "displayName": "Tcl",
     "name": "tcl",
     "color": "#e4cc98",
-    "extensions": [".tcl", ".adp", ".sdc", ".tcl.in", ".tm", ".xdc"],
+    "extensions": [
+      ".tcl",
+      ".adp",
+      ".sdc",
+      ".tcl.in",
+      ".tm",
+      ".xdc"
+    ],
     "shikiId": "tcl"
   },
   {
     "displayName": "Tcsh",
     "name": "tcsh",
     "color": "#888888",
-    "extensions": [".tcsh", ".csh"],
+    "extensions": [
+      ".tcsh",
+      ".csh"
+    ],
     "shikiId": "shell"
   },
   {
     "displayName": "templ",
     "name": "templ",
     "color": "#66D0DD",
-    "extensions": [".templ"],
+    "extensions": [
+      ".templ"
+    ],
     "shikiId": "templ"
   },
   {
     "displayName": "Terraform Template",
     "name": "terraform template",
     "color": "#7b42bb",
-    "extensions": [".tftpl"],
+    "extensions": [
+      ".tftpl"
+    ],
     "shikiId": "terraform"
   },
   {
@@ -1755,199 +2453,289 @@
     "shikiId": "tex"
   },
   {
+    "displayName": "Plain Text",
+    "name": "text",
+    "shikiId": "text",
+    "color": "#888888",
+    "extensions": [
+      ".txt"
+    ]
+  },
+  {
     "displayName": "TOML",
     "name": "toml",
     "color": "#9c4221",
-    "extensions": [".toml", ".toml.example"],
+    "extensions": [
+      ".toml",
+      ".toml.example"
+    ],
     "shikiId": "toml"
   },
   {
     "displayName": "TSV",
     "name": "tsv",
     "color": "#237346",
-    "extensions": [".tsv", ".vcf"],
+    "extensions": [
+      ".tsv",
+      ".vcf"
+    ],
     "shikiId": "tsv"
   },
   {
     "displayName": "TSX",
     "name": "tsx",
     "color": "#3178c6",
-    "extensions": [".tsx"],
+    "extensions": [
+      ".tsx"
+    ],
     "shikiId": "tsx"
   },
   {
     "displayName": "Turtle",
     "name": "turtle",
     "color": "#888888",
-    "extensions": [".ttl"],
+    "extensions": [
+      ".ttl"
+    ],
     "shikiId": "turtle"
   },
   {
     "displayName": "Twig",
     "name": "twig",
     "color": "#c1d026",
-    "extensions": [".twig"],
+    "extensions": [
+      ".twig"
+    ],
     "shikiId": "twig"
   },
   {
     "displayName": "TypeScript",
     "name": "typescript",
     "color": "#3178c6",
-    "extensions": [".ts", ".cts", ".mts"],
+    "extensions": [
+      ".ts",
+      ".cts",
+      ".mts"
+    ],
     "shikiId": "typescript"
   },
   {
     "displayName": "TypeSpec",
     "name": "typespec",
     "color": "#4A3665",
-    "extensions": [".tsp"],
+    "extensions": [
+      ".tsp"
+    ],
     "shikiId": "typespec"
   },
   {
     "displayName": "Typst",
     "name": "typst",
     "color": "#239dad",
-    "extensions": [".typ"],
+    "extensions": [
+      ".typ"
+    ],
     "shikiId": "typst"
   },
   {
     "displayName": "Unified Parallel C",
     "name": "unified parallel c",
     "color": "#4e3617",
-    "extensions": [".upc"],
+    "extensions": [
+      ".upc"
+    ],
     "shikiId": "c"
   },
   {
     "displayName": "Unity3D Asset",
     "name": "unity3d asset",
     "color": "#222c37",
-    "extensions": [".anim", ".asset", ".mask", ".mat", ".meta", ".prefab", ".unity"],
+    "extensions": [
+      ".anim",
+      ".asset",
+      ".mask",
+      ".mat",
+      ".meta",
+      ".prefab",
+      ".unity"
+    ],
     "shikiId": "yaml"
   },
   {
     "displayName": "Uno",
     "name": "uno",
     "color": "#9933cc",
-    "extensions": [".uno"],
+    "extensions": [
+      ".uno"
+    ],
     "shikiId": "cs"
   },
   {
     "displayName": "UnrealScript",
     "name": "unrealscript",
     "color": "#a54c4d",
-    "extensions": [".uc"],
+    "extensions": [
+      ".uc"
+    ],
     "shikiId": "java"
   },
   {
     "displayName": "V",
     "name": "v",
     "color": "#4f87c4",
-    "extensions": [".v"],
+    "extensions": [
+      ".v"
+    ],
     "shikiId": "v"
   },
   {
     "displayName": "Vala",
     "name": "vala",
     "color": "#a56de2",
-    "extensions": [".vala", ".vapi"],
+    "extensions": [
+      ".vala",
+      ".vapi"
+    ],
     "shikiId": "vala"
   },
   {
     "displayName": "Verilog",
     "name": "verilog",
     "color": "#b2b7f8",
-    "extensions": [".v", ".veo"],
+    "extensions": [
+      ".v",
+      ".veo"
+    ],
     "shikiId": "verilog"
   },
   {
     "displayName": "VHDL",
     "name": "vhdl",
     "color": "#adb2cb",
-    "extensions": [".vhdl", ".vhd", ".vhf", ".vhi", ".vho", ".vhs", ".vht", ".vhw"],
+    "extensions": [
+      ".vhdl",
+      ".vhd",
+      ".vhf",
+      ".vhi",
+      ".vho",
+      ".vhs",
+      ".vht",
+      ".vhw"
+    ],
     "shikiId": "vhdl"
   },
   {
     "displayName": "Vim Script",
     "name": "vim script",
     "color": "#199f4b",
-    "extensions": [".vim", ".vba", ".vimrc", ".vmb"],
+    "extensions": [
+      ".vim",
+      ".vba",
+      ".vimrc",
+      ".vmb"
+    ],
     "shikiId": "viml"
   },
   {
     "displayName": "Volt",
     "name": "volt",
     "color": "#1F1F1F",
-    "extensions": [".volt"],
+    "extensions": [
+      ".volt"
+    ],
     "shikiId": "d"
   },
   {
     "displayName": "Vue",
     "name": "vue",
     "color": "#41b883",
-    "extensions": [".vue"],
+    "extensions": [
+      ".vue"
+    ],
     "shikiId": "vue"
   },
   {
     "displayName": "Vyper",
     "name": "vyper",
     "color": "#9F4CF2",
-    "extensions": [".vy"],
+    "extensions": [
+      ".vy"
+    ],
     "shikiId": "vyper"
   },
   {
     "displayName": "Web Ontology Language",
     "name": "web ontology language",
     "color": "#5b70bd",
-    "extensions": [".owl"],
+    "extensions": [
+      ".owl"
+    ],
     "shikiId": "xml"
   },
   {
     "displayName": "WebAssembly Interface Type",
     "name": "webassembly interface type",
     "color": "#6250e7",
-    "extensions": [".wit"],
+    "extensions": [
+      ".wit"
+    ],
     "shikiId": "wit"
   },
   {
     "displayName": "WGSL",
     "name": "wgsl",
     "color": "#1a5e9a",
-    "extensions": [".wgsl"],
+    "extensions": [
+      ".wgsl"
+    ],
     "shikiId": "wgsl"
   },
   {
     "displayName": "Wikitext",
     "name": "wikitext",
     "color": "#fc5757",
-    "extensions": [".mediawiki", ".wiki", ".wikitext"],
+    "extensions": [
+      ".mediawiki",
+      ".wiki",
+      ".wikitext"
+    ],
     "shikiId": "wikitext"
   },
   {
     "displayName": "Windows Registry Entries",
     "name": "windows registry entries",
     "color": "#52d5ff",
-    "extensions": [".reg"],
+    "extensions": [
+      ".reg"
+    ],
     "shikiId": "reg"
   },
   {
     "displayName": "wisp",
     "name": "wisp",
     "color": "#7582D1",
-    "extensions": [".wisp"],
+    "extensions": [
+      ".wisp"
+    ],
     "shikiId": "clojure"
   },
   {
     "displayName": "X BitMap",
     "name": "x bitmap",
     "color": "#888888",
-    "extensions": [".xbm"],
+    "extensions": [
+      ".xbm"
+    ],
     "shikiId": "c"
   },
   {
     "displayName": "X PixMap",
     "name": "x pixmap",
     "color": "#888888",
-    "extensions": [".xpm", ".pm"],
+    "extensions": [
+      ".xpm",
+      ".pm"
+    ],
     "shikiId": "c"
   },
   {
@@ -2013,6 +2801,7 @@
       ".ps1xml",
       ".psc1",
       ".pt",
+      ".pubxml",
       ".qhelp",
       ".rdf",
       ".res",
@@ -2070,35 +2859,48 @@
     "displayName": "Xonsh",
     "name": "xonsh",
     "color": "#285EEF",
-    "extensions": [".xsh"],
+    "extensions": [
+      ".xsh"
+    ],
     "shikiId": "python"
   },
   {
     "displayName": "XPages",
     "name": "xpages",
     "color": "#888888",
-    "extensions": [".xsp-config", ".xsp.metadata"],
+    "extensions": [
+      ".xsp-config",
+      ".xsp.metadata"
+    ],
     "shikiId": "xml"
   },
   {
     "displayName": "XProc",
     "name": "xproc",
     "color": "#888888",
-    "extensions": [".xpl", ".xproc"],
+    "extensions": [
+      ".xpl",
+      ".xproc"
+    ],
     "shikiId": "xml"
   },
   {
     "displayName": "XS",
     "name": "xs",
     "color": "#888888",
-    "extensions": [".xs"],
+    "extensions": [
+      ".xs"
+    ],
     "shikiId": "c"
   },
   {
     "displayName": "XSLT",
     "name": "xslt",
     "color": "#EB8CEB",
-    "extensions": [".xslt", ".xsl"],
+    "extensions": [
+      ".xslt",
+      ".xsl"
+    ],
     "shikiId": "xsl"
   },
   {
@@ -2123,14 +2925,19 @@
     "displayName": "ZenScript",
     "name": "zenscript",
     "color": "#00BCD1",
-    "extensions": [".zs"],
+    "extensions": [
+      ".zs"
+    ],
     "shikiId": "zenscript"
   },
   {
     "displayName": "Zig",
     "name": "zig",
     "color": "#ec915c",
-    "extensions": [".zig", ".zig.zon"],
+    "extensions": [
+      ".zig",
+      ".zig.zon"
+    ],
     "shikiId": "zig"
   }
 ]

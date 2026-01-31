@@ -258,8 +258,6 @@ export class WebSocketService {
       return
     }
 
-    console.log('Received WebSocket message of type:', message.type, message)
-
     // Forward other messages to registered handlers
     const handlers = this.messageHandlers.get(message.type) || []
     handlers.forEach((handler) => {
