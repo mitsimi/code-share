@@ -10,6 +10,7 @@ on:
       - completed
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   check-ci:
@@ -30,6 +31,7 @@ jobs:
     if: always() && (needs.check-ci.result == 'success' || needs.check-ci.result == 'skipped')
     outputs:
       changes_detected: ${{ steps.changed_files_specific.outputs.any_changed }}
+      is_manual: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout repository (main branch)
         uses: actions/checkout@v6
@@ -60,11 +62,12 @@ jobs:
         if: always()
         run: |
           echo "files changed: ${{ steps.changed_files_specific.outputs.any_changed }}"
+          echo "manual trigger: ${{ github.event_name == 'workflow_dispatch' }}"
 
   sync-demo:
     name: Sync main to demo
     needs: check-changes
-    if: needs.check-changes.outputs.changes_detected == 'true'
+    if: needs.check-changes.outputs.changes_detected == true || needs.check-changes.outputs.is_manual == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
