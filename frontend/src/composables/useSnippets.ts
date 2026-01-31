@@ -1,16 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useSnippetsStore } from '@/stores/snippets'
 import { snippetsService } from '@/services/snippets'
+import { queryKeys } from '@/composables/queryKeys'
 import { toast } from 'vue-sonner'
 import { computed } from 'vue'
 
 export function useSnippets() {
   const snippetsStore = useSnippetsStore()
   const queryClient = useQueryClient()
+  const snippetsQueryKey = queryKeys.snippets()
 
-  // Use TanStack Query for fetching, but sync data to Pinia store
   const { isPending, isError, error, refetch } = useQuery({
-    queryKey: ['snippets'],
+    queryKey: snippetsQueryKey,
     queryFn: async () => {
       snippetsStore.setLoading(true)
       try {
@@ -26,15 +27,12 @@ export function useSnippets() {
     },
   })
 
-  // Create snippet mutation
   const { mutate: createSnippet, isPending: isCreating } = useMutation({
     mutationFn: snippetsService.createSnippet,
     onSuccess: (newSnippet) => {
-      // Add to Pinia store
       snippetsStore.addSnippet(newSnippet)
 
-      // Also update TanStack Query cache for consistency
-      queryClient.setQueryData(['snippets'], (old: Array<typeof newSnippet> | undefined) => {
+      queryClient.setQueryData(snippetsQueryKey, (old: Array<typeof newSnippet> | undefined) => {
         if (!old) return [newSnippet]
         return [newSnippet, ...old]
       })
@@ -51,21 +49,14 @@ export function useSnippets() {
   })
 
   return {
-    // State from Pinia store (reactive)
     snippets: computed(() => snippetsStore.snippets),
     isLoading: computed(() => snippetsStore.isLoading || isPending.value),
     isError: computed(() => isError.value || !!snippetsStore.error),
     error: computed(() => error.value || snippetsStore.error),
-
-    // Getters
     getSnippetById: snippetsStore.getSnippetById,
     snippetsCount: snippetsStore.snippetsCount,
-
-    // Actions
     createSnippet,
     refetch,
-
-    // Loading states
     isCreating,
   }
 }

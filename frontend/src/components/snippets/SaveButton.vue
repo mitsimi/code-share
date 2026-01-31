@@ -30,6 +30,7 @@ import { type Snippet } from '@/types'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { queryKeys } from '@/composables/queryKeys'
 import { snippetsService } from '@/services/snippets'
 import { toast } from 'vue-sonner'
 import type { ButtonProps } from '@/components/ui/button'
@@ -38,6 +39,11 @@ import { useSnippetsStore } from '@/stores/snippets'
 const authStore = useAuthStore()
 const snippetsStore = useSnippetsStore()
 const queryClient = useQueryClient()
+
+const snippetQueryKey = (id: string) => queryKeys.snippet(id)
+const savedSnippetsQueryKey = queryKeys.savedSnippets()
+const likedSnippetsQueryKey = queryKeys.likedSnippets()
+const mySnippetsQueryKey = queryKeys.mySnippets()
 
 const props = withDefaults(
   defineProps<{
@@ -67,15 +73,15 @@ const { mutate: updateSave } = useMutation<
     }
   },
   onSuccess: (updatedSnippet) => {
-    queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
+    queryClient.setQueryData(snippetQueryKey(updatedSnippet.id), updatedSnippet)
 
     snippetsStore.updateSnippet(updatedSnippet.id, {
       isSaved: updatedSnippet.isSaved,
     })
 
-    queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
-    queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
-    queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
+    queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
+    queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
+    queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
   },
   onError: (error, { snippetId, action }) => {
     const revertAction = action === 'save' ? 'unsave' : 'save'

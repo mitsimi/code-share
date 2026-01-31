@@ -1,15 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useSnippetsStore } from '@/stores/snippets'
 import { snippetsService } from '@/services/snippets'
+import { queryKeys } from '@/composables/queryKeys'
 import { toast } from 'vue-sonner'
 import { computed } from 'vue'
 
 export function useSnippet(snippetId: string) {
   const snippetsStore = useSnippetsStore()
   const queryClient = useQueryClient()
+  const snippetQueryKey = queryKeys.snippet(snippetId)
+  const mySnippetsQueryKey = queryKeys.mySnippets()
+  const likedSnippetsQueryKey = queryKeys.likedSnippets()
+  const savedSnippetsQueryKey = queryKeys.savedSnippets()
 
   const { isPending, isError, error, refetch } = useQuery({
-    queryKey: ['snippet', snippetId],
+    queryKey: snippetQueryKey,
     queryFn: async () => {
       const data = await snippetsService.getSnippet(snippetId)
       snippetsStore.addSnippet(data)
@@ -17,23 +22,18 @@ export function useSnippet(snippetId: string) {
     },
   })
 
-  // Get snippet from store (reactive)
   const snippet = computed(() => snippetsStore.getSnippetById(snippetId))
 
-  // Update snippet mutation
   const { mutate: updateSnippet, isPending: isUpdating } = useMutation({
     mutationFn: (formData: { title: string; content: string; language?: string }) =>
       snippetsService.updateSnippet(snippetId, formData),
     onSuccess: (updatedSnippet) => {
-      // Update in Pinia store
       snippetsStore.updateSnippet(updatedSnippet.id, updatedSnippet)
+      queryClient.setQueryData(queryKeys.snippet(updatedSnippet.id), updatedSnippet)
 
-      // Also update TanStack Query cache for consistency
-      queryClient.setQueryData(['snippet', updatedSnippet.id], updatedSnippet)
-
-      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
 
       toast.success('Snippet updated successfully')
     },
@@ -42,19 +42,15 @@ export function useSnippet(snippetId: string) {
     },
   })
 
-  // Delete snippet mutation
   const { mutate: deleteSnippet, isPending: isDeleting } = useMutation({
     mutationFn: () => snippetsService.deleteSnippet(snippetId),
     onSuccess: () => {
-      // Remove from Pinia store
       snippetsStore.removeSnippet(snippetId)
+      queryClient.removeQueries({ queryKey: snippetQueryKey })
 
-      // Remove from TanStack Query cache
-      queryClient.removeQueries({ queryKey: ['snippet', snippetId] })
-
-      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
 
       toast.success('Snippet deleted successfully')
     },
@@ -64,18 +60,13 @@ export function useSnippet(snippetId: string) {
   })
 
   return {
-    // State from Pinia store (reactive)
     snippet,
     isLoading: isPending,
     isError,
     error,
-
-    // Actions
     updateSnippet,
     deleteSnippet,
     refetch,
-
-    // Loading states
     isUpdating,
     isDeleting,
   }

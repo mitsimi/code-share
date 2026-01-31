@@ -7,6 +7,7 @@ import {
   type ListUpdateData,
   type SnippetUpdateData,
 } from '@/services/websocket'
+import { queryKeys } from '@/composables/queryKeys'
 import { useQueryClient } from '@tanstack/vue-query'
 import { onUnmounted } from 'vue'
 
@@ -15,21 +16,19 @@ export function useWebSocket() {
   const snippetsStore = useSnippetsStore()
   const queryClient = useQueryClient()
 
-  // Setup message handlers for TanStack Query integration
+  const mySnippetsQueryKey = queryKeys.mySnippets()
+  const likedSnippetsQueryKey = queryKeys.likedSnippets()
+  const savedSnippetsQueryKey = queryKeys.savedSnippets()
 
-  // Update user's like/save status in cache based on action
-  // This will sync the UI when actions happen in other tabs/devices
   const cleanupUserActionsHandler = wsStore.onMessage(
     MessageType.USER_ACTIONS,
     (message: WebSocketMessage) => {
-      // Handle user action data with proper typing
       const actionData = message.data as UserActionData
       snippetsStore.handleUserAction(actionData)
 
-      // Invalidate related queries to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
     },
   )
 
@@ -37,13 +36,11 @@ export function useWebSocket() {
     MessageType.LIST_UPDATES,
     (message: WebSocketMessage) => {
       const updateData = message.data as ListUpdateData
-
       snippetsStore.handleContentUpdate(updateData.snippet_id, updateData)
 
-      // Invalidate related queries to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
     },
   )
 
@@ -67,14 +64,12 @@ export function useWebSocket() {
         })
       }
 
-      // Invalidate related queries to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['my-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['liked-snippets'] })
-      queryClient.invalidateQueries({ queryKey: ['saved-snippets'] })
+      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
+      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
     },
   )
 
-  // Cleanup handlers when component unmounts
   onUnmounted(() => {
     cleanupUserActionsHandler()
     cleanupListUpdatesHandler()
@@ -82,13 +77,10 @@ export function useWebSocket() {
   })
 
   return {
-    // State
     isConnected: wsStore.isConnected,
     isConnecting: wsStore.isConnecting,
     connectionState: wsStore.connectionState,
     subscriptions: wsStore.subscriptions,
-
-    // Methods
     connect: wsStore.connect,
     subscribe: wsStore.subscribe,
     unsubscribe: wsStore.unsubscribe,
