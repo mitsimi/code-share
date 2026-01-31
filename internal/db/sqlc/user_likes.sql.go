@@ -69,7 +69,7 @@ LEFT JOIN user_likes ul ON s.id = ul.snippet_id
 LEFT JOIN user_saves us ON s.id = us.snippet_id AND us.user_id = ?1
 LEFT JOIN users u ON s.author = u.id
 WHERE ul.user_id = ?1
-ORDER BY s.created_at DESC
+ORDER BY ul.created_at DESC
 `
 
 type GetLikedSnippetsRow struct {
