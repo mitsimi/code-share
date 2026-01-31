@@ -14,7 +14,7 @@ import { queryKeys } from '@/composables/queryKeys'
 import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
 
 const { data: mySnippets, isLoading: isLoadingMySnippets } = useQuery({
-  queryKey: queryKeys.mySnippets(),
+  queryKey: queryKeys.my(),
   queryFn: usersService.getMySnippets,
 })
 

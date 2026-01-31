@@ -1,5 +1,5 @@
 import { useWebSocketStore } from '@/stores/websocket'
-import { useSnippetsStore } from '@/stores/snippets'
+import { queryKeys } from '@/composables/queryKeys'
 import {
   MessageType,
   type WebSocketMessage,
@@ -7,28 +7,43 @@ import {
   type ListUpdateData,
   type SnippetUpdateData,
 } from '@/services/websocket'
-import { queryKeys } from '@/composables/queryKeys'
 import { useQueryClient } from '@tanstack/vue-query'
 import { onUnmounted } from 'vue'
+import type { Snippet } from '@/types'
 
 export function useWebSocket() {
   const wsStore = useWebSocketStore()
-  const snippetsStore = useSnippetsStore()
   const queryClient = useQueryClient()
 
-  const mySnippetsQueryKey = queryKeys.mySnippets()
-  const likedSnippetsQueryKey = queryKeys.likedSnippets()
-  const savedSnippetsQueryKey = queryKeys.savedSnippets()
+  const updateSnippetInCache = (snippetId: string, updates: Partial<Snippet>) => {
+    const detailKey = queryKeys.detail(snippetId)
+    const current = queryClient.getQueryData<Snippet>(detailKey)
+
+    if (current) {
+      queryClient.setQueryData(detailKey, { ...current, ...updates })
+    }
+  }
 
   const cleanupUserActionsHandler = wsStore.onMessage(
     MessageType.USER_ACTIONS,
     (message: WebSocketMessage) => {
       const actionData = message.data as UserActionData
-      snippetsStore.handleUserAction(actionData)
 
-      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
-      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
-      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
+      if (actionData.action === 'like' || actionData.action === 'unlike') {
+        updateSnippetInCache(actionData.snippet_id, {
+          isLiked: actionData.value,
+          likes: actionData.like_count,
+        })
+      } else if (actionData.action === 'save' || actionData.action === 'unsave') {
+        updateSnippetInCache(actionData.snippet_id, {
+          isSaved: actionData.value,
+        })
+      }
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.my() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.liked() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.saved() })
     },
   )
 
@@ -36,11 +51,14 @@ export function useWebSocket() {
     MessageType.LIST_UPDATES,
     (message: WebSocketMessage) => {
       const updateData = message.data as ListUpdateData
-      snippetsStore.handleContentUpdate(updateData.snippet_id, updateData)
 
-      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
-      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
-      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
+      updateSnippetInCache(updateData.snippet_id, {
+        title: updateData.title,
+        content: updateData.content,
+        language: updateData.language,
+      })
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
     },
   )
 
@@ -48,25 +66,21 @@ export function useWebSocket() {
     MessageType.SNIPPET_UPDATES,
     (message: WebSocketMessage) => {
       const snippetData = message.data as SnippetUpdateData
+      const updates: Partial<Snippet> = {}
 
-      if (snippetData.update_type === 'stats') {
-        snippetsStore.handleStatsUpdate(snippetData.snippet_id, {
-          views: snippetData.view_count,
-          likes: snippetData.like_count,
-        })
-      } else if (snippetData.update_type === 'content') {
-        snippetsStore.handleContentUpdate(snippetData.snippet_id, snippetData)
-      } else if (snippetData.update_type === 'both') {
-        snippetsStore.handleContentUpdate(snippetData.snippet_id, snippetData)
-        snippetsStore.handleStatsUpdate(snippetData.snippet_id, {
-          views: snippetData.view_count,
-          likes: snippetData.like_count,
-        })
+      if (snippetData.update_type === 'content' || snippetData.update_type === 'both') {
+        if (snippetData.title) updates.title = snippetData.title
+        if (snippetData.content) updates.content = snippetData.content
+        if (snippetData.language) updates.language = snippetData.language
       }
 
-      queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
-      queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
-      queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
+      if (snippetData.update_type === 'stats' || snippetData.update_type === 'both') {
+        if (snippetData.view_count !== undefined) updates.views = snippetData.view_count
+        if (snippetData.like_count !== undefined) updates.likes = snippetData.like_count
+      }
+
+      updateSnippetInCache(snippetData.snippet_id, updates)
+      queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
     },
   )
 

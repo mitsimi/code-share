@@ -62,7 +62,7 @@
 
           <!-- Like button -->
           <div @click.stop>
-            <LikeButton :snippetId="snippet.id" />
+            <LikeButton :snippetId="snippet.id" :likes="snippet.likes" :isLiked="snippet.isLiked" />
           </div>
         </div>
       </div>

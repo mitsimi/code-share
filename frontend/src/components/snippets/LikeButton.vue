@@ -1,7 +1,7 @@
 <template>
   <Button
     :variant="variant"
-    @click.stop="authStore.isAuthenticated() && toggleLike()"
+    @click.stop="authStore.isAuthenticated() && handleLike()"
     :class="[
       { 'pointer-events-none': !authStore.isAuthenticated() },
       isLiked
@@ -10,7 +10,7 @@
     ]"
   >
     <span v-if="!hideCount">{{ likes }}</span>
-    <template v-if="isLoading">
+    <template v-if="isPending">
       <LoaderCircleIcon class="size-4 animate-spin" />
     </template>
     <template v-else>
@@ -18,7 +18,6 @@
         class="size-4 transition-transform duration-200"
         :class="{ 'scale-110': isLiked }"
         :fill="isLiked ? 'currentColor' : 'none'"
-        :stroke="isLiked ? 'currentColor' : 'currentColor'"
         stroke-width="2"
       />
     </template>
@@ -27,29 +26,19 @@
 
 <script setup lang="ts">
 import { Heart, LoaderCircleIcon } from 'lucide-vue-next'
-import { type Snippet } from '@/types'
-import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useSnippetsStore } from '@/stores/snippets'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { queryKeys } from '@/composables/queryKeys'
-import { snippetsService } from '@/services/snippets'
-import { toast } from 'vue-sonner'
+import { useLikeSnippet } from '@/composables/useLikeSnippet'
 import type { ButtonProps } from '@/components/ui/button'
 import { Button } from '@/components/ui/button'
 
 const authStore = useAuthStore()
-const snippetsStore = useSnippetsStore()
-const queryClient = useQueryClient()
-
-const snippetQueryKey = (id: string) => queryKeys.snippet(id)
-const likedSnippetsQueryKey = queryKeys.likedSnippets()
-const mySnippetsQueryKey = queryKeys.mySnippets()
-const savedSnippetsQueryKey = queryKeys.savedSnippets()
+const { mutate: toggleLike, isPending } = useLikeSnippet()
 
 const props = withDefaults(
   defineProps<{
     snippetId: string
+    likes: number
+    isLiked: boolean
     hideCount?: boolean
     variant?: ButtonProps['variant']
   }>(),
@@ -59,74 +48,15 @@ const props = withDefaults(
   },
 )
 
-// Get reactive snippet data from store
-const snippet = computed(() => snippetsStore.getSnippetById(props.snippetId))
-const likes = computed(() => snippet.value?.likes ?? 0)
-const isLiked = computed(() => snippet.value?.isLiked ?? false)
+const handleLike = () => {
+  if (!props.snippetId || isPending.value) return
 
-const isLoading = ref(false)
-
-const { mutate: updateLike } = useMutation<
-  Snippet,
-  Error,
-  { snippetId: string; action: 'like' | 'unlike' }
->({
-  mutationKey: ['likeMutation', props.snippetId],
-  mutationFn: async ({ snippetId, action }) => {
-    isLoading.value = true
-    try {
-      return await snippetsService.toggleLike(snippetId, action)
-    } finally {
-      isLoading.value = false
-    }
-  },
-  onSuccess: (updatedSnippet) => {
-    queryClient.setQueryData(snippetQueryKey(updatedSnippet.id), updatedSnippet)
-
-    snippetsStore.updateSnippet(updatedSnippet.id, {
-      isLiked: updatedSnippet.isLiked,
-      likes: updatedSnippet.likes,
-    })
-
-    queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
-    queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
-    queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
-  },
-  onError: (error, { snippetId, action }) => {
-    const revertAction = action === 'like' ? 'unlike' : 'like'
-    snippetsStore.handleUserAction({
-      action: revertAction,
-      snippet_id: snippetId,
-      value: revertAction === 'like',
-      like_count: likes.value,
-    })
-
-    console.error('Like mutation failed:', error)
-    toast.error(error.message || 'Please try again')
-  },
-})
-
-const toggleLike = () => {
-  if (!props.snippetId) {
-    console.error('Cannot toggle like: snippetId is missing')
-    return
-  }
-
-  if (isLoading.value) {
-    return
-  }
-
-  const action = isLiked.value ? 'unlike' : 'like'
-
-  // Optimistic update - immediate UI feedback
-  snippetsStore.handleUserAction({
+  const action = props.isLiked ? 'unlike' : 'like'
+  toggleLike({
+    snippetId: props.snippetId,
     action,
-    snippet_id: props.snippetId,
-    value: action === 'like',
-    like_count: likes.value,
+    currentLikes: props.likes,
+    currentIsLiked: props.isLiked,
   })
-
-  // Then make the API call
-  updateLike({ snippetId: props.snippetId, action })
 }
 </script>

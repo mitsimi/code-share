@@ -1,7 +1,7 @@
 <template>
   <Button
     :variant="variant"
-    @click.stop="authStore.isAuthenticated() && toggleSave()"
+    @click.stop="authStore.isAuthenticated() && handleSave()"
     :class="[
       { 'pointer-events-none': !authStore.isAuthenticated() },
       isSaved
@@ -9,7 +9,7 @@
         : 'text-muted-foreground hover:bg-secondary/10',
     ]"
   >
-    <template v-if="isLoading">
+    <template v-if="isPending">
       <LoaderCircleIcon class="size-4 animate-spin" />
     </template>
     <template v-else>
@@ -17,7 +17,6 @@
         class="size-4 transition-transform duration-200"
         :class="{ 'scale-110': isSaved }"
         :fill="isSaved ? 'currentColor' : 'none'"
-        :stroke="isSaved ? 'currentColor' : 'currentColor'"
         stroke-width="2"
       />
     </template>
@@ -26,24 +25,13 @@
 
 <script setup lang="ts">
 import { BookmarkIcon, LoaderCircleIcon } from 'lucide-vue-next'
-import { type Snippet } from '@/types'
-import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { queryKeys } from '@/composables/queryKeys'
-import { snippetsService } from '@/services/snippets'
-import { toast } from 'vue-sonner'
+import { useSaveSnippet } from '@/composables/useSaveSnippet'
 import type { ButtonProps } from '@/components/ui/button'
-import { useSnippetsStore } from '@/stores/snippets'
+import { Button } from '@/components/ui/button'
 
 const authStore = useAuthStore()
-const snippetsStore = useSnippetsStore()
-const queryClient = useQueryClient()
-
-const snippetQueryKey = (id: string) => queryKeys.snippet(id)
-const savedSnippetsQueryKey = queryKeys.savedSnippets()
-const likedSnippetsQueryKey = queryKeys.likedSnippets()
-const mySnippetsQueryKey = queryKeys.mySnippets()
+const { mutate: toggleSave, isPending } = useSaveSnippet()
 
 const props = withDefaults(
   defineProps<{
@@ -56,57 +44,14 @@ const props = withDefaults(
   },
 )
 
-const isLoading = ref(false)
-
-const { mutate: updateSave } = useMutation<
-  Snippet,
-  Error,
-  { snippetId: string; action: 'save' | 'unsave' }
->({
-  mutationKey: ['saveMutation', props.snippetId],
-  mutationFn: async ({ snippetId, action }) => {
-    isLoading.value = true
-    try {
-      return await snippetsService.toggleSave(snippetId, action)
-    } finally {
-      isLoading.value = false
-    }
-  },
-  onSuccess: (updatedSnippet) => {
-    queryClient.setQueryData(snippetQueryKey(updatedSnippet.id), updatedSnippet)
-
-    snippetsStore.updateSnippet(updatedSnippet.id, {
-      isSaved: updatedSnippet.isSaved,
-    })
-
-    queryClient.invalidateQueries({ queryKey: savedSnippetsQueryKey })
-    queryClient.invalidateQueries({ queryKey: likedSnippetsQueryKey })
-    queryClient.invalidateQueries({ queryKey: mySnippetsQueryKey })
-  },
-  onError: (error, { snippetId, action }) => {
-    const revertAction = action === 'save' ? 'unsave' : 'save'
-    snippetsStore.handleUserAction({
-      action: revertAction,
-      snippet_id: snippetId,
-      value: true,
-    })
-
-    console.error('Like mutation failed:', error)
-    toast.error(error.message || 'Please try again')
-  },
-})
-
-const toggleSave = () => {
-  if (!props.snippetId) {
-    console.error('Cannot toggle save: snippetId is missing')
-    return
-  }
-
-  if (isLoading.value) {
-    return
-  }
+const handleSave = () => {
+  if (!props.snippetId || isPending.value) return
 
   const action = props.isSaved ? 'unsave' : 'save'
-  updateSave({ snippetId: props.snippetId, action })
+  toggleSave({
+    snippetId: props.snippetId,
+    action,
+    currentIsSaved: props.isSaved,
+  })
 }
 </script>

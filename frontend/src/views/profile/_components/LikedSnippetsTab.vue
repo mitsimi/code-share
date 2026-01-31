@@ -17,7 +17,7 @@ import { queryKeys } from '@/composables/queryKeys'
 import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
 
 const { data: likedSnippets, isLoading: isLoadingLiked } = useQuery({
-  queryKey: queryKeys.likedSnippets(),
+  queryKey: queryKeys.liked(),
   queryFn: usersService.getLikedSnippets,
 })
 
