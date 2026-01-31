@@ -4,32 +4,43 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import { VueQueryPlugin } from '@tanstack/vue-query'
+import { VueQueryPlugin, type VueQueryPluginOptions } from '@tanstack/vue-query'
 import { useAuthStore } from '@/stores/auth'
 import { useWebSocketStore } from '@/stores/websocket'
 
 const app = createApp(App)
 const pinia = createPinia()
 
-app.use(router).use(pinia).use(VueQueryPlugin)
+const vueQueryOptions: VueQueryPluginOptions = {
+  queryClientConfig: {
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        retry: 3,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+      },
+      mutations: {
+        retry: 1,
+      },
+    },
+  },
+}
 
-// Initialize app
+app.use(router).use(pinia).use(VueQueryPlugin, vueQueryOptions)
+
 const init = async () => {
-  // Initialize Pinia stores
   const authStore = useAuthStore()
   const wsStore = useWebSocketStore()
 
   try {
-    // Try to restore authentication state
     await authStore.initializeAuth()
   } catch (error) {
     console.error('Failed to initialize auth:', error)
   }
 
-  // Initialize WebSocket connection (no auth required)
   wsStore.connect()
-
-  // Mount the app
   app.mount('#app')
 }
 

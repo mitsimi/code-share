@@ -13,11 +13,11 @@
 import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { usersService } from '@/services/users'
+import { queryKeys } from '@/composables/queryKeys'
 import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
 
-// Fetch saved snippets
 const { data: savedSnippets, isLoading: isLoadingSaved } = useQuery({
-  queryKey: ['saved-snippets'],
+  queryKey: queryKeys.saved(),
   queryFn: usersService.getSavedSnippets,
 })
 

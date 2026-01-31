@@ -10,11 +10,11 @@
 import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { usersService } from '@/services/users'
+import { queryKeys } from '@/composables/queryKeys'
 import SnippetGrid from '@/components/snippets/SnippetGrid.vue'
 
-// Fetch user's snippets
 const { data: mySnippets, isLoading: isLoadingMySnippets } = useQuery({
-  queryKey: ['my-snippets'],
+  queryKey: queryKeys.my(),
   queryFn: usersService.getMySnippets,
 })
 

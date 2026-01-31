@@ -151,6 +151,8 @@
                       size="sm"
                       class="flex-1"
                       :snippetId="snippet.id"
+                      :likes="snippet.likes"
+                      :isLiked="snippet.isLiked"
                       :hideCount="true"
                     />
 
@@ -172,7 +174,7 @@
                         variant="destructive"
                         size="sm"
                         class="flex-1"
-                        :disabled="isDeleting"
+                        :disabled="deleteSnippet.isPending.value"
                         @click="handleDeleteSnippet"
                       >
                         <Trash2Icon class="size-4 shrink-0" />
@@ -227,7 +229,7 @@
       <SnippetFormModal
         v-if="snippet"
         :show="showEditModal"
-        :is-loading="isUpdating"
+        :is-loading="updateSnippet.isPending.value"
         :snippet="snippet"
         @close="showEditModal = false"
         @submit="handleUpdateSnippet"
@@ -257,9 +259,9 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import CardContent from '@/components/ui/card/CardContent.vue'
 import SnippetFormModal from './_components/SnippetFormModal.vue'
 import { useSnippetDetails } from '@/composables/useSnippetSubscription'
-import { useSnippet } from '@/composables/useSnippet'
 import HighlightedCode from '@/components/snippets/HighlightedCode.vue'
 import { getLanguage } from '@/lib/languages'
+import { useSnippets } from '@/composables/useSnippets'
 
 dayjs.extend(relativeTime)
 
@@ -270,20 +272,23 @@ const showEditModal = ref(false)
 // Use WebSocket subscription for real-time updates
 useSnippetDetails(route.params.snippetId as string)
 
-const { snippet, isLoading, isError, error, updateSnippet, deleteSnippet, isUpdating, isDeleting } =
-  useSnippet(route.params.snippetId as string)
+const { getSnippet, updateSnippet, deleteSnippet } = useSnippets()
+const { data: snippet, isLoading, isError, error } = getSnippet(route.params.snippetId as string)
 
 const handleUpdateSnippet = (formData: { title: string; content: string; language?: string }) => {
-  updateSnippet({
-    title: formData.title,
-    content: formData.content,
-    language: formData.language || snippet.value?.language || '',
+  updateSnippet.mutate({
+    snippetId: route.params.snippetId as string,
+    formData: {
+      title: formData.title,
+      content: formData.content,
+      language: formData.language || snippet.value?.language || '',
+    },
   })
   showEditModal.value = false
 }
 
 const handleDeleteSnippet = () => {
-  deleteSnippet()
+  deleteSnippet.mutate({ snippetId: route.params.snippetId as string })
   router.go(-1)
 }
 

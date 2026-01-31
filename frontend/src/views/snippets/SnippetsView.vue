@@ -5,10 +5,13 @@ import { useSnippets } from '@/composables/useSnippets'
 
 const showModal = ref(false)
 
-const { snippets, isLoading, isError, error, createSnippet, isCreating, refetch } = useSnippets()
+const {
+  getList: { data: snippets, isLoading, isError, error, refetch },
+  createSnippet,
+} = useSnippets()
 
 const handleCreateSnippet = (formData: { title: string; content: string; language?: string }) => {
-  createSnippet({
+  createSnippet.mutate({
     title: formData.title,
     content: formData.content,
     language: formData.language,
@@ -38,7 +41,7 @@ const handleCreateSnippet = (formData: { title: string; content: string; languag
 
   <SnippetFormModal
     :show="showModal"
-    :is-loading="isCreating"
+    :is-loading="createSnippet.isPending.value"
     @close="showModal = false"
     @submit="handleCreateSnippet"
   />
