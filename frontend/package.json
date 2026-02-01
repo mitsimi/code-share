@@ -56,7 +56,7 @@
     "shiki": "^3.21.0",
     "tsx": "^4.21.0",
     "unplugin-auto-import": "^19.3.0",
-    "unplugin-vue-components": "^28.8.0",
+    "unplugin-vue-components": "^31.0.0",
     "vite": "^6.4.1",
     "vite-plugin-vue-devtools": "^8.0.5",
     "vitest": "^4.0.16",
