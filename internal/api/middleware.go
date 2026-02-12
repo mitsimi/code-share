@@ -56,8 +56,7 @@ func (m *AuthMiddleware) TryAttachUserID(next http.Handler) http.Handler {
 		// If no valid session, try JWT token
 		if userID == "" {
 			authHeader := r.Header.Get("Authorization")
-			if strings.HasPrefix(authHeader, "Bearer ") {
-				token := strings.TrimPrefix(authHeader, "Bearer ")
+			if token, ok := strings.CutPrefix(authHeader, "Bearer "); ok {
 				if user, err := auth.ValidateToken(token, m.secretKey); err == nil {
 					userID = user.UserID
 				}
