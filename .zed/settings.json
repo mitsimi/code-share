@@ -9,7 +9,6 @@
         "buildFlags": ["-tags=dev"],
         "ui.semanticTokens": true,
         "completeUnimported": true,
-        "completion.usePlaceholders": true,
       },
     },
   },
